@@ -46,7 +46,7 @@ namespace Bot.Core.Lookup
             cd.FlavorText = GetObjectStringProp(obj, "flavor");
             var imageUrlStr = GetObjectStringProp(obj, "image");
             if (imageUrlStr != null)
-                cd.ImageUrl = Uri.EscapeUriString(imageUrlStr);
+                cd.ImageUrl = Uri.EscapeDataString(imageUrlStr);
 
             return cd;
         }

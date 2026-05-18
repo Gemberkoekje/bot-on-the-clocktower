@@ -56,7 +56,7 @@ namespace Bot.Core.Lookup
 
             var almanacUrl = JsonParseUtil.GetObjectStringProp(obj, "almanac");
             if (almanacUrl != null)
-                sd.AlmanacUrl = Uri.EscapeUriString(almanacUrl);
+                sd.AlmanacUrl = Uri.EscapeDataString(almanacUrl);
             sd.Author = JsonParseUtil.GetObjectStringProp(obj, "author");
             return sd;
         }
