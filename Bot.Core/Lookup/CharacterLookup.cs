@@ -10,9 +10,9 @@ namespace Bot.Core.Lookup
     {
         private readonly ICharacterStorage m_storage;
 
-        public CharacterLookup(IServiceProvider serviceProvider)
+        public CharacterLookup(ICharacterStorage storage)
         {
-            serviceProvider.Inject(out m_storage);
+            m_storage = storage;
         }
 
         public async Task<LookupCharacterResult> LookupCharacterAsync(ulong guildId, string charString)

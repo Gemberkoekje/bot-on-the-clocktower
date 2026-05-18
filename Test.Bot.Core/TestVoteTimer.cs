@@ -107,8 +107,8 @@ namespace Test.Bot.Core
 
             TownKeyCallbackSchedulerMock.Setup(cs => cs.ScheduleCallback(It.IsAny<TownKey>(), It.IsAny<DateTime>()));
 
-            RunVoteTimerVerifyCompleted("6 minutes");
-            
+            RunVoteTimerVerifyCompleted("6 minutes", voteHandlerMock.Object);
+
             Assert.NotNull(callback);
             voteHandlerMock.Verify(vh => vh.PerformVoteAsync(It.IsAny<TownKey>()), Times.Never);
 
@@ -117,7 +117,7 @@ namespace Test.Bot.Core
 
             AdvanceTime(TimeSpan.FromMinutes(6));
 
-            callback!(MockTownKey);
+            AssertCompletedTask(() => callback!(MockTownKey));
 
             voteHandlerMock.Verify(vh => vh.PerformVoteAsync(It.Is<TownKey>(tr => tr == MockTownKey)), Times.Once);
             ChatChannelMock.Verify(c => c.SendMessageAsync(It.Is<string>(s => s.Contains(VillagerRoleMock.Object.Mention) && s.Contains(TownSquareMock.Object.Name) && s.Contains("returning", StringComparison.InvariantCultureIgnoreCase))), Times.Once);
@@ -126,20 +126,22 @@ namespace Test.Bot.Core
         [Fact]
         public void PerformVote_Succeeds()
         {
-            var bc = new BotGameplay(GetServiceProvider());
+            var bc = new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             AssertCompletedTask(() => bc.PerformVoteAsync(MockTownKey));
         }
 
         private void RunVoteTimerVerifyCompleted()
         {
-            RunVoteTimerVerifyCompleted("");
+            RunVoteTimerVerifyCompleted("", null);
         }
 
-        private void RunVoteTimerVerifyCompleted(string timeString)
+        private void RunVoteTimerVerifyCompleted(string timeString, IVoteHandler? voteHandler = null)
         {
-            var vt = new BotVoteTimer(GetServiceProvider());
-            
+            voteHandler ??= new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
+            var voteTimerController = new BotVoteTimer.VoteTimerController(MockDateTime.Object, TownLookupMock.Object, TownResolverMock.Object, voteHandler, CallbackSchedulerFactoryMock.Object);
+            var vt = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, MockDateTime.Object, voteTimerController);
+
             var result = AssertCompletedTask(() => vt.RunVoteTimerUnsafe(MockTownKey, timeString, ProcessLoggerMock.Object));
             Assert.False(string.IsNullOrWhiteSpace(result.Message));
         }

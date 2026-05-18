@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core.Lookup;
 using Moq;
 using System;
@@ -47,7 +47,7 @@ namespace Test.Bot.Core.Lookup
             string charAbility = "Character Ability";
             var c = new CharacterData(charId, charName, charAbility, CharacterTeam.Outsider, isOfficial: false);
 
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(c, Enumerable.Empty<ScriptData>()));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -63,7 +63,7 @@ namespace Test.Bot.Core.Lookup
             var c = CreateBasicCharacter();
             c.FlavorText = flavorText;
 
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(c, Enumerable.Empty<ScriptData>()));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -76,7 +76,7 @@ namespace Test.Bot.Core.Lookup
             var script1 = new ScriptData("Script 1", isOfficial: false);
             var script2 = new ScriptData("Script 2", isOfficial: false);
 
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(CreateBasicCharacter(), new[] { script1, script2 }));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -92,7 +92,7 @@ namespace Test.Bot.Core.Lookup
             var officialScript = new ScriptData("Trouble Brewing", isOfficial: true);
             officialScript.AlmanacUrl = "almanac_url";
 
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(CreateBasicCharacter(isOfficial:true), new[] { officialScript }));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -107,7 +107,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void PassedNoScript_NoFoundInFields()
         {
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(CreateBasicCharacter(), Enumerable.Empty<ScriptData>()));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -125,7 +125,7 @@ namespace Test.Bot.Core.Lookup
             string author2 = "some person";
             script2.Author = author2;            
 
-            var leb = new LookupEmbedBuilder(GetServiceProvider());
+            var leb = new LookupEmbedBuilder(m_botSystem.Object);
             var embed = leb.BuildLookupEmbed(new LookupCharacterItem(CreateBasicCharacter(), new[] { script1, script2 }));
 
             Assert.Equal(m_mockEmbed.Object, embed);
@@ -138,3 +138,4 @@ namespace Test.Bot.Core.Lookup
         private static CharacterData CreateBasicCharacter(bool isOfficial=false) => new("charid", "charname", "charAbility", CharacterTeam.Townsfolk, isOfficial: isOfficial);
     }
 }
+

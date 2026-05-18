@@ -20,14 +20,11 @@ namespace Bot.Core
 
         public event EventHandler<TownCleanupRequestedArgs>? CleanupRequested;
 
-        public TownCleanup(IServiceProvider services)
+        public TownCleanup(IDateTime dateTime, IGameActivityDatabase gameActivityDb, IBotClient botClient, ICallbackSchedulerFactory callbackFactory)
         {
-            services.Inject(out m_dateTime);
-            services.Inject(out m_gameActivityDb);
-            services.Inject(out m_botClient);
-
-
-            var callbackFactory = services.GetService<ICallbackSchedulerFactory>();
+            m_dateTime = dateTime;
+            m_gameActivityDb = gameActivityDb;
+            m_botClient = botClient;
 
 #if TEST_RAPID_CLEANUP
             TimeSpan cleanupCheckTime = TimeSpan.FromSeconds(5);

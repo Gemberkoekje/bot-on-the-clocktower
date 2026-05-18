@@ -9,9 +9,9 @@ namespace Bot.Core.Lookup
     {
         private readonly IBotSystem m_botSystem;
 
-        public LookupEmbedBuilder(IServiceProvider serviceProvider)
+        public LookupEmbedBuilder(IBotSystem botSystem)
         {
-            serviceProvider.Inject(out m_botSystem);
+            m_botSystem = botSystem;
         }
 
         public IEmbed BuildLookupEmbed(LookupCharacterItem lookupItem)

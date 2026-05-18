@@ -1,6 +1,7 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
 using Bot.Core;
+using Bot.Core.Interaction;
 using Moq;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,7 +30,11 @@ namespace Test.Bot.Core
         private readonly Mock<IMember> AuthorMock;
         private readonly Mock<IGuild> GuildMock;
         private readonly Mock<ITownDatabase> TownDatabaseMock;
+        private readonly Mock<ITownResolver> TownResolverMock;
         private readonly Mock<IBotSystem> SystemMock;
+        private readonly Mock<ICommandMetricDatabase> CommandMetricDatabaseMock;
+        private readonly Mock<IDateTime> DateTimeMock;
+        private readonly Mock<IGuildInteractionWrapper> InteractionWrapperMock;
         private TownDescription TownDesc;
 
         public TestSetup()
@@ -44,9 +49,22 @@ namespace Test.Bot.Core
             TownDatabaseMock.Setup(x => x.AddTownAsync(It.IsAny<ITown>(), It.IsAny<IMember>()));
             RegisterMock(TownDatabaseMock);
 
+            TownResolverMock = new();
+            RegisterMock(TownResolverMock);
+
             SystemMock = new();
             SystemMock.Setup(x => x.CreateTextInput(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<bool>())).Returns(new Mock<IBotComponent>().Object);
             RegisterMock(SystemMock);
+
+            CommandMetricDatabaseMock = new();
+            RegisterMock(CommandMetricDatabaseMock);
+
+            DateTimeMock = new();
+            DateTimeMock.SetupGet(x => x.Now).Returns(System.DateTime.UtcNow);
+            RegisterMock(DateTimeMock);
+
+            InteractionWrapperMock = new();
+            RegisterMock(InteractionWrapperMock);
         }
 
         private static Mock<IChannel> MakeChannel(string name)
@@ -151,7 +169,7 @@ namespace Test.Bot.Core
             townDb.Setup(x => x.AddTownAsync(It.IsAny<ITown>(), It.IsAny<IMember>()));
             RegisterMock(townDb);
 
-            BotSetup bs = new(GetServiceProvider());
+            BotSetup bs = new(townDb.Object, TownResolverMock.Object, SystemMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, InteractionWrapperMock.Object);
             var t = bs.AddTown(town, author);
             t.Wait(50);
             Assert.True(t.IsCompleted);
@@ -161,7 +179,7 @@ namespace Test.Bot.Core
 
         private BotSetup CreateTownAssertCompleted()
         {
-            BotSetup bs = new(GetServiceProvider());
+            BotSetup bs = new(TownDatabaseMock.Object, TownResolverMock.Object, SystemMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, InteractionWrapperMock.Object);
             var t = bs.CreateTown(TownDesc, AuthorMock.Object);
             t.Wait(50);
             Assert.True(t.IsCompleted);

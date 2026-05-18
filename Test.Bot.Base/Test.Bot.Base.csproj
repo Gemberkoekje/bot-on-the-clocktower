@@ -10,6 +10,7 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="SharpCompress" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

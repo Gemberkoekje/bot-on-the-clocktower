@@ -8,9 +8,10 @@ namespace Bot.Core.Lookup
     public class OfficialScriptParser : IOfficialScriptParser
     {
         private readonly IOfficialUrlProvider m_urlProvider;
-        public OfficialScriptParser(IServiceProvider serviceProvider)
+
+        public OfficialScriptParser(IOfficialUrlProvider urlProvider)
         {
-            serviceProvider.Inject(out m_urlProvider);
+            m_urlProvider = urlProvider;
         }
 
         public GetOfficialCharactersResult ParseOfficialData(IEnumerable<string> scriptJsons, IEnumerable<string> characterJsons)

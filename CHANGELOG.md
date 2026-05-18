@@ -1,5 +1,14 @@
 # Bot on the Clocktower Changelog
 
+## Unreleased
+
+* Migrated Discord integration from **DSharpPlus** to **Remora.Discord** (see `plans/dsharp-to-remora-discord.md`).
+* Migrated persistence layer from **MongoDB** to **PostgreSQL via Marten** (see `plans/mongodb-to-postgres-marten.md`).
+* Adopted the standard .NET configuration stack: `appsettings.json`, `appsettings.{Environment}.json`, `usersettings.json`, user secrets, and environment variables (see `plans/appsettings-and-user-secrets.md`).
+* Updated target framework to **.NET 10**.
+* Added `ARCHITECTURE.md` documenting the current implementation.
+* Added `IMPROVEMENTS.md` describing missing features, improvements, and concerns.
+
 ## Version 3.0.0
 
 * Brand new version of the bot rewritten from scratch in C# using DSharpPlus

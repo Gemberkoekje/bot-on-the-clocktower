@@ -16,12 +16,16 @@ namespace Bot.Core
         private readonly IDateTime m_dateTime;
         private readonly ILogger m_logger;
 
-        public BotMessaging(IServiceProvider services)
+        public BotMessaging(
+            ITownInteractionQueue townCommandQueue,
+            ICommandMetricDatabase commandMetricsDatabase,
+            IDateTime dateTime,
+            ILogger logger)
         {
-            services.Inject(out m_townCommandQueue);
-            services.Inject(out m_commandMetricsDatabase);
-            services.Inject(out m_dateTime);
-            services.Inject(out m_logger);
+            m_townCommandQueue = townCommandQueue;
+            m_commandMetricsDatabase = commandMetricsDatabase;
+            m_dateTime = dateTime;
+            m_logger = logger;
         }
 
         private const string DemonGreeting = "{0}: You are the **demon**. ";

@@ -1,4 +1,5 @@
 ﻿using Bot.Core;
+using Bot.Core.Interaction;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Test.Bot.Core
         [Fact]
         public void TestEvilMessage()
         {
-            BotMessaging bm = new(GetServiceProvider());
+            BotMessaging bm = new(new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             var t = bm.SendEvilMessage(Villager1Mock.Object, new[] { Villager2Mock.Object, Villager3Mock.Object });
             t.Wait(50);
@@ -38,7 +39,7 @@ namespace Test.Bot.Core
         [Fact]
         public void TestLunaticMessage()
         {
-            BotMessaging bm = new(GetServiceProvider());
+            BotMessaging bm = new(new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             var t = bm.SendLunaticMessage(Villager1Mock.Object, new[] { Villager2Mock.Object, Villager3Mock.Object });
             t.Wait(50);
@@ -57,7 +58,7 @@ namespace Test.Bot.Core
         [Fact]
         public void TestLegionMessage()
         {
-            BotMessaging bm = new(GetServiceProvider());
+            BotMessaging bm = new(new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             var t = bm.SendLegionMessage(new[] { Villager1Mock.Object, Villager2Mock.Object, Villager3Mock.Object });
             t.Wait(50);
@@ -80,7 +81,7 @@ namespace Test.Bot.Core
         [Fact]
         public void TestMagicianMessage()
         {
-            BotMessaging bm = new(GetServiceProvider());
+            BotMessaging bm = new(new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             var t = bm.SendMagicianMessage(Villager1Mock.Object, new[] { Villager2Mock.Object }, Villager3Mock.Object);
             t.Wait(50);

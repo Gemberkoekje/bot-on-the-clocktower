@@ -10,6 +10,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Formatting.Compact" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>

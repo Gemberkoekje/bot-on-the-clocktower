@@ -18,10 +18,10 @@ namespace Bot.Core.Interaction
 
         const string ShutdownRequestedMessage = "Bot on the Clocktower is restarting. Please wait a few moments, then try again.";
 
-        public BaseInteractionQueue(IServiceProvider serviceProvider)
+        public BaseInteractionQueue(IBotSystem botSystem, IShutdownPreventionService shutdownPreventionService)
         {
-            serviceProvider.Inject(out m_botSystem);
-            serviceProvider.Inject(out m_shutdownPreventionService);
+            m_botSystem = botSystem;
+            m_shutdownPreventionService = shutdownPreventionService;
 
             m_shutdownPreventionService.RegisterShutdownPreventer(m_readyToShutdown.Task);
             m_shutdownPreventionService.ShutdownRequested += OnShutdownRequsted;

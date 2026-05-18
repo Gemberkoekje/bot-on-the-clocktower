@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core;
 using Bot.Core.Interaction;
 using Moq;
@@ -47,7 +47,7 @@ namespace Test.Bot.Core
         [Fact]
         public void TownCommandQueue_RegistersAsPreventer()
         {
-            var tcq = new TownInteractionQueue(GetServiceProvider());
+            var tcq = new TownInteractionQueue(m_mockBotSystem.Object, m_mockShutdownPrevention.Object);
 
             m_mockShutdownPrevention.Verify(sp => sp.RegisterShutdownPreventer(It.IsAny<Task>()), Times.Once());
             Assert.Collection(m_registeredPreventerTasks,
@@ -57,7 +57,7 @@ namespace Test.Bot.Core
         [Fact]
         public void NothingQueued_LearnsOfShutdown_UnblocksShutdown()
         {
-            var tcq = new TownInteractionQueue(GetServiceProvider());
+            var tcq = new TownInteractionQueue(m_mockBotSystem.Object, m_mockShutdownPrevention.Object);
 
             Assert.Collection(m_registeredPreventerTasks,
                 t => Assert.False(t.IsCompleted));
@@ -76,7 +76,7 @@ namespace Test.Bot.Core
 
             var tcs = new TaskCompletionSource<InteractionResult>();
 
-            var tcq = new TownInteractionQueue(GetServiceProvider());
+            var tcq = new TownInteractionQueue(m_mockBotSystem.Object, m_mockShutdownPrevention.Object);
             var t = tcq.QueueInteractionAsync(initialMessage, m_mockInteractionContext.Object, () => tcs.Task);
 
             Assert.True(t.IsCompleted);
@@ -112,7 +112,7 @@ namespace Test.Bot.Core
                 throw new InvalidOperationException("Should not be calling the queue function when cancel is requested");
             }
 
-            var tcq = new TownInteractionQueue(GetServiceProvider());
+            var tcq = new TownInteractionQueue(m_mockBotSystem.Object, m_mockShutdownPrevention.Object);
 
             m_mockShutdownPrevention.Raise(sp => sp.ShutdownRequested += null, EventArgs.Empty);
 
@@ -129,7 +129,7 @@ namespace Test.Bot.Core
         [Fact]
         public void ShutdownServiceNoPreventers_Cancelled_ReadyToShutdown()
         {
-            RegisterMock(new Mock<IDateTime>());
+            var dateTimeMock = RegisterMock(new Mock<IDateTime>());
             using var cts = new CancellationTokenSource();
 
             int shutdownRequestCount = 0;
@@ -139,7 +139,7 @@ namespace Test.Bot.Core
             }
 
 
-            var ss = new ShutdownService(GetServiceProvider(), cts.Token);
+            var ss = new ShutdownService(dateTimeMock.Object, cts.Token);
             ss.ShutdownRequested += ShutdownRequestedFunc;
 
             Assert.Equal(0, shutdownRequestCount);
@@ -154,7 +154,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task ShutdownServiceWithPreventers_Cancelled_WaitsForPreventers()
         {
-            RegisterMock(new Mock<IDateTime>());
+            var dateTimeMock = RegisterMock(new Mock<IDateTime>());
             using var cts = new CancellationTokenSource();
 
             var tcs = new TaskCompletionSource();
@@ -165,7 +165,7 @@ namespace Test.Bot.Core
                 ++shutdownRequestCount;
             }
 
-            var ss = new ShutdownService(GetServiceProvider(), cts.Token);
+            var ss = new ShutdownService(dateTimeMock.Object, cts.Token);
             ss.ShutdownRequested += ShutdownRequestedFunc;
             ss.RegisterShutdownPreventer(tcs.Task);
 
@@ -185,3 +185,4 @@ namespace Test.Bot.Core
         }
     }
 }
+

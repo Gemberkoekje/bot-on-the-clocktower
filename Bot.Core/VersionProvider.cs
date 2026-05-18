@@ -9,13 +9,13 @@ namespace Bot.Core
         private Dictionary<Version, IMessageBuilder> m_versions = new();
         public Dictionary<Version, IMessageBuilder> Versions => m_versions;
 
-        private IBotSystem m_botSystem;
-        private IColorBuilder m_colorBuilder;
+        private readonly IBotSystem m_botSystem;
+        private readonly IColorBuilder m_colorBuilder;
 
-        public VersionProvider(IServiceProvider sp)
+        public VersionProvider(IBotSystem botSystem, IColorBuilder colorBuilder)
         {
-            sp.Inject(out m_botSystem);
-            sp.Inject(out m_colorBuilder);
+            m_botSystem = botSystem;
+            m_colorBuilder = colorBuilder;
         }
 
         public void InitializeVersions()

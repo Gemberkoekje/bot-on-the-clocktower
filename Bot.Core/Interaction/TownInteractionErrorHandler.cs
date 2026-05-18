@@ -1,13 +1,13 @@
 ﻿using Bot.Api;
-using System;
 
 namespace Bot.Core.Interaction
 {
     public class TownInteractionErrorHandler : BaseInteractionErrorHandler<TownKey>, ITownInteractionErrorHandler
     {
-        public TownInteractionErrorHandler(IServiceProvider serviceProvider) 
-            : base(serviceProvider)
-        {}
+        public TownInteractionErrorHandler(IProcessLoggerFactory processLoggerFactory, ITask task)
+            : base(processLoggerFactory, task)
+        {
+        }
 
         protected override string GetFriendlyStringForKey(TownKey townKey) => $"Guild: `{townKey.GuildId}`\nChannel: `{townKey.ControlChannelId}`";
     }

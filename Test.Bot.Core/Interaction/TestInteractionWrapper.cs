@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core.Interaction;
 using Moq;
 using System;
@@ -27,7 +27,9 @@ namespace Test.Bot.Core.Interaction
             TestInteractionQueueHelper.TestQueueRequested<ITestInteractionQueue>(GetServiceProvider(),
                 (sp) =>
                 {
-                    TestInteractionWrapperClass iwc = new(sp);
+                    TestInteractionWrapperClass iwc = new(
+                        (ITestInteractionQueue)sp.GetService(typeof(ITestInteractionQueue))!,
+                        (ITestInteractionErrorHandler)sp.GetService(typeof(ITestInteractionErrorHandler))!);
                     return iwc.WrapInteractionAsync(MockInitialMessage, m_mockInteractionContext.Object,
                         (pl) =>
                         {
@@ -50,7 +52,7 @@ namespace Test.Bot.Core.Interaction
                     TestInteractionErrorHandlerHelper.TestErrorHandlingRequested<int, ITestInteractionErrorHandler>(queueSp,
                         (sp) =>
                         {
-                            TestInteractionWrapperClass iwc = new(sp);
+                            TestInteractionWrapperClass iwc = new((ITestInteractionQueue)sp.GetService(typeof(ITestInteractionQueue))!, (ITestInteractionErrorHandler)sp.GetService(typeof(ITestInteractionErrorHandler))!);
                             return iwc.WrapInteractionAsync(MockInitialMessage, m_mockInteractionContext.Object,
                                 (pl) =>
                                 {
@@ -81,7 +83,7 @@ namespace Test.Bot.Core.Interaction
                     TestInteractionErrorHandlerHelper.TestErrorHandlingMethod<int, ITestInteractionErrorHandler>(queueSp,
                         (sp) =>
                         {
-                            TestInteractionWrapperClass iwc = new(sp);
+                            TestInteractionWrapperClass iwc = new((ITestInteractionQueue)sp.GetService(typeof(ITestInteractionQueue))!, (ITestInteractionErrorHandler)sp.GetService(typeof(ITestInteractionErrorHandler))!);
                             return iwc.WrapInteractionAsync(MockInitialMessage, m_mockInteractionContext.Object,
                                 (pl) => Task.FromResult(returnedFromFunc));
                         },
@@ -105,11 +107,13 @@ namespace Test.Bot.Core.Interaction
 
         private class TestInteractionWrapperClass : BaseInteractionWrapper<int, ITestInteractionQueue, ITestInteractionErrorHandler>
         {
-            public TestInteractionWrapperClass(IServiceProvider serviceProvider)
-                : base(serviceProvider)
-            {}
+            public TestInteractionWrapperClass(ITestInteractionQueue queue, ITestInteractionErrorHandler errorHandler)
+                : base(queue, errorHandler)
+            {
+            }
 
             protected override int KeyFromContext(IBotInteractionContext context) => MockKey;
         }
     }
 }
+

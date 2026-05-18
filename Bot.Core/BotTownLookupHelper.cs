@@ -1,6 +1,5 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,10 +15,10 @@ namespace Bot.Core
 
         protected const string InvalidTownMessage = "Couldn't find a registered town for this server and channel. Consider re-creating the town with `/createTown` or `/addTown`.";
 
-        public BotTownLookupHelper(IServiceProvider serviceProvider)
+        public BotTownLookupHelper(ITownDatabase townLookup, ITownResolver townResolver)
         {
-            serviceProvider.Inject(out m_townLookup);
-            serviceProvider.Inject(out m_townResolver);
+            m_townLookup = townLookup;
+            m_townResolver = townResolver;
         }
 
         protected Task<ITown?> GetValidTownOrLogErrorAsync(TownKey townKey, IProcessLogger processLogger)

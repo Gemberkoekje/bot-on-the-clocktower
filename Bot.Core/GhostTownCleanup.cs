@@ -1,9 +1,5 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Bot.Core
@@ -16,13 +12,18 @@ namespace Bot.Core
         private readonly IGameMetricDatabase m_gameMetricDatabase;
         private readonly IDateTime m_dateTime;
 
-        public GhostTownCleanup(IServiceProvider sp)
+        public GhostTownCleanup(
+            ITownMaintenance startupTownTasks,
+            IBotClient botClient,
+            ITownDatabase townDatabase,
+            IGameMetricDatabase gameMetricDatabase,
+            IDateTime dateTime)
         {
-            sp.Inject(out m_startupTownTasks);
-            sp.Inject(out m_botClient);
-            sp.Inject(out m_townDatabase);
-            sp.Inject(out m_gameMetricDatabase);
-            sp.Inject(out m_dateTime);
+            m_startupTownTasks = startupTownTasks;
+            m_botClient = botClient;
+            m_townDatabase = townDatabase;
+            m_gameMetricDatabase = gameMetricDatabase;
+            m_dateTime = dateTime;
 
             m_startupTownTasks.AddMaintenanceTask(CleanupGhostTown);
         }

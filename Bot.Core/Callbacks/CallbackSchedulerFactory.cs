@@ -1,25 +1,28 @@
-﻿using System;
+﻿using Bot.Api;
+using System;
 using System.Threading.Tasks;
 
 namespace Bot.Core.Callbacks
 {
     public class CallbackSchedulerFactory : ICallbackSchedulerFactory
     {
-        private readonly IServiceProvider m_serviceProvider;
+        private readonly IDateTime m_dateTime;
+        private readonly ITask m_task;
 
-        public CallbackSchedulerFactory(IServiceProvider serviceProvider)
+        public CallbackSchedulerFactory(IDateTime dateTime, ITask task)
         {
-            m_serviceProvider = serviceProvider;
+            m_dateTime = dateTime;
+            m_task = task;
         }
 
         public ICallbackScheduler<TKey> CreateScheduler<TKey>(Func<TKey, Task> callback, TimeSpan checkPeriod) where TKey : notnull
         {
-            return new CallbackScheduler<TKey>(m_serviceProvider, callback, checkPeriod);
+            return new CallbackScheduler<TKey>(m_dateTime, m_task, callback, checkPeriod);
         }
 
         public ICallbackScheduler CreateScheduler(Func<Task> callback, TimeSpan checkPeriod)
         {
-            return new CallbackScheduler(m_serviceProvider, callback, checkPeriod);
+            return new CallbackScheduler(m_dateTime, m_task, callback, checkPeriod);
         }
     }
 }

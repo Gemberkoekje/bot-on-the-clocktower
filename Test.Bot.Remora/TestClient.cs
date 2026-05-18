@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Test.Bot.Base;
 using Xunit;
-using ServiceProvider = Bot.Base.ServiceProvider;
 
 namespace Test.Bot.Remora
 {
@@ -16,8 +15,8 @@ namespace Test.Bot.Remora
         [Fact]
         public void ClientConnect_NoDiscordToken_ThrowsException()
         {
-            RegisterMock(new Mock<IEnvironment>());
-            Assert.Throws<RemoraClient.InvalidDiscordTokenException>(() => new RemoraClient(GetServiceProvider()));
+            var env = new Mock<IEnvironment>();
+            Assert.Throws<RemoraClient.InvalidDiscordTokenException>(() => new RemoraClient(env.Object));
         }
 
         [Fact]
@@ -27,7 +26,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("staging");
 
-            Assert.Throws<RemoraClient.InvalidDeployTypeException>(() => new RemoraClient(GetServiceProvider()));
+            Assert.Throws<RemoraClient.InvalidDeployTypeException>(() => new RemoraClient(env.Object));
         }
 
         [Theory]
@@ -39,7 +38,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(deployType);
 
-            _ = new RemoraClient(GetServiceProvider());
+            _ = new RemoraClient(env.Object);
         }
 
         [Fact]
@@ -58,15 +57,15 @@ namespace Test.Bot.Remora
             sp.AddService(registrar.Object);
 
             RemoraSlashCommandRegistry registry = new();
-            registry.AddSource(_ => new StubSource(new StubCommand("stub-dev")));
+            registry.AddSource(new StubSource(new StubCommand("stub-dev")));
             sp.AddService(registry);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object, commandRegistrar: registrar.Object, commandRegistry: registry);
             int connectedCalls = 0;
             client.Connected += (_, _) => connectedCalls++;
 
-            await client.ConnectAsync(sp);
-            await client.ConnectAsync(sp);
+            await client.ConnectAsync();
+            await client.ConnectAsync();
 
             Assert.Equal(1, connectedCalls);
             Assert.True(client.IsConnected);
@@ -85,7 +84,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("prod");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
             RemoraGuild guild = new(123, "guild");
             client.RegisterGuild(guild);
 
@@ -103,7 +102,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("prod");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
             int messageCalls = 0;
             client.MessageCreated += (_, _) => messageCalls++;
 
@@ -122,7 +121,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
             int messageCalls = 0;
             client.MessageCreated += (_, args) =>
             {
@@ -145,7 +144,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
             RemoraGuild guild = new(1, "guild");
             RemoraChannel channel = new(2, "general");
             RemoraMember member = new(3, "member");
@@ -172,7 +171,7 @@ namespace Test.Bot.Remora
                 .ReturnsAsync(true);
             sp.AddService(componentService.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object, componentService: componentService.Object);
             RemoraGuild guild = new(11, "guild");
             RemoraChannel channel = new(22, "general");
             RemoraMember member = new(33, "member");
@@ -197,7 +196,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
 
             Assert.Equal("dev", client.CommandRegistrationPlan.DeployType);
             Assert.False(client.CommandRegistrationPlan.RegisterGlobalCommands);
@@ -221,17 +220,17 @@ namespace Test.Bot.Remora
             sp.AddService(registrar.Object);
 
             RemoraSlashCommandRegistry registry = new();
-            registry.AddSource(_ => new StubSource(new StubCommand("stub-prod")));
+            registry.AddSource(new StubSource(new StubCommand("stub-prod")));
             sp.AddService(registry);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object, commandRegistrar: registrar.Object, commandRegistry: registry);
 
             Assert.Equal("prod", client.CommandRegistrationPlan.DeployType);
             Assert.True(client.CommandRegistrationPlan.RegisterGlobalCommands);
             Assert.True(client.CommandRegistrationPlan.ClearDevGuildCommands);
             Assert.NotEmpty(client.CommandRegistrationPlan.DevGuildIds);
 
-            await client.ConnectAsync(sp);
+            await client.ConnectAsync();
 
             registrar.Verify(r => r.ClearGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>()), Times.Once);
             registrar.Verify(r => r.RegisterGlobalCommandsAsync(
@@ -249,7 +248,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DISCORD_DEV_GUILD_IDS")).Returns("42, 43,invalid,44");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
 
             Assert.Equal(new ulong[] { 42, 43, 44 }, client.CommandRegistrationPlan.DevGuildIds.ToArray());
         }
@@ -267,7 +266,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("Discord:DevGuildIds:2")).Returns("not-a-number");
             sp.AddService(env.Object);
 
-            RemoraClient client = new(sp);
+            RemoraClient client = new(env.Object);
 
             Assert.Equal(new ulong[] { 1001, 1002 }, client.CommandRegistrationPlan.DevGuildIds.ToArray());
         }

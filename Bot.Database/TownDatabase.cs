@@ -19,11 +19,15 @@ namespace Bot.Database
 
 		private static TownRecord RecordFromTownAndAuthorInfo(ITown town, ulong authorId, string? authorName)
 		{
+			var guildId = town.Guild?.Id ?? 0;
+			var controlChannelId = town.ControlChannel?.Id ?? 0;
+
 			return new TownRecord()
 			{
-				GuildId = town.Guild?.Id ?? 0,
+				Id = $"{guildId}:{controlChannelId}",
+				GuildId = guildId,
 				ControlChannel = town.ControlChannel?.Name,
-				ControlChannelId = town.ControlChannel?.Id ?? 0,
+				ControlChannelId = controlChannelId,
 				ChatChannel = town.ChatChannel?.Name,
 				ChatChannelId = town.ChatChannel?.Id ?? 0,
 				TownSquare = town.TownSquare?.Name,

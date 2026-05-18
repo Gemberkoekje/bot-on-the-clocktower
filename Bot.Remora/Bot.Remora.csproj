@@ -11,6 +11,7 @@
     <PackageReference Include="Remora.Discord.Gateway" />
     <PackageReference Include="Remora.Discord.Interactivity" />
     <PackageReference Include="Remora.Discord.Rest" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>

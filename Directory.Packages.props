@@ -7,6 +7,11 @@
 	<!-- Bot projects -->
 	<PackageVersion Include="Destructurama.ByIgnoring" Version="4.0.1" />
 	<PackageVersion Include="FuzzySharp" Version="2.0.2" />
+	<PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+	<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
+	<PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
+	<PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.1" />
+	<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
 	<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
 	<PackageVersion Include="Marten" Version="8.37.0" />
 	<PackageVersion Include="Moq" Version="4.20.72" />

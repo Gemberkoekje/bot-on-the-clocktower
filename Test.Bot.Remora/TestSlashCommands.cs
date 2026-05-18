@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bot.Api;
 using Bot.Remora;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -188,8 +189,15 @@ namespace Test.Bot.Remora
         [Fact]
         public void ServiceFactory_RegistersAllSlashCommandSources()
         {
-            var sp = ServiceFactory.RegisterServices(null);
-            var registry = sp.GetService(typeof(RemoraSlashCommandRegistry)) as RemoraSlashCommandRegistry;
+            var services = new ServiceCollection();
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
+            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
+            services.AddSingleton(env.Object);
+            services.AddRemoraServices();
+
+            using var sp = services.BuildServiceProvider();
+            var registry = sp.GetService<RemoraSlashCommandRegistry>();
 
             Assert.NotNull(registry);
             Assert.Contains(typeof(RemoraGameSlashCommands), registry!.SourceTypes);
@@ -203,13 +211,11 @@ namespace Test.Bot.Remora
         public void Registry_ResolveCommands_CreatesCommandsViaFactoryInjection()
         {
             var registry = new RemoraSlashCommandRegistry();
-            var services = new global::Bot.Base.ServiceProvider();
 
             var gameplay = new Mock<IBotGameplayInteractionHandler>();
-            services.AddService(gameplay.Object);
-            registry.AddSource(sp => new RemoraGameSlashCommands((IBotGameplayInteractionHandler)sp.GetService(typeof(IBotGameplayInteractionHandler))!));
+            registry.AddSource(new RemoraGameSlashCommands(gameplay.Object));
 
-            var commands = registry.ResolveCommands(services).Select(c => c.Name).ToArray();
+            var commands = registry.ResolveCommands().Select(c => c.Name).ToArray();
 
             Assert.Contains("game", commands);
             Assert.Contains("storytellers", commands);

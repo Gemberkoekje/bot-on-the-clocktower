@@ -41,18 +41,27 @@ namespace Bot.Core
         const string CommandLogMsg = "/{command} command on guild {@guild} by user {@user}";
         const string ButtonLogMsg = "[{button}] button pressed on guild {@guild} by user {@user}";
 
-        public BotGameplayInteractionHandler(IServiceProvider serviceProvider, BotGameplay gameplay, BotVoteTimer voteTimer)
+        public BotGameplayInteractionHandler(
+            BotGameplay gameplay,
+            BotVoteTimer voteTimer,
+            IBotSystem system,
+            IComponentService componentService,
+            ITownInteractionQueue townCommandQueue,
+            ITownInteractionErrorHandler townErrorHandler,
+            IGameMetricDatabase gameMetricDatabase,
+            ICommandMetricDatabase commandMetricDatabase,
+            IDateTime dateTime)
         {
             m_gameplay = gameplay;
             m_voteTimer = voteTimer;
 
-            serviceProvider.Inject(out m_system);
-            serviceProvider.Inject(out m_componentService);
-            serviceProvider.Inject(out m_townCommandQueue);
-            serviceProvider.Inject(out m_townErrorHandler);
-            serviceProvider.Inject(out m_gameMetricDatabase);
-            serviceProvider.Inject(out m_commandMetricDatabase);
-            serviceProvider.Inject(out m_dateTime);
+            m_system = system;
+            m_componentService = componentService;
+            m_townCommandQueue = townCommandQueue;
+            m_townErrorHandler = townErrorHandler;
+            m_gameMetricDatabase = gameMetricDatabase;
+            m_commandMetricDatabase = commandMetricDatabase;
+            m_dateTime = dateTime;
 
             m_nightButton = CreateButton(GameplayButton.Night, "Night", pressMethod: NightButtonPressed, emoji: "🌙");
             m_dayButton = CreateButton(GameplayButton.Day, "Day", pressMethod: DayButtonPressed, IBotSystem.ButtonType.Success, emoji: "☀️");

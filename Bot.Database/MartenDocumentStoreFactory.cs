@@ -16,6 +16,7 @@ namespace Bot.Database
                 options.Connection(connectionString);
 
                 options.Schema.For<TownRecord>()
+                    .Identity(x => x.Id)
                     .Index(x => x.GuildId)
                     .Index(x => x.ControlChannelId)
                     .Index(x => x.DayCategory);
@@ -25,17 +26,20 @@ namespace Bot.Database
                     .Index(x => x.ChannelId);
 
                 options.Schema.For<LookupRoleRecord>()
+                    .Identity(x => x.Id)
                     .Index(x => x.GuildId);
 
                 options.Schema.For<AnnouncementRecord>()
+                    .Identity(x => x.Id)
                     .Index(x => x.GuildId);
 
                 options.Schema.For<GameMetricRecord>()
-                    .Index(x => x.TownHash)
+                    .Identity(x => x.TownHash)
                     .Index(x => x.Complete)
                     .Index(x => x.FirstActivity);
 
                 options.Schema.For<CommandMetricRecord>()
+                    .Identity(x => x.Id)
                     .Index(x => x.Day);
             });
         }

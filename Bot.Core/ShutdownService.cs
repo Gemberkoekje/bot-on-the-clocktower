@@ -15,9 +15,9 @@ namespace Bot.Core
 
         private bool m_shutdownRequested = false;
 
-        public ShutdownService(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        public ShutdownService(IDateTime dateTime, CancellationToken cancellationToken)
         {
-            serviceProvider.Inject(out m_dateTime);
+            m_dateTime = dateTime;
             cancellationToken.Register(CancelRequested);
         }
 

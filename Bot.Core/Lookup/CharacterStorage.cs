@@ -12,11 +12,11 @@ namespace Bot.Core.Lookup
         private readonly IOfficialCharacterCache m_officialCache;
         private readonly ICustomScriptCache m_customCache;
 
-        public CharacterStorage(IServiceProvider serviceProvider)
+        public CharacterStorage(ILookupRoleDatabase lookupDb, IOfficialCharacterCache officialCache, ICustomScriptCache customCache)
         {
-            serviceProvider.Inject(out m_lookupDb);
-            serviceProvider.Inject(out m_officialCache);
-            serviceProvider.Inject(out m_customCache);
+            m_lookupDb = lookupDb;
+            m_officialCache = officialCache;
+            m_customCache = customCache;
         }
 
         public async Task<GetCharactersResult> GetCharactersAsync(ulong guildId)

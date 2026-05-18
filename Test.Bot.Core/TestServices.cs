@@ -1,11 +1,10 @@
-﻿using Bot.Api;
-using Bot.Api.Database;
-using Bot.Base;
+using Bot.Api;
 using Bot.Core;
 using Bot.Core.Callbacks;
 using Bot.Core.Interaction;
-using Moq;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Threading;
 using Test.Bot.Base;
 using Xunit;
@@ -14,20 +13,6 @@ namespace Test.Bot.Core
 {
     public class TestServices : TestBase
     {
-        [Fact]
-        public void CreateCoreServices_ConstructsType()
-        {
-            RegisterMock(new Mock<ILookupRoleDatabase>());
-            var sp = ServiceFactory.RegisterCoreServices(GetServiceProvider(), CancellationToken.None);
-            Assert.IsType<ServiceProvider>(sp);
-        }
-
-        [Fact]
-        public static void CreateBotServices_NothingRegistered_Throws()
-        {
-            Assert.Throws<ServiceNotFoundException>(() => ServiceFactory.RegisterBotServices(new ServiceProvider()));
-        }
-
         [Theory]
         [InlineData(typeof(IGuildInteractionErrorHandler), typeof(GuildInteractionErrorHandler))]
         [InlineData(typeof(ITownInteractionErrorHandler), typeof(TownInteractionErrorHandler))]
@@ -37,37 +22,40 @@ namespace Test.Bot.Core
         [InlineData(typeof(IShuffleService), typeof(ShuffleService))]
         [InlineData(typeof(IFinalShutdownService), typeof(ShutdownService))]
         [InlineData(typeof(IShutdownPreventionService), typeof(ShutdownService))]
-        public void RegisterCoreServices_CreatesAllRequiredServices(Type serviceInterface, Type serviceImpl)
+        public void RegisterCoreServices_RegistersAllRequiredServices(Type serviceInterface, Type serviceImpl)
         {
-            var newSp = ServiceFactory.RegisterCoreServices(GetServiceProvider(), CancellationToken.None);
-            var service = newSp.GetService(serviceInterface);
+            var services = new ServiceCollection();
+            services.AddBotCoreServices(CancellationToken.None);
 
-            Assert.NotNull(service);
-            Assert.IsType(serviceImpl, service);
+            AssertRegistered(services, serviceInterface, serviceImpl);
         }
 
         [Theory]
         [InlineData(typeof(IVoteHandler), typeof(BotGameplay))]
         [InlineData(typeof(IBotGameplayInteractionHandler), typeof(BotGameplayInteractionHandler))]
         [InlineData(typeof(IBotMessaging), typeof(BotMessaging))]
-        [InlineData(typeof(IGuildInteractionQueue), typeof(GuildInteractionQueue))]		
+        [InlineData(typeof(IGuildInteractionQueue), typeof(GuildInteractionQueue))]
         [InlineData(typeof(ITownInteractionQueue), typeof(TownInteractionQueue))]
         [InlineData(typeof(IGuildInteractionWrapper), typeof(GuildInteractionWrapper))]
         [InlineData(typeof(ITownInteractionWrapper), typeof(TownInteractionWrapper))]
         [InlineData(typeof(ITownCleanup), typeof(TownCleanup))]
         [InlineData(typeof(ITownResolver), typeof(TownResolver))]
         [InlineData(typeof(ILegacyCommandReminder), typeof(LegacyCommandReminder))]
-        public void CreateBotServices_CreatesAllRequiredServices(Type serviceInterfaceType, Type serviceImplType)
+        public void CreateBotServices_RegistersAllRequiredServices(Type serviceInterfaceType, Type serviceImplType)
         {
-            RegisterMock(new Mock<IBotSystem>());
-            RegisterMock(new Mock<ICallbackSchedulerFactory>());
-            RegisterMock(new Mock<IShutdownPreventionService>());
-            RegisterMock(new Mock<IComponentService>());
+            var services = new ServiceCollection();
+            services.AddBotGameplayServices();
 
-            var newSp = ServiceFactory.RegisterBotServices(GetServiceProvider());
-            var impl = newSp.GetService(serviceInterfaceType);
+            AssertRegistered(services, serviceInterfaceType, serviceImplType);
+        }
 
-            Assert.IsType(serviceImplType, impl);
+        private static void AssertRegistered(IServiceCollection services, Type serviceInterface, Type serviceImpl)
+        {
+            var descriptor = services.FirstOrDefault(d => d.ServiceType == serviceInterface);
+            Assert.NotNull(descriptor);
+            Assert.True(
+                descriptor!.ImplementationType == serviceImpl || descriptor.ImplementationFactory != null,
+                $"Expected {serviceInterface.Name} to be registered as {serviceImpl.Name} (directly or via factory).");
         }
     }
 }

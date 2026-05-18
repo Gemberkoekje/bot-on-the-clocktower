@@ -1,5 +1,4 @@
 using Bot.Api;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,11 +6,6 @@ namespace Bot.Remora
 {
     public class RemoraSystem : IBotSystem
     {
-        public IBotClient CreateClient(IServiceProvider serviceProvider)
-        {
-            return new RemoraClient(serviceProvider);
-        }
-
         public IBotWebhookBuilder CreateWebhookBuilder() => new RemoraWebhookBuilder();
 
         public IInteractionResponseBuilder CreateInteractionResponseBuilder() => new RemoraInteractionResponseBuilder();

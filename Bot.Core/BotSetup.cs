@@ -20,14 +20,20 @@ namespace Bot.Core
         private readonly IDateTime m_dateTime;
         private readonly IGuildInteractionWrapper m_interactionWrapper;
 
-        public BotSetup(IServiceProvider sp)
+        public BotSetup(
+            ITownDatabase townDb,
+            ITownResolver townResolver,
+            IBotSystem botSystem,
+            ICommandMetricDatabase commandMetricsDatabase,
+            IDateTime dateTime,
+            IGuildInteractionWrapper interactionWrapper)
         {
-            sp.Inject(out m_townDb);
-            sp.Inject(out m_townResolver);
-            sp.Inject(out m_botSystem);
-            sp.Inject(out m_commandMetricsDatabase);
-            sp.Inject(out m_dateTime);
-            sp.Inject(out m_interactionWrapper);
+            m_townDb = townDb;
+            m_townResolver = townResolver;
+            m_botSystem = botSystem;
+            m_commandMetricsDatabase = commandMetricsDatabase;
+            m_dateTime = dateTime;
+            m_interactionWrapper = interactionWrapper;
         }
 
         public Task AddTownAsync(IBotInteractionContext ctx, 

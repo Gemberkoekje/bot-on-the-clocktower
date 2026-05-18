@@ -16,13 +16,12 @@ namespace Bot.Core.Lookup
         private GetOfficialCharactersResult? m_lastResult;
         private DateTime m_lastResultTime = System.DateTime.MinValue;
 
-        public OfficialCharacterCache(IServiceProvider serviceProvider)
+        public OfficialCharacterCache(IDateTime dateTime, IOfficialUrlProvider urlProvider, IOfficialScriptParser scriptParser, IStringDownloader downloader)
         {
-            serviceProvider.Inject(out DateTime);
-
-            serviceProvider.Inject(out m_urlProvider);
-            serviceProvider.Inject(out m_scriptParser);
-            serviceProvider.Inject(out m_downloader);
+            DateTime = dateTime;
+            m_urlProvider = urlProvider;
+            m_scriptParser = scriptParser;
+            m_downloader = downloader;
         }
 
         public async Task<GetOfficialCharactersResult> GetOfficialCharactersAsync()

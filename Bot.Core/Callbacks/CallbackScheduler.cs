@@ -15,11 +15,10 @@ namespace Bot.Core.Callbacks
         private readonly IDateTime m_dateTime;
         private readonly ITask m_task;
 
-        public CallbackScheduler(IServiceProvider serviceProvider, Func<TKey, Task> callback, TimeSpan period)
+        public CallbackScheduler(IDateTime dateTime, ITask task, Func<TKey, Task> callback, TimeSpan period)
         {
-            serviceProvider.Inject(out m_dateTime);
-            serviceProvider.Inject(out m_task);
-
+            m_dateTime = dateTime;
+            m_task = task;
             m_callback = callback;
             m_period = period;
         }
@@ -102,11 +101,10 @@ namespace Bot.Core.Callbacks
         private readonly IDateTime m_dateTime;
         private readonly ITask m_task;
 
-        public CallbackScheduler(IServiceProvider serviceProvider, Func<Task> callback, TimeSpan period)
+        public CallbackScheduler(IDateTime dateTime, ITask task, Func<Task> callback, TimeSpan period)
         {
-            serviceProvider.Inject(out m_dateTime);
-            serviceProvider.Inject(out m_task);
-
+            m_dateTime = dateTime;
+            m_task = task;
             m_callback = callback;
             m_period = period;
         }

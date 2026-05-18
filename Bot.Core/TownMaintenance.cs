@@ -27,17 +27,16 @@ namespace Bot.Core
 
         private readonly List<Func<TownKey, Task>> m_startupTasks = new();
 
-        public TownMaintenance(IServiceProvider sp)
+        public TownMaintenance(IDateTime dateTime, ITownDatabase townDatabase, IBotClient botClient, IShutdownPreventionService shutdownPrevention, ICallbackSchedulerFactory callbackFactory)
         {
-            sp.Inject(out m_dateTime);
-            sp.Inject(out m_townDatabase);
-            sp.Inject(out m_botClient);
-            sp.Inject(out m_shutdownPrevention);
+            m_dateTime = dateTime;
+            m_townDatabase = townDatabase;
+            m_botClient = botClient;
+            m_shutdownPrevention = shutdownPrevention;
 
             m_shutdownPrevention.ShutdownRequested += (s, e) => OnShutdownRequested();
             m_shutdownPrevention.RegisterShutdownPreventer(m_shutdownTcs.Task);
 
-            var callbackFactory = sp.GetService<ICallbackSchedulerFactory>();
             // Scheduler for when we're running the queue - every few minutes, process some more towns
             m_callbackScheduler = callbackFactory.CreateScheduler<Queue<TownKey>>(ProcessQueueAsync, TimeSpan.FromMinutes(1));
             // Scheduler for when we're waiting between maintenance periods - only needs to check every day or so

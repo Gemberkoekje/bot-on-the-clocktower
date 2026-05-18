@@ -1,0 +1,12 @@
+{
+  "$schema": "./usersettings.schema.json",
+  "Discord": {
+	"Token": "YOUR_DISCORD_BOT_TOKEN_HERE",
+	"DevGuildIds": [
+	  123456789012345678
+	]
+  },
+  "ConnectionStrings": {
+	"Postgres": "Host=localhost;Port=5432;Database=botc;Username=postgres;Password=postgres"
+  }
+}

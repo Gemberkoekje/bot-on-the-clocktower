@@ -1,5 +1,7 @@
 # Gameplay Command Details
 
+> See [README.md](README.md) for an overview of the bot, [SETUP.md](SETUP.md) for the town layout, and [ARCHITECTURE.md](ARCHITECTURE.md) for the internal design.
+
 ## `/game`
 
 Primary game flow command - will give you convenient buttons for managing the Day / Night cycle as well as bringing villagers back to vote.
@@ -41,7 +43,7 @@ Example usage:
 > `/storytellers Alice Bob`
 
 
-## `/evil <demon> <minion> <minion> <minion>...`
+## `/evil <demon> <minion1> [minion2] [minion3] [magician]`
 
 Sends DMs to the evil players informing them of their teammates.
 
@@ -56,6 +58,8 @@ The demon gets a message reading:
 Minions get a message reading:
 
 > Bob: You are a **minion**. Your demon is: Alice. Your fellow minions are: Carol
+
+If a `magician` is specified, the messages are adjusted to account for the Magician's effect on the evil team's information.
 
 ## `/lunatic <lunatic> <fake minion> <fake minion> <fake minion>...`
 
@@ -175,3 +179,12 @@ You can control whether your server gets these messages:
 Tells the bot you whether you wish to receive feature announcements for towns on your server.
 
 ---
+
+# See Also
+
+- [README.md](README.md) — overview and quick start.
+- [SETUP.md](SETUP.md) — town/channel/role layout.
+- [CONFIGURATION.md](CONFIGURATION.md) — self-hosting configuration reference.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — internal implementation overview.
+- [IMPROVEMENTS.md](IMPROVEMENTS.md) — missing features and known concerns.
+- [CHANGELOG.md](CHANGELOG.md) — release notes.

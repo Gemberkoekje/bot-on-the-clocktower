@@ -15,12 +15,12 @@ namespace Bot.Core
         private readonly ICommandMetricDatabase m_commandMetricsDatabase;
         private readonly IDateTime m_dateTime;
 
-        public BotVoteTimer(IServiceProvider serviceProvider)
-            : base(serviceProvider)
+        public BotVoteTimer(ITownDatabase townLookup, ITownResolver townResolver, ICommandMetricDatabase commandMetricsDatabase, IDateTime dateTime, VoteTimerController voteTimerController)
+            : base(townLookup, townResolver)
         {
-            m_voteTimerController = new(serviceProvider);
-            serviceProvider.Inject(out m_commandMetricsDatabase);
-            serviceProvider.Inject(out m_dateTime);
+            m_voteTimerController = voteTimerController;
+            m_commandMetricsDatabase = commandMetricsDatabase;
+            m_dateTime = dateTime;
         }
 
         public async Task<InteractionResult> RunVoteTimerUnsafe(TownKey townKey, string timeString, IProcessLogger processLoggger)
@@ -95,7 +95,7 @@ namespace Bot.Core
             return message.ToString();
         }
 
-        private class VoteTimerController
+        public class VoteTimerController
         {
             private readonly IDateTime DateTime;
 
@@ -106,15 +106,12 @@ namespace Bot.Core
 
             private readonly Dictionary<TownKey, DateTime> m_townKeyToVoteTime = new();
 
-            public VoteTimerController(IServiceProvider serviceProvider)
+            public VoteTimerController(IDateTime dateTime, ITownDatabase townLookup, ITownResolver townResolver, IVoteHandler voteHandler, ICallbackSchedulerFactory callbackFactory)
             {
-                serviceProvider.Inject(out DateTime);
-
-                serviceProvider.Inject(out m_townLookup);
-                serviceProvider.Inject(out m_townResolver);
-                serviceProvider.Inject(out m_voteHandler);
-
-                var callbackFactory = serviceProvider.GetService<ICallbackSchedulerFactory>();
+                DateTime = dateTime;
+                m_townLookup = townLookup;
+                m_townResolver = townResolver;
+                m_voteHandler = voteHandler;
                 m_callbackScheduler = callbackFactory.CreateScheduler<TownKey>(ScheduledCallbackAsync, TimeSpan.FromSeconds(1));
             }
 

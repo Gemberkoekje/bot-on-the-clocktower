@@ -1,4 +1,4 @@
-﻿using Bot.Core.Lookup;
+using Bot.Core.Lookup;
 using Moq;
 using System.Linq;
 using Test.Bot.Base;
@@ -38,7 +38,7 @@ namespace Test.Bot.Core.Lookup
             m_customCultLeader = new("cultleadercustom", m_officialCultLeader.Name, m_officialCultLeader.Ability, CharacterTeam.Outsider, isOfficial: false);
 
             m_customIcarus = new("icarus", "Icarus", "Each day you may privately ask the storyteller a question. Either they answer truthfully or you become drunk for the rest of the game.", CharacterTeam.Townsfolk, isOfficial: false);
-            m_customIcarus.FlavorText = "Let me warn you, Icarus, take the middle way, because the moisture will weigh down your wings, if you fly too low. But if you go too high, the sun will scorch them. Travel between the extremes and take the course I’ll show you!";
+            m_customIcarus.FlavorText = "Let me warn you, Icarus, take the middle way, because the moisture will weigh down your wings, if you fly too low. But if you go too high, the sun will scorch them. Travel between the extremes and take the course I�ll show you!";
             m_customImp = new("impcustom", m_officialImp.Name, m_officialImp.Ability, m_officialImp.Team, isOfficial: false);
             m_customImp.FlavorText = "We must keep our wits sharp and our sword sharper. Evil walks among us, and will stop at nothing to destroy us good, simple folk, bringing our fine town to ruin. Trust no-one. But, if you must trust someone, trust me.";
 
@@ -65,7 +65,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void CharacterLookup_BogusRequest_NoResults()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "this is a bogus character request"));
 
@@ -75,7 +75,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void AnyGuild_LegitRequest_ReturnsResult()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "washerwoman"));
 
@@ -91,7 +91,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void Guild1_OfficialRoleInCustomScript_ReturnsBothScriptsOneItem()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "poisoner"));
 
@@ -108,7 +108,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void Guild1_CustomRoleInCustomScript2_ReturnsBothScriptsOneItem()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "icarus"));
 
@@ -125,7 +125,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void Guild1_OfficialRoleTweakedInCustomScript_ReturnsTwoItems()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "cult leader"));
 
@@ -147,7 +147,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void Guild1_OfficialRoleWithCustomFlavorProvided_ReturnsWithFlavor()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "imp"));
 
@@ -166,7 +166,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void FuzzyNameProvided_ReturnsCorrectCharacter()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             var result = AssertCompletedTask(() => lookup.LookupCharacterAsync(GuildId, "warshwomn"));
 
@@ -180,7 +180,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void RefreshScriptsCalled_CallsStorageRefresh()
         {
-            var lookup = new CharacterLookup(GetServiceProvider());
+            var lookup = new CharacterLookup(m_mockCharacterStorage.Object);
 
             AssertCompletedTask(() => lookup.RefreshCharactersAsync(GuildId));
 
@@ -197,3 +197,4 @@ namespace Test.Bot.Core.Lookup
         }
     }
 }
+

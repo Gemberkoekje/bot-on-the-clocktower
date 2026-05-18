@@ -5,6 +5,8 @@ namespace Bot.Database
 {
     public class TownRecord : ITownRecord
     {
+        public string Id { get; set; } = string.Empty;
+
         public ulong GuildId { get; set; }
         public string? ControlChannel { get; set; }
         public ulong ControlChannelId { get; set; }

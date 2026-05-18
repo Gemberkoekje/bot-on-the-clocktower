@@ -1,4 +1,4 @@
-﻿using Bot.Api.Database;
+using Bot.Api.Database;
 using Bot.Core.Lookup;
 using Moq;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace Test.Bot.Core.Lookup
 
             m_mockOfficialCache.Setup(sc => sc.GetOfficialCharactersAsync()).ReturnsAsync(new GetOfficialCharactersResult(new[] { new GetOfficialCharactersItem(expectedChar, new[] { expectedScript }) }));
 
-            var cs = new CharacterStorage(GetServiceProvider());
+            var cs = new CharacterStorage(m_mockLookupDb.Object, m_mockOfficialCache.Object, m_mockCustomCache.Object);
 
             var actualResult = AssertCompletedTask(() => cs.GetCharactersAsync(0ul));
 
@@ -66,7 +66,7 @@ namespace Test.Bot.Core.Lookup
             m_mockCustomCache.Setup(cc => cc.GetCustomScriptAsync(It.Is<string>(s => s == testUrl1))).ReturnsAsync(new GetCustomScriptResult(new[] { new ScriptWithCharacters(expectedScript1, new[] { expectedChar1 }) }));
             m_mockCustomCache.Setup(cc => cc.GetCustomScriptAsync(It.Is<string>(s => s == testUrl2))).ReturnsAsync(new GetCustomScriptResult(new[] { new ScriptWithCharacters(expectedScript2, new[] { expectedChar2, expectedChar3 }) }));
 
-            var cs = new CharacterStorage(GetServiceProvider());
+            var cs = new CharacterStorage(m_mockLookupDb.Object, m_mockOfficialCache.Object, m_mockCustomCache.Object);
 
             var actualResult = AssertCompletedTask(() => cs.GetCharactersAsync(testGuildId));
 
@@ -101,7 +101,7 @@ namespace Test.Bot.Core.Lookup
 
             m_mockLookupDb.Setup(ld => ld.GetScriptUrlsAsync(It.Is<ulong>(g => g == testGuildId))).ReturnsAsync(new string[] { testUrl1, testUrl2 });
 
-            var cs = new CharacterStorage(GetServiceProvider());
+            var cs = new CharacterStorage(m_mockLookupDb.Object, m_mockOfficialCache.Object, m_mockCustomCache.Object);
             m_mockOfficialCache.Verify(oc => oc.InvalidateCache(), Times.Never);
             m_mockCustomCache.Verify(cc => cc.InvalidateCache(It.IsAny<string>()), Times.Never);
 
@@ -115,3 +115,4 @@ namespace Test.Bot.Core.Lookup
         }
     }
 }
+

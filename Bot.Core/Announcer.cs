@@ -1,6 +1,5 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,14 +20,20 @@ namespace Bot.Core
         private readonly ITownMaintenance m_townMaintenance;
         private readonly IEnvironment m_environment;
 
-        public Announcer(IServiceProvider sp)
+        public Announcer(
+            IVersionProvider versionProvider,
+            IAnnouncementDatabase announcementDatabase,
+            IBotSystem botSystem,
+            IBotClient botClient,
+            ITownMaintenance townMaintenance,
+            IEnvironment environment)
         {
-            sp.Inject(out m_versionProvider);
-            sp.Inject(out m_announcementDatabase);
-            sp.Inject(out m_botSystem);
-            sp.Inject(out m_botClient);
-            sp.Inject(out m_townMaintenance);
-            sp.Inject(out m_environment);
+            m_versionProvider = versionProvider;
+            m_announcementDatabase = announcementDatabase;
+            m_botSystem = botSystem;
+            m_botClient = botClient;
+            m_townMaintenance = townMaintenance;
+            m_environment = environment;
 
             m_townMaintenance.AddMaintenanceTask(AnnounceToTown);
         }

@@ -15,12 +15,12 @@ namespace Bot.Core.Lookup
         private readonly ICharacterLookup m_characterLookup;
         private readonly ILookupEmbedBuilder m_lookupEmbedBuilder;
 
-        public BotLookupService(IServiceProvider serviceProvider)
+        public BotLookupService(IGuildInteractionWrapper interactionWrapper, ILookupRoleDatabase lookupDb, ICharacterLookup characterLookup, ILookupEmbedBuilder lookupEmbedBuilder)
         {
-            serviceProvider.Inject(out m_interactionWrapper);
-            serviceProvider.Inject(out m_lookupDb);
-            serviceProvider.Inject(out m_characterLookup);
-            serviceProvider.Inject(out m_lookupEmbedBuilder);
+            m_interactionWrapper = interactionWrapper;
+            m_lookupDb = lookupDb;
+            m_characterLookup = characterLookup;
+            m_lookupEmbedBuilder = lookupEmbedBuilder;
         }
 
         public Task LookupAsync(IBotInteractionContext ctx, string lookupString) => m_interactionWrapper.WrapInteractionAsync($"Looking up \"{lookupString}\"...", ctx, l => PerformLookupAsync(l, ctx, lookupString));

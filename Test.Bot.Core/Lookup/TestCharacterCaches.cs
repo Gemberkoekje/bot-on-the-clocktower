@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core.Lookup;
 using Moq;
 using System;
@@ -58,7 +58,7 @@ namespace Test.Bot.Core.Lookup
             SetupDownload(url, json);
             SetupCustomParser(json, expectedResult);
 
-            var csc = new CustomScriptCache(GetServiceProvider());
+            var csc = new CustomScriptCache(m_mockDateTime.Object, m_mockDownloader.Object, m_mockCustomParser.Object);
             var firstResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url));
             var secondResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url));
             var finalResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url));
@@ -85,7 +85,7 @@ namespace Test.Bot.Core.Lookup
             SetupCustomParser(json1, expectedResult1);
             SetupCustomParser(json2, expectedResult2);
 
-            var csc = new CustomScriptCache(GetServiceProvider());
+            var csc = new CustomScriptCache(m_mockDateTime.Object, m_mockDownloader.Object, m_mockCustomParser.Object);
 
             var firstResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url));
             AdvanceTime(TimeSpan.FromHours(13));
@@ -133,7 +133,7 @@ namespace Test.Bot.Core.Lookup
             SetupCustomParser(json2a, expected2a);
             SetupCustomParser(json2b, expected2b);
 
-            var csc = new CustomScriptCache(GetServiceProvider());
+            var csc = new CustomScriptCache(m_mockDateTime.Object, m_mockDownloader.Object, m_mockCustomParser.Object);
 
             m_mockDownloader.Verify(d => d.DownloadStringAsync(It.Is<string>(s => s == url1)), Times.Never);
 
@@ -182,7 +182,7 @@ namespace Test.Bot.Core.Lookup
             m_mockOfficialUrlProvider.SetupGet(oup => oup.ScriptUrls).Returns(new[] { s1, s2 });
             m_mockOfficialUrlProvider.SetupGet(oup => oup.CharacterUrls).Returns(new[] { c1, c2 });
 
-            var oc = new OfficialCharacterCache(GetServiceProvider());
+            var oc = new OfficialCharacterCache(m_mockDateTime.Object, m_mockOfficialUrlProvider.Object, m_mockOfficialParser.Object, m_mockDownloader.Object);
             AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
 
             m_mockDownloader.Verify(d => d.DownloadStringAsync(It.Is<string>(s => s == s1)), Times.Once);
@@ -218,7 +218,7 @@ namespace Test.Bot.Core.Lookup
                     It.Is<IEnumerable<string>>(c => c.SequenceEqual(new[] { cj1, cj2 }))))
                 .Returns(expectedResult);
 
-            var oc = new OfficialCharacterCache(GetServiceProvider());
+            var oc = new OfficialCharacterCache(m_mockDateTime.Object, m_mockOfficialUrlProvider.Object, m_mockOfficialParser.Object, m_mockDownloader.Object);
             var result = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
 
             Assert.Equal(expectedResult, result);
@@ -233,7 +233,7 @@ namespace Test.Bot.Core.Lookup
             m_mockOfficialUrlProvider.SetupGet(oup => oup.ScriptUrls).Returns(new[] { "script" });
             m_mockOfficialUrlProvider.SetupGet(oup => oup.CharacterUrls).Returns(new[] { "char" });
 
-            var oc = new OfficialCharacterCache(GetServiceProvider());
+            var oc = new OfficialCharacterCache(m_mockDateTime.Object, m_mockOfficialUrlProvider.Object, m_mockOfficialParser.Object, m_mockDownloader.Object);
             var result1 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
             var result2 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
 
@@ -256,7 +256,7 @@ namespace Test.Bot.Core.Lookup
             m_mockOfficialUrlProvider.SetupGet(oup => oup.ScriptUrls).Returns(new[] { "script" });
             m_mockOfficialUrlProvider.SetupGet(oup => oup.CharacterUrls).Returns(new[] { "char" });
 
-            var oc = new OfficialCharacterCache(GetServiceProvider());
+            var oc = new OfficialCharacterCache(m_mockDateTime.Object, m_mockOfficialUrlProvider.Object, m_mockOfficialParser.Object, m_mockDownloader.Object);
             var result1 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
             AdvanceTime(TimeSpan.FromHours(25));
             var result2 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
@@ -279,7 +279,7 @@ namespace Test.Bot.Core.Lookup
             m_mockOfficialUrlProvider.SetupGet(oup => oup.ScriptUrls).Returns(new[] { "script" });
             m_mockOfficialUrlProvider.SetupGet(oup => oup.CharacterUrls).Returns(new[] { "char" });
 
-            var oc = new OfficialCharacterCache(GetServiceProvider());
+            var oc = new OfficialCharacterCache(m_mockDateTime.Object, m_mockOfficialUrlProvider.Object, m_mockOfficialParser.Object, m_mockDownloader.Object);
             var result1 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
             oc.InvalidateCache();
             var result2 = AssertCompletedTask(() => oc.GetOfficialCharactersAsync());
@@ -301,7 +301,7 @@ namespace Test.Bot.Core.Lookup
             SetupDownload(url2, json);
             SetupCustomParser(json, expectedResult);
 
-            var csc = new CustomScriptCache(GetServiceProvider());
+            var csc = new CustomScriptCache(m_mockDateTime.Object, m_mockDownloader.Object, m_mockCustomParser.Object);
             var firstResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url1));
             var secondResult = AssertCompletedTask(() => csc.GetCustomScriptAsync(url2));
 
@@ -320,7 +320,7 @@ namespace Test.Bot.Core.Lookup
 
         private GetCustomScriptResult PerformCustomGet()
         {
-            var csc = new CustomScriptCache(GetServiceProvider());
+            var csc = new CustomScriptCache(m_mockDateTime.Object, m_mockDownloader.Object, m_mockCustomParser.Object);
             return AssertCompletedTask(() => csc.GetCustomScriptAsync("url"));
         }
 
@@ -345,3 +345,4 @@ namespace Test.Bot.Core.Lookup
         }
     }
 }
+

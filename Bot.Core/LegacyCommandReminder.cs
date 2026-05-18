@@ -53,20 +53,24 @@ namespace Bot.Core
 
         private readonly static Dictionary<string, LegacyCommandUpdate> s_commandMap = new();
 
+        public LegacyCommandReminder(
+            IDateTime dateTime,
+            IBotSystem botSystem,
+            IBotClient botClient)
+        {
+            m_dateTime = dateTime;
+            m_botSystem = botSystem;
+            m_botClient = botClient;
+
+            m_botClient.MessageCreated += ClientMessageCreated;
+        }
+
         static LegacyCommandReminder()
         {
             foreach(var command in s_commands)
                 s_commandMap.Add(command.LegacyCommandString.ToLowerInvariant(), command);
         }
 
-        public LegacyCommandReminder(IServiceProvider sp)
-        {
-            sp.Inject(out m_dateTime);
-            sp.Inject(out m_botSystem);
-            sp.Inject(out m_botClient);
-
-            m_botClient.MessageCreated += ClientMessageCreated;
-        }
 
         private void Cleanup()
         {

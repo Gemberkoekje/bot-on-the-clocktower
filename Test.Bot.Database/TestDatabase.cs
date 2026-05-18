@@ -2,84 +2,120 @@ using Bot.Api;
 using Bot.Api.Database;
 using Bot.Database;
 using Marten;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
 using Test.Bot.Base;
 using Xunit;
 
 namespace Test.Bot.Database
 {
-	public class TestDatabase : TestBase
-	{
-		private const string MockConnectionString = "mock-conn-string";
+    public class TestDatabase : TestBase
+    {
+        private const string MockConnectionString = "mock-conn-string";
 
-		[Fact]
-		public void ConnectToDocumentStore_NoConnString_ThrowsException()
-		{
-			RegisterMock(new Mock<IEnvironment>());
-			DatabaseFactory db = new(GetServiceProvider());
+        private static ServiceCollection CreateServices()
+        {
+            var services = new ServiceCollection();
+            services.AddBotDatabaseServices();
+            return services;
+        }
 
-			Assert.Throws<DatabaseFactory.InvalidPostgresConnectStringException>(db.ConnectToDocumentStore);
-		}
+        [Fact]
+        public void ConnectToDocumentStore_NoConnString_ThrowsException()
+        {
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable(It.IsAny<string>())).Returns((string)null!);
 
-		[Fact]
-		public void ConnectToDocumentStore_NoStore_ThrowsException()
-		{
-			var mockEnv = RegisterMock(new Mock<IEnvironment>());
-			mockEnv.Setup(e => e.GetEnvironmentVariable(It.Is<string>(s => s == DatabaseFactory.PostgresConnectionStringConfigKey))).Returns(MockConnectionString);
+            var services = CreateServices();
+            services.AddSingleton(env.Object);
+            using var sp = services.BuildServiceProvider();
 
-			RegisterMock(new Mock<IMartenDocumentStoreFactory>());
-			DatabaseFactory db = new(GetServiceProvider());
+            Assert.Throws<DependencyInjection.InvalidPostgresConnectStringException>(() => sp.GetRequiredService<IDocumentStore>());
+        }
 
-			Assert.Throws<DatabaseFactory.DocumentStoreNotCreatedException>(db.ConnectToDocumentStore);
-		}
+        [Fact]
+        public void ConnectToDocumentStore_NoStore_ThrowsException()
+        {
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable(DependencyInjection.PostgresConnectionStringConfigKey)).Returns(MockConnectionString);
 
-		[Fact]
-		public void ConnectToDocumentStore_StoreCreated_Works()
-		{
-			var mockEnv = RegisterMock(new Mock<IEnvironment>());
-			mockEnv.Setup(e => e.GetEnvironmentVariable(It.Is<string>(s => s == DatabaseFactory.PostgresConnectionStringConfigKey))).Returns(MockConnectionString);
+            var storeFactory = new Mock<IMartenDocumentStoreFactory>();
 
-			var mockStore = new Mock<IDocumentStore>();
-			var storeFactory = RegisterMock(new Mock<IMartenDocumentStoreFactory>());
-			storeFactory.Setup(sf => sf.CreateDocumentStore(It.Is<string>(s => s == MockConnectionString))).Returns(mockStore.Object);
-			DatabaseFactory db = new(GetServiceProvider());
+            var services = CreateServices();
+            services.AddSingleton(env.Object);
+            services.AddSingleton(storeFactory.Object);
+            using var sp = services.BuildServiceProvider();
 
-			var result = db.ConnectToDocumentStore();
+            Assert.Throws<DependencyInjection.DocumentStoreNotCreatedException>(() => sp.GetRequiredService<IDocumentStore>());
+        }
 
-			Assert.Equal(mockStore.Object, result);
-		}
+        [Fact]
+        public void ConnectToDocumentStore_StoreCreated_Works()
+        {
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable(DependencyInjection.PostgresConnectionStringConfigKey)).Returns(MockConnectionString);
 
-		[Fact]
-		public void CreateDbServices_CreatesTownLookup()
-		{
-			var mockStore = new Mock<IDocumentStore>(MockBehavior.Strict);
-			var mockTownLookup = new Mock<ITownDatabase>(MockBehavior.Strict);
-			var mockGameActivityDb = new Mock<IGameActivityDatabase>(MockBehavior.Strict);
-			var mockLookupRoleDb = new Mock<ILookupRoleDatabase>(MockBehavior.Strict);
-			var mockAnnouncementDb = new Mock<IAnnouncementDatabase>(MockBehavior.Strict);
-			var mockGameMetricDb = new Mock<IGameMetricDatabase>(MockBehavior.Strict);
-			var mockCommandMetricDb = new Mock<ICommandMetricDatabase>(MockBehavior.Strict);
-			var mockLookupRoleDbFactory = RegisterMock(new Mock<ILookupRoleDatabaseFactory>(MockBehavior.Strict));
-			var mockTownLookupFactory = RegisterMock(new Mock<ITownDatabaseFactory>(MockBehavior.Strict));
-			var mockGameActivityDbFactory = RegisterMock(new Mock<IGameActivityDatabaseFactory>(MockBehavior.Strict));
-			var mockAnnouncementDbFactory = RegisterMock(new Mock<IAnnouncementDatabaseFactory>(MockBehavior.Strict));
-			var mockGameMetricDbFactory = RegisterMock(new Mock<IGameMetricDatabaseFactory>(MockBehavior.Strict));
-			var mockCommandMetricDbFactory = RegisterMock(new Mock<ICommandMetricDatabaseFactory>(MockBehavior.Strict));
+            var mockStore = new Mock<IDocumentStore>();
+            var storeFactory = new Mock<IMartenDocumentStoreFactory>();
+            storeFactory.Setup(sf => sf.CreateDocumentStore(MockConnectionString)).Returns(mockStore.Object);
 
-			mockGameActivityDbFactory.Setup(gadbf => gadbf.CreateGameActivityDatabase(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockGameActivityDb.Object);
-			mockLookupRoleDbFactory.Setup(lrdbf => lrdbf.CreateLookupRoleDatabase(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockLookupRoleDb.Object);
-			mockAnnouncementDbFactory.Setup(adbf => adbf.CreateAnnouncementDatabase(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockAnnouncementDb.Object);
-			mockGameMetricDbFactory.Setup(gmdbf => gmdbf.CreateGameMetricDatabase(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockGameMetricDb.Object);
-			mockCommandMetricDbFactory.Setup(gmdbf => gmdbf.CreateCommandMetricDatabase(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockCommandMetricDb.Object);
+            var services = CreateServices();
+            services.AddSingleton(env.Object);
+            services.AddSingleton(storeFactory.Object);
+            using var sp = services.BuildServiceProvider();
 
-			mockTownLookupFactory.Setup(tlf => tlf.CreateTownLookup(It.Is<IDocumentStore>(ds => ds == mockStore.Object))).Returns(mockTownLookup.Object);
-			DatabaseFactory db = new(GetServiceProvider());
+            Assert.Equal(mockStore.Object, sp.GetRequiredService<IDocumentStore>());
+        }
 
-			var result = db.CreateDatabaseServices(mockStore.Object);
+        [Fact]
+        public void CreateDbServices_CreatesTownLookup()
+        {
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable(DependencyInjection.PostgresConnectionStringConfigKey)).Returns(MockConnectionString);
 
-			mockTownLookupFactory.Verify(tlf => tlf.CreateTownLookup(It.Is<IDocumentStore>(ds => ds == mockStore.Object)), Times.Once);
-			Assert.Equal(mockTownLookup.Object, result.GetService<ITownDatabase>());
-		}
-	}
+            var mockStore = new Mock<IDocumentStore>(MockBehavior.Loose);
+            var storeFactory = new Mock<IMartenDocumentStoreFactory>();
+            storeFactory.Setup(sf => sf.CreateDocumentStore(MockConnectionString)).Returns(mockStore.Object);
+
+            var mockTownLookup = new Mock<ITownDatabase>(MockBehavior.Strict).Object;
+            var mockGameActivityDb = new Mock<IGameActivityDatabase>(MockBehavior.Strict).Object;
+            var mockLookupRoleDb = new Mock<ILookupRoleDatabase>(MockBehavior.Strict).Object;
+            var mockAnnouncementDb = new Mock<IAnnouncementDatabase>(MockBehavior.Strict).Object;
+            var mockGameMetricDb = new Mock<IGameMetricDatabase>(MockBehavior.Strict).Object;
+            var mockCommandMetricDb = new Mock<ICommandMetricDatabase>(MockBehavior.Strict).Object;
+
+            var townLookupFactory = new Mock<ITownDatabaseFactory>(MockBehavior.Strict);
+            townLookupFactory.Setup(f => f.CreateTownLookup(mockStore.Object)).Returns(mockTownLookup);
+
+            var gameActivityDbFactory = new Mock<IGameActivityDatabaseFactory>(MockBehavior.Strict);
+            gameActivityDbFactory.Setup(f => f.CreateGameActivityDatabase(mockStore.Object)).Returns(mockGameActivityDb);
+
+            var lookupRoleDbFactory = new Mock<ILookupRoleDatabaseFactory>(MockBehavior.Strict);
+            lookupRoleDbFactory.Setup(f => f.CreateLookupRoleDatabase(mockStore.Object)).Returns(mockLookupRoleDb);
+
+            var announcementDbFactory = new Mock<IAnnouncementDatabaseFactory>(MockBehavior.Strict);
+            announcementDbFactory.Setup(f => f.CreateAnnouncementDatabase(mockStore.Object)).Returns(mockAnnouncementDb);
+
+            var gameMetricDbFactory = new Mock<IGameMetricDatabaseFactory>(MockBehavior.Strict);
+            gameMetricDbFactory.Setup(f => f.CreateGameMetricDatabase(mockStore.Object)).Returns(mockGameMetricDb);
+
+            var commandMetricDbFactory = new Mock<ICommandMetricDatabaseFactory>(MockBehavior.Strict);
+            commandMetricDbFactory.Setup(f => f.CreateCommandMetricDatabase(mockStore.Object)).Returns(mockCommandMetricDb);
+
+            var services = CreateServices();
+            services.AddSingleton(env.Object);
+            services.AddSingleton(storeFactory.Object);
+            services.AddSingleton(townLookupFactory.Object);
+            services.AddSingleton(gameActivityDbFactory.Object);
+            services.AddSingleton(lookupRoleDbFactory.Object);
+            services.AddSingleton(announcementDbFactory.Object);
+            services.AddSingleton(gameMetricDbFactory.Object);
+            services.AddSingleton(commandMetricDbFactory.Object);
+
+            using var sp = services.BuildServiceProvider();
+
+            Assert.Equal(mockTownLookup, sp.GetRequiredService<ITownDatabase>());
+            townLookupFactory.Verify(f => f.CreateTownLookup(mockStore.Object), Times.Once);
+        }
+    }
 }

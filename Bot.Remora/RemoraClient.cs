@@ -8,7 +8,6 @@ namespace Bot.Remora
 {
     public class RemoraClient : IBotClient
     {
-        private readonly IServiceProvider m_serviceProvider;
         private readonly string m_token;
         private readonly Dictionary<ulong, IGuild> m_guilds = new();
         private readonly IComponentService m_componentService;
@@ -22,14 +21,16 @@ namespace Bot.Remora
 
         public bool IsConnected { get; private set; }
 
-        public RemoraClient(IServiceProvider serviceProvider)
+        public RemoraClient(
+            IEnvironment environment,
+            IComponentService? componentService = null,
+            IRemoraCommandRegistrar? commandRegistrar = null,
+            RemoraSlashCommandRegistry? commandRegistry = null)
         {
-            m_serviceProvider = serviceProvider;
-            var environment = serviceProvider.GetService<IEnvironment>();
             m_token = environment.GetEnvironmentVariable("DISCORD_TOKEN") ?? string.Empty;
-            m_componentService = (serviceProvider.GetService(typeof(IComponentService)) as IComponentService) ?? new NoOpComponentService();
-            m_commandRegistrar = (serviceProvider.GetService(typeof(IRemoraCommandRegistrar)) as IRemoraCommandRegistrar) ?? new NoOpRemoraCommandRegistrar();
-            m_commandRegistry = serviceProvider.GetService(typeof(RemoraSlashCommandRegistry)) as RemoraSlashCommandRegistry;
+            m_componentService = componentService ?? new NoOpComponentService();
+            m_commandRegistrar = commandRegistrar ?? new NoOpRemoraCommandRegistrar();
+            m_commandRegistry = commandRegistry;
 
             if (string.IsNullOrWhiteSpace(m_token))
             {
@@ -47,7 +48,7 @@ namespace Bot.Remora
             }
         }
 
-        public async Task ConnectAsync(IServiceProvider serviceProvider)
+        public async Task ConnectAsync()
         {
             if (!IsConnected)
             {
@@ -117,7 +118,7 @@ namespace Bot.Remora
                 return Array.Empty<IRemoraSlashCommand>();
             }
 
-            return m_commandRegistry.ResolveCommands(m_serviceProvider).ToArray();
+            return m_commandRegistry.ResolveCommands().ToArray();
         }
 
         public class InvalidDiscordTokenException : Exception { }

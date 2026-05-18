@@ -7,21 +7,27 @@ namespace Bot.Remora
     public class RemoraSlashCommandRegistry
     {
         private readonly List<Type> m_sourceTypes = new();
-        private readonly List<Func<IServiceProvider, IRemoraSlashCommandSource>> m_factories = new();
+        private readonly List<Func<IRemoraSlashCommandSource>> m_sourceFactories = new();
 
         public IReadOnlyList<Type> SourceTypes => m_sourceTypes;
 
-        public void AddSource<T>(Func<IServiceProvider, T> factory) where T : IRemoraSlashCommandSource
+        public void AddSource<T>(T source) where T : IRemoraSlashCommandSource
         {
             m_sourceTypes.Add(typeof(T));
-            m_factories.Add(sp => factory(sp));
+            m_sourceFactories.Add(() => source);
         }
 
-        public IEnumerable<IRemoraSlashCommand> ResolveCommands(IServiceProvider serviceProvider)
+        public void AddSource<T>(Func<T> sourceFactory) where T : IRemoraSlashCommandSource
         {
-            foreach (var factory in m_factories)
+            m_sourceTypes.Add(typeof(T));
+            m_sourceFactories.Add(() => sourceFactory());
+        }
+
+        public IEnumerable<IRemoraSlashCommand> ResolveCommands()
+        {
+            foreach (var sourceFactory in m_sourceFactories)
             {
-                IRemoraSlashCommandSource source = factory(serviceProvider);
+                IRemoraSlashCommandSource source = sourceFactory();
                 foreach (var command in source.GetCommands())
                 {
                     yield return command;

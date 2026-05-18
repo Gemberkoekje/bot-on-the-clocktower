@@ -14,12 +14,11 @@ namespace Bot.Core.Lookup
 
         private readonly ConcurrentDictionary<string, (GetCustomScriptResult, DateTime)> m_urlToScriptAndTime = new();
 
-        public CustomScriptCache(IServiceProvider serviceProvider)
+        public CustomScriptCache(IDateTime dateTime, IStringDownloader stringDownloader, ICustomScriptParser scriptParser)
         {
-            serviceProvider.Inject(out DateTime);
-
-            serviceProvider.Inject(out m_stringDownloader);
-            serviceProvider.Inject(out m_scriptParser);
+            DateTime = dateTime;
+            m_stringDownloader = stringDownloader;
+            m_scriptParser = scriptParser;
         }
 
         public async Task<GetCustomScriptResult> GetCustomScriptAsync(string url)

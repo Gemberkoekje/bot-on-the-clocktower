@@ -264,16 +264,25 @@ namespace Test.Bot.Core
 
         protected BotGameplayInteractionHandler CreateGameplayInteractionHandler()
         {
-            RegisterService<ITownInteractionErrorHandler>(new TownInteractionErrorHandler(GetServiceProvider())); // NOTE: This catches exceptions. This is checked in Dispose(). Could be changed to a mock that does not catch exceptions
-            RegisterService<ITownInteractionQueue>(new TownInteractionQueue(GetServiceProvider()));
-            return new(GetServiceProvider(), new BotGameplay(GetServiceProvider()), new BotVoteTimer(GetServiceProvider()));
+            var processLoggerFactory = RegisterService<IProcessLoggerFactory>(ProcessLoggerFactoryMock.Object);
+            var task = RegisterService<ITask>(TaskMock.Object);
+            var townInteractionErrorHandler = new TownInteractionErrorHandler(processLoggerFactory, task); // NOTE: This catches exceptions. This is checked in Dispose(). Could be changed to a mock that does not catch exceptions
+            RegisterService<ITownInteractionErrorHandler>(townInteractionErrorHandler);
+
+            var townInteractionQueue = new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object);
+            RegisterService<ITownInteractionQueue>(townInteractionQueue);
+
+            var gameplay = new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
+            var voteTimerController = new BotVoteTimer.VoteTimerController(DateTimeMock.Object, TownLookupMock.Object, TownResolverMock.Object, gameplay, CallbackSchedulerFactoryMock.Object);
+            var voteTimer = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, voteTimerController);
+            return new(gameplay, voteTimer, BotSystemMock.Object, ComponentServiceMock.Object, townInteractionQueue, townInteractionErrorHandler, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object);
         }
 
         protected IGame? RunCurrentGameAssertComplete(IMember? requester = null)
         {
             requester ??= InteractionAuthorMock.Object;
 
-            BotGameplay gs = new(GetServiceProvider());
+            BotGameplay gs = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
             var t = gs.CurrentGameAsync(MockTownKey, requester, ProcessLoggerMock.Object);
             t.Wait(50);
             Assert.True(t.IsCompleted);

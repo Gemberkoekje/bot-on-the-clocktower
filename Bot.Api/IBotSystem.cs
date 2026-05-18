@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Bot.Api
 {
     public interface IBotSystem
     {
-        IBotClient CreateClient(IServiceProvider serviceProvider);
-
         IBotWebhookBuilder CreateWebhookBuilder();
 
         IInteractionResponseBuilder CreateInteractionResponseBuilder();

@@ -56,6 +56,7 @@ namespace Bot.Database
 
             GameActivityRecord rec = new()
             {
+                Id = $"{townKey.GuildId}:{townKey.ControlChannelId}",
                 GuildId = townKey.GuildId,
                 ChannelId = townKey.ControlChannelId,
                 LastActivity = activityTime,

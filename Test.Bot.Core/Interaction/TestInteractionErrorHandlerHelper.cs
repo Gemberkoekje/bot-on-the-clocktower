@@ -1,5 +1,4 @@
 ﻿using Bot.Api;
-using Bot.Base;
 using Bot.Core.Interaction;
 using Moq;
 using System;

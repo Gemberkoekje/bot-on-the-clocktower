@@ -11,7 +11,7 @@ namespace Test.Bot.Core
     {
         public TestNightPhase()
         {
-            RegisterService<ITownInteractionErrorHandler>(new TownInteractionErrorHandler(GetServiceProvider()));
+            RegisterService<ITownInteractionErrorHandler>(new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object));
         }
 
         [Theory]
@@ -104,7 +104,7 @@ namespace Test.Bot.Core
             // Add a second storyteller
             UserShouldHaveRole(st2, StorytellerRoleMock.Object);
 
-            BotGameplay g = new(GetServiceProvider());
+            BotGameplay g = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             // Get the Game
             var game = AssertCompletedTask(() => g.CurrentGameAsync(MockTownKey, InteractionAuthorMock.Object, ProcessLoggerMock.Object));
@@ -125,7 +125,7 @@ namespace Test.Bot.Core
 
             MockGameInProgress();
 
-            BotGameplay g = new(GetServiceProvider());
+            BotGameplay g = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             // Get the Game
             var game = AssertCompletedTask(() => g.CurrentGameAsync(MockTownKey, InteractionAuthorMock.Object, ProcessLoggerMock.Object));

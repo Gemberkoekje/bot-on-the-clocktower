@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core;
 using Bot.Core.Interaction;
 using Moq;
@@ -15,9 +15,10 @@ namespace Test.Bot.Core
     {
         private class TestInteractionErrorHandler : BaseInteractionErrorHandler<int>
         {
-            public TestInteractionErrorHandler(IServiceProvider serviceProvider) 
-                : base(serviceProvider)
-            {}
+            public TestInteractionErrorHandler(IProcessLoggerFactory processLoggerFactory, ITask task)
+                : base(processLoggerFactory, task)
+            {
+            }
 
             protected override string GetFriendlyStringForKey(int key) => key.ToString();
         }
@@ -46,7 +47,7 @@ namespace Test.Bot.Core
             Mock<Func<IProcessLogger, Task<InteractionResult>>> mockFunc = new();
             mockFunc.Setup(f => f.Invoke(It.IsAny<IProcessLogger>())).ReturnsAsync(InteractionResult.FromMessage("message"));
 
-            TestInteractionErrorHandler ih = new(GetServiceProvider());
+            TestInteractionErrorHandler ih = new(m_processLoggerFactoryMock.Object, m_taskMock.Object);
             AssertCompletedTask(() => ih.TryProcessReportingErrorsAsync(123, mockRequester.Object, mockFunc.Object));
 
             mockFunc.Verify(m => m(It.IsAny<IProcessLogger>()), Times.Once);
@@ -67,7 +68,7 @@ namespace Test.Bot.Core
                 isProcessLoggerEqual = m_processLoggerMock.Object == pl;
             }).ReturnsAsync(InteractionResult.FromMessage("message"));
 
-            TestInteractionErrorHandler ih = new(GetServiceProvider());
+            TestInteractionErrorHandler ih = new(m_processLoggerFactoryMock.Object, m_taskMock.Object);
             AssertCompletedTask(() => ih.TryProcessReportingErrorsAsync(123, mockAuthor.Object, mockFunc.Object));
 
             Assert.True(isProcessLoggerEqual, "Process Logger from factory not passed");
@@ -87,7 +88,7 @@ namespace Test.Bot.Core
             var thrownException = new ApplicationException();
             mockFunc.Setup(m => m(It.IsAny<IProcessLogger>())).ThrowsAsync(thrownException);
 
-            TestInteractionErrorHandler ih = new(GetServiceProvider());
+            TestInteractionErrorHandler ih = new(m_processLoggerFactoryMock.Object, m_taskMock.Object);
             AssertCompletedTask(() => ih.TryProcessReportingErrorsAsync(mockKey, mockAuthor.Object, mockFunc.Object));
 
             mockAuthor.Verify(m => m.SendMessageAsync(It.Is<string>(s => s.Contains(mockKey.ToString()))), Times.Once);
@@ -109,7 +110,7 @@ namespace Test.Bot.Core
             var thrownException = new ApplicationException();
             mockFunc.Setup(m => m(It.IsAny<IProcessLogger>())).ThrowsAsync(thrownException);
 
-            TestInteractionErrorHandler ih = new(GetServiceProvider());
+            TestInteractionErrorHandler ih = new(m_processLoggerFactoryMock.Object, m_taskMock.Object);
             AssertCompletedTask(() => ih.TryProcessReportingErrorsAsync(123, mockAuthor.Object, mockFunc.Object));
         }
 
@@ -133,7 +134,7 @@ namespace Test.Bot.Core
 
             mockFunc.Setup(f => f.Invoke(It.IsAny<IProcessLogger>())).Returns(tcs.Task);
 
-            TestInteractionErrorHandler ih = new(GetServiceProvider());
+            TestInteractionErrorHandler ih = new(m_processLoggerFactoryMock.Object, m_taskMock.Object);
             var ir = await ih.TryProcessReportingErrorsAsync(123, mockAuthor.Object, mockFunc.Object);
 
             Assert.Equal(verboseIr, ir);
@@ -142,3 +143,4 @@ namespace Test.Bot.Core
         }
     }
 }
+

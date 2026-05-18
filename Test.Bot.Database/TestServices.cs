@@ -1,4 +1,5 @@
-﻿using Bot.Database;
+using Bot.Database;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using Test.Bot.Base;
 using Xunit;
@@ -14,8 +15,11 @@ namespace Test.Bot.Database
         [InlineData(typeof(ILookupRoleDatabaseFactory), typeof(LookupRoleDatabaseFactory))]
         public void RegisterServices_CreatesAllRequiredServices(Type serviceInterface, Type serviceImpl)
         {
-            var newSp = ServiceFactory.RegisterServices(GetServiceProvider());
-            var service = newSp.GetService(serviceInterface);
+            var services = new ServiceCollection();
+            services.AddBotDatabaseServices();
+
+            using var sp = services.BuildServiceProvider();
+            var service = sp.GetService(serviceInterface);
 
             Assert.NotNull(service);
             Assert.IsType(serviceImpl, service);

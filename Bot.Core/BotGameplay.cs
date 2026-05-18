@@ -21,19 +21,28 @@ namespace Bot.Core
 
         public const string NoGameInProgressMessage = "Could not start a game. This might mean there was a permission issue, or it could mean nobody is currently in the Town channels. Are you ready to play?";
 
-        public BotGameplay(IServiceProvider services)
-            : base(services)
+		public BotGameplay(
+			ITownDatabase townLookup,
+			ITownResolver townResolver,
+			IBotClient client,
+			IShuffleService shuffle,
+			ITownCleanup townCleanup,
+			IGameMetricDatabase gameMetricsDatabase,
+			ICommandMetricDatabase commandMetricsDatabase,
+			IDateTime dateTime,
+			ILogger logger)
+			: base(townLookup, townResolver)
 		{
-            services.Inject(out m_client);
-            services.Inject(out m_shuffle);
-            services.Inject(out m_townCleanup);
-            services.Inject(out m_gameMetricsDatabase);
-            services.Inject(out m_commandMetricsDatabase);
-            services.Inject(out m_dateTime);
-            services.Inject(out m_logger);
+			m_client = client;
+			m_shuffle = shuffle;
+			m_townCleanup = townCleanup;
+			m_gameMetricsDatabase = gameMetricsDatabase;
+			m_commandMetricsDatabase = commandMetricsDatabase;
+			m_dateTime = dateTime;
+			m_logger = logger;
 
-            m_townCleanup.CleanupRequested += TownCleanup_CleanupRequested;
-        }
+			m_townCleanup.CleanupRequested += TownCleanup_CleanupRequested;
+		}
 
         public static bool CheckIsTownViable(ITown? town, IProcessLogger logger)
         {

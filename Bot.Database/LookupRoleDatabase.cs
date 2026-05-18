@@ -43,6 +43,7 @@ namespace Bot.Database
             {
                 doc = new LookupRoleRecord
                 {
+                    Id = guildId.ToString(),
                     GuildId = guildId,
                     Urls = new List<string>()
                 };

@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core;
 using Moq;
 using System;
@@ -11,7 +11,7 @@ namespace Test.Bot.Core
         [Fact]
         public void ActivityRecorded_CleanupScheduled()
         {
-            var tc = new TownCleanup(GetServiceProvider());
+            var tc = new TownCleanup(DateTimeMock.Object, GameActivityDatabaseMock.Object, ClientMock.Object, CallbackSchedulerFactoryMock.Object);
 
             var t = tc.RecordActivityAsync(MockTownKey);
             t.Wait(50);
@@ -23,7 +23,7 @@ namespace Test.Bot.Core
         [Fact]
         public void CleanupHappened_ActivityCleared()
         {
-            var tc = new TownCleanup(GetServiceProvider());
+            var tc = new TownCleanup(DateTimeMock.Object, GameActivityDatabaseMock.Object, ClientMock.Object, CallbackSchedulerFactoryMock.Object);
 
             Assert.NotNull(TownKeyCallback);
             TownKeyCallback!(MockTownKey);
@@ -50,7 +50,7 @@ namespace Test.Bot.Core
             if (!anyoneInTown)
                 TownSquareMock.SetupGet(t => t.Users).Returns(Array.Empty<IMember>()); // game is ended at 4 AM, nobody is around anymore
 
-            BotGameplay bg = new(GetServiceProvider());
+            BotGameplay bg = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
             TownCleanupMock.Raise(tc => tc.CleanupRequested += null, new TownCleanupRequestedArgs(MockTownKey));
 
             InteractionAuthorMock.Verify(m => m.SetDisplayName(It.Is<string>(s => s == StorytellerDisplayName)), Times.Once);
@@ -61,3 +61,4 @@ namespace Test.Bot.Core
         }
     }
 }
+

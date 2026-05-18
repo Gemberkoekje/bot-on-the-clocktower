@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bot on the Clocktower User Settings",
+  "description": "User-specific configuration for Discord bot (not committed to source control)",
+  "type": "object",
+  "properties": {
+    "Discord": {
+      "type": "object",
+      "description": "Discord bot connection settings",
+      "properties": {
+        "Token": {
+          "type": "string",
+          "description": "Discord bot token from the Discord Developer Portal"
+        },
+        "DevGuildIds": {
+          "type": "array",
+          "description": "List of Discord server (guild) IDs for development/testing (commands will be registered here in dev mode)",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "Token"
+      ]
+    },
+    "ConnectionStrings": {
+      "type": "object",
+      "description": "Database connection strings",
+      "properties": {
+        "Postgres": {
+          "type": "string",
+          "description": "PostgreSQL connection string used by Marten"
+        }
+      }
+    }
+  }
+}

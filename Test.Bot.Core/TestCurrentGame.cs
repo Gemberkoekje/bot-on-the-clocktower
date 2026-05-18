@@ -293,7 +293,7 @@ namespace Test.Bot.Core
         {
             TownSquareMock.SetupGet(c => c.Users).Returns(Enumerable.Empty<IMember>().ToList());
 
-            BotGameplay gs = new(GetServiceProvider());
+            BotGameplay gs = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
             var t = AssertCompletedTask(() => gs.CurrentGameAsync(MockTownKey, InteractionAuthorMock.Object, ProcessLoggerMock.Object));
 
             Assert.Null(t);
@@ -303,7 +303,7 @@ namespace Test.Bot.Core
         [Fact]
         public void CurrenGame_OutputsVerboseLogging()
         {
-            BotGameplay gs = new(GetServiceProvider());
+            BotGameplay gs = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
 
             AssertCompletedTask(() => gs.CurrentGameAsync(MockTownKey, InteractionAuthorMock.Object, ProcessLoggerMock.Object));
 

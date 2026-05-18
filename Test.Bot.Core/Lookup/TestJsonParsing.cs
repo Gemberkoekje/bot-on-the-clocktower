@@ -1,4 +1,4 @@
-﻿using Bot.Core.Lookup;
+using Bot.Core.Lookup;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Test.Bot.Base;
@@ -127,7 +127,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_JustCharacters_ReturnsCharacters()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new string[] { }, new[] { $"[{PoisonerJson}]", $"[{SavantJson}]" });
 
             Assert.Collection(result.Items,
@@ -152,7 +152,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_CharacterInScript_ReturnsCharacterInScript()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new[] { $"[{TbJson}]" }, new[] { $"[{PoisonerJson}]" });
 
             Assert.Collection(result.Items,
@@ -173,7 +173,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_InvalidScriptJson_Continues()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new[] { $"[\"this is invalid data\"]" }, new[] { $"[{PoisonerJson}]" });
 
             Assert.Collection(result.Items,
@@ -186,7 +186,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_InvalidCharacterJson_Continues()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new string[] {}, new[] { $"[\"invalid role json\",{PoisonerJson},\"another invalid role json\"]" });
 
             Assert.Collection(result.Items,
@@ -199,7 +199,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_TeensyvilleScript_FindsCharacter()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new[] { $"[{LufJson}]" }, new[] { $"[{SavantJson}]" });
 
             Assert.Collection(result.Items,
@@ -224,7 +224,7 @@ namespace Test.Bot.Core.Lookup
         [Fact]
         public void OfficialParse_UnofficialScript_MarkedUnofficial()
         {
-            var op = new OfficialScriptParser(GetServiceProvider());
+            var op = new OfficialScriptParser(m_mockUrlProvider.Object);
             var result = op.ParseOfficialData(new[] { $"[{UnofficialJson}]" }, new[] { $"[{SavantJson}]" });
 
             Assert.Collection(result.Items,
@@ -345,3 +345,4 @@ namespace Test.Bot.Core.Lookup
         }
     }
 }
+

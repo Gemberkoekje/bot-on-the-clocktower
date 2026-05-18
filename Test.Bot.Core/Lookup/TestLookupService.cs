@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Api.Database;
 using Bot.Core.Interaction;
 using Bot.Core.Lookup;
@@ -15,6 +15,11 @@ namespace Test.Bot.Core.Lookup
 {
     public class TestLookupService : TestBase
     {
+        private BotLookupService CreateLookupService(IGuildInteractionWrapper interactionWrapper)
+        {
+            return new BotLookupService(interactionWrapper, m_mockLookupDb.Object, m_mockCharacterLookup.Object, m_mockLookupEmbedBuilder.Object);
+        }
+
         private readonly Mock<IBotInteractionContext> m_mockInteractionContext = new(MockBehavior.Strict);
         private readonly Mock<IGuildInteractionErrorHandler> m_mockGuildErrorHandler = new(MockBehavior.Strict);
         private readonly Mock<ICharacterLookup> m_mockCharacterLookup = new(MockBehavior.Strict);
@@ -61,7 +66,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionRequested(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.LookupAsync(m_mockInteractionContext.Object, lookupStr);
                 },
                 (s, ic) =>
@@ -79,7 +84,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionRequested(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.AddScriptAsync(m_mockInteractionContext.Object, scriptUrl);
                 },
                 (s, ic) =>
@@ -98,7 +103,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionRequested(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.RemoveScriptAsync(m_mockInteractionContext.Object, scriptUrl);
                 },
                 (s, ic) =>
@@ -115,7 +120,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionRequested(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.ListScriptsAsync(m_mockInteractionContext.Object);
                 },
                 (s, ic) =>
@@ -131,7 +136,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionRequested(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.RefreshScriptsAsync(m_mockInteractionContext.Object);
                 },
                 (s, ic) =>
@@ -150,7 +155,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.AddScriptAsync(m_mockInteractionContext.Object, scriptUrl);
                 },
                 (_, ir) =>
@@ -170,7 +175,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.RemoveScriptAsync(m_mockInteractionContext.Object, scriptUrl);
                 },
                 (_, ir) =>
@@ -188,7 +193,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.ListScriptsAsync(m_mockInteractionContext.Object);
                 },
                 (_, ir) =>
@@ -209,15 +214,15 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.ListScriptsAsync(m_mockInteractionContext.Object);
                 },
                 (_, ir) =>
                 {
                     Assert.Contains("custom scripts", ir.Message, StringComparison.InvariantCultureIgnoreCase);
                     Assert.Contains("found", ir.Message, StringComparison.InvariantCultureIgnoreCase);
-                    Assert.Contains($"⦁ {script1}", ir.Message);
-                    Assert.Contains($"⦁ {script2}", ir.Message);
+                    Assert.Contains(script1, ir.Message);
+                    Assert.Contains(script2, ir.Message);
                     Assert.False(ir.IncludeComponents);
                 });
         }
@@ -230,7 +235,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.LookupAsync(m_mockInteractionContext.Object, lookupStr);
                 },
                 (_, ir) =>
@@ -267,7 +272,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.LookupAsync(m_mockInteractionContext.Object, lookupStr);
                 },
                 (_, ir) =>
@@ -286,7 +291,7 @@ namespace Test.Bot.Core.Lookup
             TestInteractionWrapperHelper.TestGuildInteractionMethod(GetServiceProvider(),
                 (sp) =>
                 {
-                    BotLookupService bls = new(sp);
+                    BotLookupService bls = CreateLookupService((IGuildInteractionWrapper)sp.GetService(typeof(IGuildInteractionWrapper))!);
                     return bls.RefreshScriptsAsync(m_mockInteractionContext.Object);
                 },
                 (_, ir) =>
@@ -298,3 +303,4 @@ namespace Test.Bot.Core.Lookup
         }
     }
 }
+

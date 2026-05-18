@@ -12,10 +12,10 @@ namespace Bot.Core.Interaction
         private readonly TQueue m_queue;
         private readonly TErrorHandler m_errorHandler;
 
-        public BaseInteractionWrapper(IServiceProvider serviceProvider)
+        public BaseInteractionWrapper(TQueue queue, TErrorHandler errorHandler)
         {
-            serviceProvider.Inject(out m_queue);
-            serviceProvider.Inject(out m_errorHandler);
+            m_queue = queue;
+            m_errorHandler = errorHandler;
         }
 
         public Task WrapInteractionAsync(string initialMessage, IBotInteractionContext context, Func<IProcessLogger, Task<InteractionResult>> process)

@@ -28,4 +28,35 @@ namespace Test.Bot.Base
             m_mapping[typeof(T)] = service;
         }
     }
+
+    public class ServiceProvider : IServiceProvider
+    {
+        private readonly IServiceProvider? m_parent;
+        private readonly Dictionary<Type, object> m_services = new();
+
+        public ServiceProvider()
+        {
+        }
+
+        public ServiceProvider(IServiceProvider parent)
+        {
+            m_parent = parent;
+        }
+
+        public object? GetService(Type serviceType)
+        {
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (m_services.TryGetValue(serviceType, out var service))
+            {
+                return service;
+            }
+
+            return m_parent?.GetService(serviceType);
+        }
+
+        public void AddService<T>(T service) where T : class
+        {
+            m_services[typeof(T)] = service;
+        }
+    }
 }

@@ -1,6 +1,5 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,10 +11,10 @@ namespace Bot.Core
         private readonly IBotClient m_client;
         private readonly ITownDatabase m_townDb;
 
-        public TownResolver(IServiceProvider serviceProvider)
+        public TownResolver(IBotClient client, ITownDatabase townDb)
         {
-            serviceProvider.Inject(out m_client);
-            serviceProvider.Inject(out m_townDb);
+            m_client = client;
+            m_townDb = townDb;
         }
 
         public async Task<ITown?> ResolveTownAsync(ITownRecord rec)

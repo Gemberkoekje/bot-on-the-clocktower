@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core.Callbacks;
 using Moq;
 using System;
@@ -49,7 +49,7 @@ namespace Test.Bot.Core
         {
             Mock<Func<object, Task>> mockCb = new();
 
-            var csf = new CallbackSchedulerFactory(GetServiceProvider());
+            var csf = new CallbackSchedulerFactory(m_mockDateTime.Object, m_mockTask.Object);
             var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));
 
             Assert.NotNull(factory);
@@ -58,7 +58,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_ScheduleCallback_NotCalledYet()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -72,7 +72,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_ScheduleCallback_CalledAfterDelay()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -93,7 +93,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_CancelCallback_NeverCalled()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -116,7 +116,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_ChangeCallTime_UsesNewValue()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -144,7 +144,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_NoCallbacks_NeverTicked()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             AdvanceTime(TimeSpan.FromSeconds(20));
             await Task.Delay(10);
@@ -156,7 +156,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerKey_FiredOnce_OnlyTickedOnce()
         {
-            var helper = new CallbackHelperWithKey(GetServiceProvider());
+            var helper = new CallbackHelperWithKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));
 
@@ -173,7 +173,7 @@ namespace Test.Bot.Core
         {
             Mock<Func<Task>> mockCb = new();
 
-            var csf = new CallbackSchedulerFactory(GetServiceProvider());
+            var csf = new CallbackSchedulerFactory(m_mockDateTime.Object, m_mockTask.Object);
             var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));
 
             Assert.NotNull(factory);
@@ -182,7 +182,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_ScheduleCallback_NotCalledYet()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -196,7 +196,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_ScheduleCallback_CalledAfterDelay()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -217,7 +217,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_CancelCallback_NeverCalled()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -240,7 +240,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_ChangeCallTime_UsesNewValue()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));
 
@@ -268,7 +268,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_NoCallbacks_NeverTicked()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             AdvanceTime(TimeSpan.FromSeconds(20));
             await Task.Delay(10);
@@ -280,7 +280,7 @@ namespace Test.Bot.Core
         [Fact]
         public async Task CallbackSchedulerNoKey_FiredOnce_OnlyTickedOnce()
         {
-            var helper = new CallbackHelperNoKey(GetServiceProvider());
+            var helper = new CallbackHelperNoKey(m_mockDateTime.Object, m_mockTask.Object);
 
             helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));
 
@@ -302,9 +302,9 @@ namespace Test.Bot.Core
 
             private const int Key = 7;
 
-            public CallbackHelperWithKey(IServiceProvider serviceProvider)
+            public CallbackHelperWithKey(IDateTime dateTime, ITask task)
             {
-                m_callbackScheduler = new(serviceProvider, Callback, TimeSpan.FromSeconds(1));
+                m_callbackScheduler = new(dateTime, task, Callback, TimeSpan.FromSeconds(1));
             }
 
             public void ScheduleCallback(DateTime callTime)
@@ -340,9 +340,9 @@ namespace Test.Bot.Core
 
             private readonly AsyncAutoResetEvent m_resetEvent = new();
 
-            public CallbackHelperNoKey(IServiceProvider serviceProvider)
+            public CallbackHelperNoKey(IDateTime dateTime, ITask task)
             {
-                m_callbackScheduler = new(serviceProvider, Callback, TimeSpan.FromSeconds(1));
+                m_callbackScheduler = new(dateTime, task, Callback, TimeSpan.FromSeconds(1));
             }
 
             public void ScheduleCallback(DateTime callTime)
@@ -370,3 +370,5 @@ namespace Test.Bot.Core
         }
     }
 }
+
+

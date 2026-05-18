@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core;
 using Bot.Core.Interaction;
 using Moq;
@@ -18,21 +18,13 @@ namespace Test.Bot.Core
             var taskMock = RegisterMock(new Mock<ITask>(MockBehavior.Strict));
             taskMock.Setup(t => t.Delay(It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>())).Returns(new TaskCompletionSource().Task);
 
-            RegisterService<ITownInteractionErrorHandler>(new TownInteractionErrorHandler(GetServiceProvider()));
+            RegisterService<ITownInteractionErrorHandler>(new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object));
         }
 
         [Fact]
         public void ConstructGame_NoExceptions()
         {
-            var _ = new BotGameplay(GetServiceProvider());
-        }
-
-        [Fact]
-        public void CreateBotServices_ProperServicesAvailable_RegistersServices()
-        {
-            var sp = ServiceFactory.RegisterBotServices(GetServiceProvider());
-
-            Assert.NotNull(sp.GetService<IBotGameplayInteractionHandler>());
+            var _ = new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
         }
 
         [Fact]
@@ -132,7 +124,7 @@ namespace Test.Bot.Core
 
             var sts = new[] { InteractionAuthorMock.Object, Villager1Mock.Object };
 
-            BotGameplay gs = new(GetServiceProvider());
+            BotGameplay gs = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
             var t = gs.SetStorytellersUnsafe(MockTownKey, InteractionAuthorMock.Object, sts, ProcessLoggerMock.Object);
             t.Wait(50);
             Assert.True(t.IsCompleted);
@@ -151,7 +143,7 @@ namespace Test.Bot.Core
 
             var sts = new[] { Villager1Mock.Object, Villager2Mock.Object };
 
-            BotGameplay gs = new(GetServiceProvider());
+            BotGameplay gs = new(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
             var t = gs.SetStorytellersUnsafe(MockTownKey, InteractionAuthorMock.Object, sts, ProcessLoggerMock.Object);
             t.Wait(50);
             Assert.True(t.IsCompleted);
@@ -175,7 +167,13 @@ namespace Test.Bot.Core
             var thrownException = CreateException(exceptionType);
             InteractionAuthorMock.Setup(m => m.RevokeRoleAsync(It.IsAny<IRole>())).ThrowsAsync(thrownException);
 
-            var createTestableGIH = (IServiceProvider sp) => new BotGameplayInteractionHandler(sp, new BotGameplay(sp), new BotVoteTimer(sp));
+            var createTestableGIH = (IServiceProvider sp) =>
+            {
+                var gameplay = new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
+                var voteTimerController = new BotVoteTimer.VoteTimerController(DateTimeMock.Object, TownLookupMock.Object, TownResolverMock.Object, gameplay, CallbackSchedulerFactoryMock.Object);
+                var voteTimer = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, voteTimerController);
+                return new BotGameplayInteractionHandler(gameplay, voteTimer, BotSystemMock.Object, ComponentServiceMock.Object, new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object), GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object);
+            };
             TestInteractionQueueHelper.TestTownQueueMethod(GetServiceProvider(), (sp) => createTestableGIH(sp).CommandEndGameAsync(InteractionContextMock.Object));
 
             ProcessLoggerMock.Verify(pl => pl.LogException(It.Is<Exception>(e => e == thrownException), It.Is<string>(s => s.Contains(StorytellerRoleMock.Object.Name) && s.Contains(InteractionAuthorMock.Object.DisplayName))), Times.Once);
@@ -192,7 +190,13 @@ namespace Test.Bot.Core
             var thrownException = CreateException(exceptionType);
             Villager2Mock.Setup(m => m.RevokeRoleAsync(It.IsAny<IRole>())).ThrowsAsync(thrownException);
 
-            var createTestableGIH = (IServiceProvider sp) => new BotGameplayInteractionHandler(sp, new BotGameplay(sp), new BotVoteTimer(sp));
+            var createTestableGIH = (IServiceProvider sp) =>
+            {
+                var gameplay = new BotGameplay(TownLookupMock.Object, TownResolverMock.Object, ClientMock.Object, ShuffleServiceMock.Object, TownCleanupMock.Object, GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, Serilog.Log.Logger);
+                var voteTimerController = new BotVoteTimer.VoteTimerController(DateTimeMock.Object, TownLookupMock.Object, TownResolverMock.Object, gameplay, CallbackSchedulerFactoryMock.Object);
+                var voteTimer = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, voteTimerController);
+                return new BotGameplayInteractionHandler(gameplay, voteTimer, BotSystemMock.Object, ComponentServiceMock.Object, new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object), GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object);
+            };
             TestInteractionQueueHelper.TestTownQueueMethod(GetServiceProvider(), (sp) => createTestableGIH(sp).CommandEndGameAsync(InteractionContextMock.Object));
 
             ProcessLoggerMock.Verify(pl => pl.LogException(It.Is<Exception>(e => e == thrownException), It.Is<string>(s => s.Contains(VillagerRoleMock.Object.Name) && s.Contains(Villager2Mock.Object.DisplayName))), Times.Once);

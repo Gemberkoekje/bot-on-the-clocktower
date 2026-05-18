@@ -164,6 +164,7 @@
 - Mask agent tokens in logs (e.g., abbreviated form) and do not log in full
 
 ## General Guidelines
+- Deliver the full plan and instructions in a single uninterrupted sequence; do not pause for conversational confirmations between steps.
 - Under almost any circumstances, do not use nullables (?) - they are generally not needed. Only use them in very specific circumstances where there's no other way to differentiate between an entity and no entity, or consider using `Result<T>`. Do NOT add `#nullable enable` as a workaround for CS8632 warnings — remove the `?` annotations instead.
 - All enums should have an empty value.
 - Implicit usings are disabled in this workspace (via project build props). This is intentional. All System.* and SDK usings must be explicitly declared in `GlobalUsings.cs` or as local usings.
@@ -173,3 +174,10 @@
 
 ## Project Guidelines
 - In Qowaiv.Validation.Abstractions, use non-generic `Result` (with `Result.OK` for success and `Result.WithMessages(...)` for failure) when no value needs to be returned, instead of `Result<bool>`.
+- Perform incremental DI cleanup by slices:
+  - Start with Bot.Core runtime classes (BotVoteTimer, TownCleanup, TownMaintenance) and apply the same explicit-constructor-injection style used elsewhere.
+  - Apply explicit constructor injection for the slice
+  - Update DI registrations to match constructor signatures
+  - Update tests and test fixtures to reflect the refactor
+  - Validate behavior and ensure all tests pass before proceeding to the next slice
+  - Keep changes small and commit atomically to simplify review and rollback

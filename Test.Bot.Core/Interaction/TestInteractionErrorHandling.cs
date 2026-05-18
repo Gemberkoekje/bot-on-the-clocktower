@@ -1,4 +1,4 @@
-﻿using Bot.Api;
+using Bot.Api;
 using Bot.Core.Interaction;
 using Moq;
 using System;
@@ -42,7 +42,7 @@ namespace Test.Bot.Core.Interaction
             string errorMessage = "threw an error!";
             m_mockContext.Setup(c => c.DeferInteractionResponse()).Throws(() => new TestException(errorMessage));
 
-            var queue = new TestInteractionQueue(GetServiceProvider());
+            var queue = new TestInteractionQueue(m_mockSystem.Object, m_mockShutdownPrevention.Object);
             AssertCompletedTask(() => queue.QueueInteractionAsync("initial message", m_mockContext.Object, () => Task.FromResult(InteractionResult.FromMessage("success"))));
 
             m_mockMember.Verify(m => m.SendMessageAsync(It.Is<string>(s => s.Contains(nameof(TestException)) && s.Contains(errorMessage) && s.Contains(ContextKey.ToString()))), Times.Once);
@@ -60,7 +60,7 @@ namespace Test.Bot.Core.Interaction
 
             var tcs = new TaskCompletionSource();
 
-            var queue = new TestInteractionQueue(GetServiceProvider());
+            var queue = new TestInteractionQueue(m_mockSystem.Object, m_mockShutdownPrevention.Object);
             AssertCompletedTask(() => queue.QueueInteractionAsync("initial message 1", m_mockContext.Object, async () =>
             {
                 await tcs.Task;
@@ -84,12 +84,14 @@ namespace Test.Bot.Core.Interaction
 
         private class TestInteractionQueue : BaseInteractionQueue<int>
         {
-            public TestInteractionQueue(IServiceProvider serviceProvider)
-                : base(serviceProvider)
-            {}
+            public TestInteractionQueue(IBotSystem botSystem, IShutdownPreventionService shutdownPreventionService)
+                : base(botSystem, shutdownPreventionService)
+            {
+            }
 
             protected override string GetFriendlyStringForKey(int key) => key.ToString();
             protected override int KeyFromContext(IBotInteractionContext context) => ContextKey;
         }
     }
 }
+

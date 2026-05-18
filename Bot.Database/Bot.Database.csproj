@@ -10,6 +10,7 @@
     <PackageReference Include="Weasel.Postgresql" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SharpCompress" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>

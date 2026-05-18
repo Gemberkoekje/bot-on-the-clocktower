@@ -39,6 +39,7 @@ namespace Bot.Database
             {
                 AnnouncementRecord rec = new()
                 {
+                    Id = guildId.ToString(),
                     GuildId = guildId,
                     Version = version,
                 };

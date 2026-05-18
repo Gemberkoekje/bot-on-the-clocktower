@@ -12,10 +12,10 @@ namespace Bot.Core.Interaction
 
         private readonly TimeSpan m_verboseTimeout = TimeSpan.FromMilliseconds(20000);
 
-        public BaseInteractionErrorHandler(IServiceProvider serviceProvider)
+        public BaseInteractionErrorHandler(IProcessLoggerFactory processLoggerFactory, ITask task)
         {
-            serviceProvider.Inject(out m_processLoggerFactory);
-            serviceProvider.Inject(out m_task);
+            m_processLoggerFactory = processLoggerFactory;
+            m_task = task;
         }
 
         protected abstract string GetFriendlyStringForKey(TKey key);
