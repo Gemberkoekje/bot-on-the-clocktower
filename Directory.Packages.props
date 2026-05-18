@@ -8,8 +8,9 @@
 	<PackageVersion Include="Destructurama.ByIgnoring" Version="1.1.0" />
 	<PackageVersion Include="FuzzySharp" Version="2.0.2" />
 	<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-	<PackageVersion Include="MongoDB.Driver" Version="3.8.1" />
+	<PackageVersion Include="Marten" Version="8.37.0" />
 	<PackageVersion Include="Moq" Version="4.20.72" />
+	<PackageVersion Include="Weasel.Postgresql" Version="8.15.2" />
 	<PackageVersion Include="SharpCompress" Version="0.48.1" />
 	<PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
 	<PackageVersion Include="Serilog" Version="2.10.0" />

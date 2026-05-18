@@ -1,22 +1,18 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Marten;
 
 namespace Bot.Database
 {
     public interface IAnnouncementDatabaseFactory
     {
-        IAnnouncementDatabase CreateAnnouncementDatabase(IMongoDatabase db);
+        IAnnouncementDatabase CreateAnnouncementDatabase(IDocumentStore documentStore);
     }
+
     public class AnnouncementDatabaseFactory : IAnnouncementDatabaseFactory
     {
-        public IAnnouncementDatabase CreateAnnouncementDatabase(IMongoDatabase db)
+        public IAnnouncementDatabase CreateAnnouncementDatabase(IDocumentStore documentStore)
         {
-            return new AnnouncementDatabase(db);
+            return new AnnouncementDatabase(documentStore);
         }
     }
 }

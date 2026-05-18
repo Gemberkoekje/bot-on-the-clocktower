@@ -1,18 +1,18 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 
 namespace Bot.Database
 {
     public interface IGameMetricDatabaseFactory
     {
-        IGameMetricDatabase CreateGameMetricDatabase(IMongoDatabase db);
+        IGameMetricDatabase CreateGameMetricDatabase(IDocumentStore documentStore);
     }
 
     public class GameMetricDatabaseFactory : IGameMetricDatabaseFactory
     {
-        public IGameMetricDatabase CreateGameMetricDatabase(IMongoDatabase db)
+        public IGameMetricDatabase CreateGameMetricDatabase(IDocumentStore documentStore)
         {
-            return new GameMetricDatabase(db);
+            return new GameMetricDatabase(documentStore);
         }
     }
 }

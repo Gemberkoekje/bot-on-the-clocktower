@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="Marten" />
+    <PackageReference Include="Weasel.Postgresql" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SharpCompress" />
   </ItemGroup>

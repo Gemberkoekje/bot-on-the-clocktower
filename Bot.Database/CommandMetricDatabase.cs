@@ -1,38 +1,27 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Bot.Database
 {
     internal class CommandMetricDatabase : ICommandMetricDatabase
     {
-        public const string CollectionName = "CommandMetrics";
+        private readonly IDocumentStore m_documentStore;
 
-        private readonly IMongoCollection<MongoCommandMetricRecord> m_collection;
-
-        public CommandMetricDatabase(IMongoDatabase db)
+        public CommandMetricDatabase(IDocumentStore documentStore)
         {
-            m_collection = db.GetCollection<MongoCommandMetricRecord>(CollectionName);
-            if (m_collection == null) throw new MissingCommandMetricDatabaseException();
+            m_documentStore = documentStore;
         }
 
-        private FilterDefinition<MongoCommandMetricRecord>? FilterFromTime(DateTime timestamp)
+        private async Task<CommandMetricRecord?> GetExisting(DateTime timestamp)
         {
-            var builder = Builders<MongoCommandMetricRecord>.Filter;
-
-            return (builder.Lte(x => x.Day, timestamp.Date) & builder.Gt(x => x.Day, timestamp.Date.Subtract(TimeSpan.FromDays(1))));
+            using var querySession = m_documentStore.QuerySession();
+            return await querySession.Query<CommandMetricRecord>()
+                .FirstOrDefaultAsync(x => x.Day == timestamp.Date);
         }
 
-        private async Task<MongoCommandMetricRecord?> GetExisting(DateTime timestamp)
-        {
-            return await m_collection.Find(FilterFromTime(timestamp)).FirstOrDefaultAsync();
-        }
-
-        private async Task<MongoCommandMetricRecord> GetExistingOrNew(DateTime timestamp)
+        private async Task<CommandMetricRecord> GetExistingOrNew(DateTime timestamp)
         {
             var rec = await GetExisting(timestamp);
 
@@ -41,7 +30,7 @@ namespace Bot.Database
                 return rec;
             }
 
-            return new MongoCommandMetricRecord()
+            return new CommandMetricRecord()
             {
                 Day = timestamp.Date,
             };
@@ -51,16 +40,24 @@ namespace Bot.Database
         {
             var rec = await GetExistingOrNew(timestamp);
 
-            if(!rec.Commands.ContainsKey(command))
+            if (!rec.Commands.ContainsKey(command))
             {
                 rec.Commands.Add(command, 0);
             }
 
             rec.Commands[command]++;
-            var filter = FilterFromTime(timestamp);
-            await m_collection.ReplaceOneAsync(filter, rec, new ReplaceOptions() { IsUpsert = true });
+
+            using var session = m_documentStore.LightweightSession();
+            var existing = await session.Query<CommandMetricRecord>()
+                .FirstOrDefaultAsync(x => x.Day == rec.Day);
+            if (existing != null)
+            {
+                session.Delete(existing);
+            }
+            session.Store(rec);
+            await session.SaveChangesAsync();
         }
     }
 
-    class MissingCommandMetricDatabaseException : Exception { }
+    internal class MissingCommandMetricDatabaseException : Exception { }
 }

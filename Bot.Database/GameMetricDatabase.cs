@@ -1,49 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bot.Api;
+﻿using Bot.Api;
 using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bot.Database
 {
     internal class GameMetricDatabase : IGameMetricDatabase
     {
-        public const string CollectionName = "GameMetrics";
+        private readonly IDocumentStore m_documentStore;
 
-        private readonly IMongoCollection<MongoGameMetricRecord> m_collection;
-
-        public GameMetricDatabase(IMongoDatabase db)
+        public GameMetricDatabase(IDocumentStore documentStore)
         {
-            m_collection = db.GetCollection<MongoGameMetricRecord>(CollectionName);
-            if (m_collection == null) throw new MissingGameMetricDatabaseException();
+            m_documentStore = documentStore;
         }
 
-        static int TownHash(TownKey townKey)
+        private static int TownHash(TownKey townKey)
         {
             return HashCode.Combine(townKey.GuildId, townKey.ControlChannelId);
         }
 
-        private FilterDefinition<MongoGameMetricRecord>? FilterFromKey(TownKey townKey)
+        private async Task<GameMetricRecord?> GetExisting(TownKey townKey)
         {
-            var builder = Builders<MongoGameMetricRecord>.Filter;
-
-            return (builder.Eq(x => x.TownHash, TownHash(townKey)));
+            using var querySession = m_documentStore.QuerySession();
+            return await querySession.Query<GameMetricRecord>()
+                .FirstOrDefaultAsync(x => x.TownHash == TownHash(townKey) && x.Complete == false);
         }
 
-        private async Task<MongoGameMetricRecord?> GetExisting(TownKey townKey)
-        {
-            var builder = Builders<MongoGameMetricRecord>.Filter;
-
-            var filter = builder.Eq(x => x.TownHash, TownHash(townKey))
-                & builder.Eq(x => x.Complete, false);
-
-            return await m_collection.Find(filter).FirstOrDefaultAsync();
-        }
-
-        private async Task<MongoGameMetricRecord> GetExistingOrNew(TownKey townKey, DateTime timestamp)
+        private async Task<GameMetricRecord> GetExistingOrNew(TownKey townKey, DateTime timestamp)
         {
             var rec = await GetExisting(townKey);
 
@@ -53,7 +38,7 @@ namespace Bot.Database
                 return rec;
             }
 
-            return new MongoGameMetricRecord()
+            return new GameMetricRecord()
             {
                 TownHash = TownHash(townKey),
                 FirstActivity = timestamp,
@@ -61,74 +46,82 @@ namespace Bot.Database
             };
         }
 
+        private async Task UpsertByTownHash(GameMetricRecord record)
+        {
+            using var session = m_documentStore.LightweightSession();
+            var existing = await session.Query<GameMetricRecord>()
+                .FirstOrDefaultAsync(x => x.TownHash == record.TownHash && x.Complete == record.Complete);
+            if (existing != null)
+            {
+                session.Delete(existing);
+            }
+            session.Store(record);
+            await session.SaveChangesAsync();
+        }
+
         public async Task RecordGameAsync(TownKey townKey, DateTime timestamp)
         {
             var existing = await GetExisting(townKey);
-            if(existing != null)
+            if (existing != null)
             {
-                // Close any existing game
                 existing.Complete = true;
-                var filter = FilterFromKey(townKey);
-                await m_collection.ReplaceOneAsync(filter, existing, new ReplaceOptions() { IsUpsert = true });
+                using var session = m_documentStore.LightweightSession();
+                session.Store(existing);
+                await session.SaveChangesAsync();
             }
 
-            var newRec = new MongoGameMetricRecord()
+            var newRec = new GameMetricRecord()
             {
                 TownHash = TownHash(townKey),
                 FirstActivity = timestamp,
                 LastActivity = timestamp,
             };
-            await m_collection.InsertOneAsync(newRec);
+
+            using (var session = m_documentStore.LightweightSession())
+            {
+                session.Store(newRec);
+                await session.SaveChangesAsync();
+            }
         }
 
         public async Task RecordDayAsync(TownKey townKey, DateTime timestamp)
         {
             var record = await GetExistingOrNew(townKey, timestamp);
             record.Days++;
-
-            var filter = FilterFromKey(townKey);
-            await m_collection.ReplaceOneAsync(filter, record, new ReplaceOptions() { IsUpsert = true });
+            await UpsertByTownHash(record);
         }
 
         public async Task RecordNightAsync(TownKey townKey, DateTime timestamp)
         {
             var record = await GetExistingOrNew(townKey, timestamp);
             record.Nights++;
-
-            var filter = FilterFromKey(townKey);
-            await m_collection.ReplaceOneAsync(filter, record, new ReplaceOptions() { IsUpsert = true });
+            await UpsertByTownHash(record);
         }
 
         public async Task RecordVoteAsync(TownKey townKey, DateTime timestamp)
         {
             var record = await GetExistingOrNew(townKey, timestamp);
             record.Votes++;
-
-            var filter = FilterFromKey(townKey);
-            await m_collection.ReplaceOneAsync(filter, record, new ReplaceOptions() { IsUpsert = true });
+            await UpsertByTownHash(record);
         }
 
         public async Task RecordEndGameAsync(TownKey townKey, DateTime timestamp)
         {
             var record = await GetExistingOrNew(townKey, timestamp);
             record.Complete = true;
-
-            var filter = FilterFromKey(townKey);
-            await m_collection.ReplaceOneAsync(filter, record, new ReplaceOptions() { IsUpsert = true });
+            await UpsertByTownHash(record);
         }
 
         public async Task<DateTime?> GetMostRecentGameAsync(TownKey townKey)
         {
-            var filterBuilder = Builders<MongoGameMetricRecord>.Filter;
-            var filter = filterBuilder.Eq(x => x.TownHash, TownHash(townKey));
-
-            var sortBuilder = Builders<MongoGameMetricRecord>.Sort;
-            var sort = sortBuilder.Descending(x => x.FirstActivity);
-
-            var mostRecent = await m_collection.Find(filter).Sort(sort).FirstOrDefaultAsync();
-            return mostRecent?.FirstActivity ?? null;
+            using var querySession = m_documentStore.QuerySession();
+            var mostRecent = await querySession.Query<GameMetricRecord>()
+                .Where(x => x.TownHash == TownHash(townKey))
+                .OrderByDescending(x => x.FirstActivity)
+                .FirstOrDefaultAsync();
+            return mostRecent?.FirstActivity;
         }
     }
 
-    class MissingGameMetricDatabaseException : Exception { }
+    internal class MissingGameMetricDatabaseException : Exception { }
 }

@@ -1,5 +1,5 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,44 +8,40 @@ namespace Bot.Database
 {
     public class LookupRoleDatabase : ILookupRoleDatabase
     {
-        public const string CollectionName = "ServerRoleUrls";
+        private readonly IDocumentStore m_documentStore;
 
-        private readonly IMongoCollection<MongoLookupRoleRecord> m_collection;
-
-        public LookupRoleDatabase(IMongoDatabase db)
+        public LookupRoleDatabase(IDocumentStore documentStore)
         {
-            m_collection = db.GetCollection<MongoLookupRoleRecord>(CollectionName);
-            if (m_collection == null) throw new MissingLookupRoleDatabaseException();
+            m_documentStore = documentStore;
         }
 
-        private async Task<MongoLookupRoleRecord?> GetRecordInternal(ulong guildId)
+        private async Task<LookupRoleRecord?> GetRecordInternal(ulong guildId)
         {
-            // Build a filter for the specific document we want
-            var builder = Builders<MongoLookupRoleRecord>.Filter;
-            var filter = builder.Eq(x => x.GuildId, guildId);
-            var document = await m_collection.Find(filter).FirstOrDefaultAsync();
-            return document;
+            using var querySession = m_documentStore.QuerySession();
+            return await querySession.Query<LookupRoleRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == guildId);
         }
-        
-        private async Task UpdateRecordInternal(MongoLookupRoleRecord rec)
+
+        private async Task UpdateRecordInternal(LookupRoleRecord rec)
         {
-            // Build a filter for the specific document we want
-            var builder = Builders<MongoLookupRoleRecord>.Filter;
-            var filter = builder.Eq(x => x.GuildId, rec.GuildId);
-            ReplaceOptions options = new()
+            using var session = m_documentStore.LightweightSession();
+            var existing = await session.Query<LookupRoleRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == rec.GuildId);
+            if (existing != null)
             {
-                IsUpsert = true
-            };
-
-            await m_collection.ReplaceOneAsync(filter, rec, options);
+                session.Delete(existing);
+            }
+            session.Store(rec);
+            await session.SaveChangesAsync();
         }
+
         public async Task AddScriptUrlAsync(ulong guildId, string url)
         {
             var doc = await GetRecordInternal(guildId);
 
-            if(doc == null)
+            if (doc == null)
             {
-                doc = new MongoLookupRoleRecord
+                doc = new LookupRoleRecord
                 {
                     GuildId = guildId,
                     Urls = new List<string>()

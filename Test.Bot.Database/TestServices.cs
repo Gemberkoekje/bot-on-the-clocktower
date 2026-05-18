@@ -8,7 +8,7 @@ namespace Test.Bot.Database
     public class TestServices : TestBase
     {
         [Theory]
-        [InlineData(typeof(IMongoClientFactory), typeof(MongoClientFactory))]
+        [InlineData(typeof(IMartenDocumentStoreFactory), typeof(MartenDocumentStoreFactory))]
         [InlineData(typeof(ITownDatabaseFactory), typeof(TownDatabaseFactory))]
         [InlineData(typeof(IGameActivityDatabaseFactory), typeof(GameActivityDatabaseFactory))]
         [InlineData(typeof(ILookupRoleDatabaseFactory), typeof(LookupRoleDatabaseFactory))]

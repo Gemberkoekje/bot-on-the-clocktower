@@ -1,43 +1,31 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Bot.Database
 {
     internal class AnnouncementDatabase : IAnnouncementDatabase
     {
-        public const string CollectionName = "GuildVersionAnnouncementsCSharp";
+        private readonly IDocumentStore m_documentStore;
 
-        private readonly IMongoCollection<MongoAnnouncementRecord> m_collection;
-
-        public AnnouncementDatabase(IMongoDatabase db)
+        public AnnouncementDatabase(IDocumentStore documentStore)
         {
-            m_collection = db.GetCollection<MongoAnnouncementRecord>(CollectionName);
-            if (m_collection == null) throw new MissingAnnouncementDatabaseException();
+            m_documentStore = documentStore;
         }
 
-        private static FilterDefinition<MongoAnnouncementRecord> GetFilter(ulong guildId)
+        private async Task<AnnouncementRecord> GetRecord(ulong guildId)
         {
-            var builder = Builders<MongoAnnouncementRecord>.Filter;
-            return builder.Eq(x => x.GuildId, guildId);
-        }
-
-        private Task<MongoAnnouncementRecord> GetRecord(ulong guildId)
-        {
-            var filter = GetFilter(guildId);
-
-            return m_collection.Find(filter).FirstOrDefaultAsync();
+            using var querySession = m_documentStore.QuerySession();
+            return await querySession.Query<AnnouncementRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == guildId);
         }
 
         public async Task<bool> HasSeenVersion(ulong guildId, Version version)
         {
             var record = await GetRecord(guildId);
 
-            if (record == null) 
+            if (record == null)
                 return false;
 
             return record.Version >= version;
@@ -49,22 +37,22 @@ namespace Bot.Database
 
             if (record == null || version > record.Version || force)
             {
-                MongoAnnouncementRecord rec = new()
+                AnnouncementRecord rec = new()
                 {
                     GuildId = guildId,
                     Version = version,
                 };
 
-                ReplaceOptions options = new()
+                using var session = m_documentStore.LightweightSession();
+                if (record != null)
                 {
-                    IsUpsert = true
-                };
-
-                await m_collection.ReplaceOneAsync(GetFilter(guildId), rec, options);
+                    session.Delete(record);
+                }
+                session.Store(rec);
+                await session.SaveChangesAsync();
             }
         }
-
     }
 
-    class MissingAnnouncementDatabaseException : Exception { }
+    internal class MissingAnnouncementDatabaseException : Exception { }
 }

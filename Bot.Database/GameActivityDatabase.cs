@@ -1,64 +1,70 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Marten;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bot.Database
 {
-    class GameActivityDatabase : IGameActivityDatabase
+    internal class GameActivityDatabase : IGameActivityDatabase
     {
-        public const string CollectionName = "ActiveGames";
+        private readonly IDocumentStore m_documentStore;
 
-        private readonly IMongoCollection<MongoGameActivityRecord> m_collection;
-
-        public GameActivityDatabase(IMongoDatabase db)
+        public GameActivityDatabase(IDocumentStore documentStore)
         {
-            m_collection = db.GetCollection<MongoGameActivityRecord>(CollectionName);
-            if (m_collection == null) throw new MissingGameActivityDatabaseException();
-        }
-
-        private FilterDefinition<MongoGameActivityRecord>? FilterFromKey(TownKey townKey)
-        {
-            var builder = Builders<MongoGameActivityRecord>.Filter;
-            return (builder.Eq(x => x.GuildId, townKey.GuildId) & builder.Eq(x => x.ChannelId, townKey.ControlChannelId));
+            m_documentStore = documentStore;
         }
 
         public async Task<IGameActivityRecord> GetActivityRecord(TownKey townKey)
         {
-            var filter = FilterFromKey(townKey);
-
-            // Get the first match
-            return await m_collection.Find(filter).FirstOrDefaultAsync();
+            using var querySession = m_documentStore.QuerySession();
+            return await querySession.Query<GameActivityRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == townKey.GuildId && x.ChannelId == townKey.ControlChannelId);
         }
 
-        public async Task<IEnumerable<IGameActivityRecord>> GetAllActivityRecords() => await m_collection.Find(_ => true).ToListAsync();
+        public async Task<IEnumerable<IGameActivityRecord>> GetAllActivityRecords()
+        {
+            using var querySession = m_documentStore.QuerySession();
+            var records = await querySession.Query<GameActivityRecord>().ToListAsync();
+            return records;
+        }
 
-        public Task ClearActivityAsync(TownKey townKey) => m_collection.DeleteManyAsync(FilterFromKey(townKey));
+        public async Task ClearActivityAsync(TownKey townKey)
+        {
+            using var session = m_documentStore.LightweightSession();
+            var existing = await session.Query<GameActivityRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == townKey.GuildId && x.ChannelId == townKey.ControlChannelId);
+            if (existing != null)
+            {
+                session.Delete(existing);
+                await session.SaveChangesAsync();
+            }
+        }
 
-        public Task RecordActivityAsync(TownKey townKey, DateTime activityTime)
+        public async Task RecordActivityAsync(TownKey townKey, DateTime activityTime)
         {
             Serilog.Log.Verbose("Recording activity for {townKey} at {time}", townKey, activityTime);
-            var filter = FilterFromKey(townKey);
 
-            MongoGameActivityRecord rec = new()
+            using var session = m_documentStore.LightweightSession();
+            var existing = await session.Query<GameActivityRecord>()
+                .FirstOrDefaultAsync(x => x.GuildId == townKey.GuildId && x.ChannelId == townKey.ControlChannelId);
+            if (existing != null)
+            {
+                session.Delete(existing);
+            }
+
+            GameActivityRecord rec = new()
             {
                 GuildId = townKey.GuildId,
                 ChannelId = townKey.ControlChannelId,
                 LastActivity = activityTime,
             };
 
-            ReplaceOptions options = new()
-            {
-                IsUpsert = true
-            };
-
-            return m_collection.ReplaceOneAsync(filter, rec, options);
+            session.Store(rec);
+            await session.SaveChangesAsync();
         }
     }
 
     public class MissingGameActivityDatabaseException : Exception { }
-
 }

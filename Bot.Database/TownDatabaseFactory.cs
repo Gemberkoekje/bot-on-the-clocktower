@@ -1,16 +1,16 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 
 namespace Bot.Database
 {
     public interface ITownDatabaseFactory
     {
-        ITownDatabase CreateTownLookup(IMongoDatabase mongoDb);
+        ITownDatabase CreateTownLookup(IDocumentStore documentStore);
     }
 
     public class TownDatabaseFactory : ITownDatabaseFactory
     {
-        public ITownDatabase CreateTownLookup(IMongoDatabase mongoDb) => new TownDatabase(mongoDb);
+        public ITownDatabase CreateTownLookup(IDocumentStore documentStore) => new TownDatabase(documentStore);
     }
 }

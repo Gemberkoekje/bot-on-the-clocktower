@@ -1,18 +1,18 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 
 namespace Bot.Database
 {
     public interface ICommandMetricDatabaseFactory
     {
-        ICommandMetricDatabase CreateCommandMetricDatabase(IMongoDatabase db);
+        ICommandMetricDatabase CreateCommandMetricDatabase(IDocumentStore documentStore);
     }
 
     public class CommandMetricDatabaseFactory : ICommandMetricDatabaseFactory
     {
-        public ICommandMetricDatabase CreateCommandMetricDatabase(IMongoDatabase db)
+        public ICommandMetricDatabase CreateCommandMetricDatabase(IDocumentStore documentStore)
         {
-            return new CommandMetricDatabase(db);
+            return new CommandMetricDatabase(documentStore);
         }
     }
 }

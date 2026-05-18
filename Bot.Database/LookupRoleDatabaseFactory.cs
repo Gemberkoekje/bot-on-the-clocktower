@@ -1,18 +1,18 @@
 ﻿using Bot.Api.Database;
-using MongoDB.Driver;
+using Marten;
 
 namespace Bot.Database
 {
     public interface ILookupRoleDatabaseFactory
     {
-        ILookupRoleDatabase CreateLookupRoleDatabase(IMongoDatabase db);
+        ILookupRoleDatabase CreateLookupRoleDatabase(IDocumentStore documentStore);
     }
 
     public class LookupRoleDatabaseFactory : ILookupRoleDatabaseFactory
     {
-        public ILookupRoleDatabase CreateLookupRoleDatabase(IMongoDatabase db)
+        public ILookupRoleDatabase CreateLookupRoleDatabase(IDocumentStore documentStore)
         {
-            return new LookupRoleDatabase(db);
+            return new LookupRoleDatabase(documentStore);
         }
     }
 }
