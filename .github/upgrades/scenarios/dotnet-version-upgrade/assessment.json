@@ -1,0 +1,2950 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-05-18T17:40:56.0694108Z",
+  "analysisEndTime": "2026-05-18T17:40:58.6676118Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 11,
+      "issues": 6,
+      "incidents": 96,
+      "effort": 96
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 11,
+        "Optional": 2,
+        "Potential": 83,
+        "Information": 0
+      },
+      "category": {
+        "Project": 11,
+        "Api": 82,
+        "NuGet": 3
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "Bot.Api\\Bot.Api.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "Bot.Api",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 52,
+        "numberOfCodeFiles": 52,
+        "linesTotal": 1076,
+        "linesOfCode": 1076,
+        "totalApiScanned": 694,
+        "minLinesOfCodeToChange": 2,
+        "maxLinesOfCodeToChange": 2
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "a305d08c-78bc-403a-8a4f-4767c11c6256",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.Api\\Bot.Api.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.Api\\Bot.Api.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "f5d29b47-dea2-4d7f-8ae6-3bcf44059eef",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Api\\Bot.Api.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return @this.Delay(TimeSpan.FromMilliseconds(milliseconds), ct);",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Api\\ITask.cs",
+            "snippet": "return @this.Delay(TimeSpan.FromMilliseconds(milliseconds), ct);",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 25,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "74dc05ca-c511-404e-bbf8-dba8fc6a38d3",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Api\\Bot.Api.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return @this.Delay(TimeSpan.FromMilliseconds(milliseconds), CancellationToken.None);",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Api\\ITask.cs",
+            "snippet": "return @this.Delay(TimeSpan.FromMilliseconds(milliseconds), CancellationToken.None);",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 15,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Bot.Base\\Bot.Base.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Bot.Base",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 2,
+        "numberOfCodeFiles": 2,
+        "linesTotal": 70,
+        "linesOfCode": 70,
+        "totalApiScanned": 50,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "9f450ccb-095d-411c-b42b-fd59e052d674",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.Base\\Bot.Base.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.Base\\Bot.Base.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Bot.Core\\Bot.Core.csproj",
+      "startingProject": true,
+      "issues": 4,
+      "storyPoints": 21,
+      "properties": {
+        "appName": "Bot.Core",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 84,
+        "numberOfCodeFiles": 84,
+        "linesTotal": 4996,
+        "linesOfCode": 4996,
+        "totalApiScanned": 3501,
+        "minLinesOfCodeToChange": 19,
+        "maxLinesOfCodeToChange": 19
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "cc8706bc-272c-4556-975d-361b90ff3528",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Newtonsoft.Json, 13.0.1\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+              "protected": "Newtonsoft.Json, 13.0.1\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Bot.Core.csproj",
+            "snippet": "Newtonsoft.Json, 13.0.1\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "protectedSnippet": "Newtonsoft.Json, 13.0.1\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "label": "Newtonsoft.Json 13.0.1",
+            "properties": {
+              "PackageId": "Newtonsoft.Json",
+              "PackageVersion": "13.0.1",
+              "PackageNewVersion": "13.0.4",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "78455040-848b-4737-a465-a0ff6d97e9f6",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Bot.Core.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "293c3444-74b5-4d50-a973-d4d896e8b32c",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (scriptAndTime.Item2 \u003E now - TimeSpan.FromDays(1))\r\n                    return scriptAndTime.Item1;\r\n                else\r\n                    existsInDict = true;",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\CustomScriptCache.cs",
+            "snippet": "if (scriptAndTime.Item2 \u003E now - TimeSpan.FromDays(1))\r\n                    return scriptAndTime.Item1;\r\n                else\r\n                    existsInDict = true;",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 30,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "c908342b-e453-4897-9bf4-0618311024fb",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "sd.AlmanacUrl = Uri.EscapeUriString(almanacUrl);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\CustomScriptParser.cs",
+            "snippet": "sd.AlmanacUrl = Uri.EscapeUriString(almanacUrl);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 58,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "70423f43-dac4-4a61-ba69-b159b19df01b",
+          "ruleId": "Api.0002",
+          "description": "Uri.EscapeUriString can corrupt the Uri string in some cases. Consider using Uri.EscapeDataString for query string components instead. ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "sd.AlmanacUrl = Uri.EscapeUriString(almanacUrl);",
+              "protected": "M:System.Uri.EscapeUriString(System.String)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\CustomScriptParser.cs",
+            "snippet": "sd.AlmanacUrl = Uri.EscapeUriString(almanacUrl);",
+            "protectedSnippet": "M:System.Uri.EscapeUriString(System.String)",
+            "label": "M:System.Uri.EscapeUriString(System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://aka.ms/dotnet-warnings/SYSLIB0013",
+                "isCustom": false
+              }
+            ],
+            "line": 58,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "bf3a7003-105d-44e7-904a-86f27323ce68",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "cd.ImageUrl = Uri.EscapeUriString(imageUrlStr);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\JsonParseUtil.cs",
+            "snippet": "cd.ImageUrl = Uri.EscapeUriString(imageUrlStr);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 48,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "7970c313-e771-4066-bfaa-8083451576f6",
+          "ruleId": "Api.0002",
+          "description": "Uri.EscapeUriString can corrupt the Uri string in some cases. Consider using Uri.EscapeDataString for query string components instead. ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "cd.ImageUrl = Uri.EscapeUriString(imageUrlStr);",
+              "protected": "M:System.Uri.EscapeUriString(System.String)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\JsonParseUtil.cs",
+            "snippet": "cd.ImageUrl = Uri.EscapeUriString(imageUrlStr);",
+            "protectedSnippet": "M:System.Uri.EscapeUriString(System.String)",
+            "label": "M:System.Uri.EscapeUriString(System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://aka.ms/dotnet-warnings/SYSLIB0013",
+                "isCustom": false
+              }
+            ],
+            "line": 48,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "367a7c47-a9a2-45ee-8bd2-227c449a3a2d",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Uri.EscapeUriString(string.Join(\u0027_\u0027, thingName.Split(\u0027 \u0027).Select(s =\u003E $\u0022{char.ToUpper(s[0])}{s[1..]}\u0022)))",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\OfficialWikiHelper.cs",
+            "snippet": "Uri.EscapeUriString(string.Join(\u0027_\u0027, thingName.Split(\u0027 \u0027).Select(s =\u003E $\u0022{char.ToUpper(s[0])}{s[1..]}\u0022)))",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 9,
+            "column": 79
+          }
+        },
+        {
+          "incidentId": "5431f593-0798-4054-bd7e-6ba1f963dfad",
+          "ruleId": "Api.0002",
+          "description": "Uri.EscapeUriString can corrupt the Uri string in some cases. Consider using Uri.EscapeDataString for query string components instead. ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Uri.EscapeUriString(string.Join(\u0027_\u0027, thingName.Split(\u0027 \u0027).Select(s =\u003E $\u0022{char.ToUpper(s[0])}{s[1..]}\u0022)))",
+              "protected": "M:System.Uri.EscapeUriString(System.String)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\OfficialWikiHelper.cs",
+            "snippet": "Uri.EscapeUriString(string.Join(\u0027_\u0027, thingName.Split(\u0027 \u0027).Select(s =\u003E $\u0022{char.ToUpper(s[0])}{s[1..]}\u0022)))",
+            "protectedSnippet": "M:System.Uri.EscapeUriString(System.String)",
+            "label": "M:System.Uri.EscapeUriString(System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://aka.ms/dotnet-warnings/SYSLIB0013",
+                "isCustom": false
+              }
+            ],
+            "line": 9,
+            "column": 79
+          }
+        },
+        {
+          "incidentId": "59f31c95-ef9c-4681-91ef-7a249e062d4e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (m_lastResult != null \u0026\u0026 m_lastResultTime \u003E now - TimeSpan.FromDays(1))\r\n                return m_lastResult;",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\Lookup\\OfficialCharacterCache.cs",
+            "snippet": "if (m_lastResult != null \u0026\u0026 m_lastResultTime \u003E now - TimeSpan.FromDays(1))\r\n                return m_lastResult;",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 31,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6fd9f487-761a-4f75-ae02-52ad961fb7b1",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "TimeSpan cleanupTime = TimeSpan.FromHours(5);",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownCleanup.cs",
+            "snippet": "TimeSpan cleanupTime = TimeSpan.FromHours(5);",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 62,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "b982a94a-f390-47e7-942c-476e9bd00771",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "TimeSpan cleanupCheckTime = TimeSpan.FromHours(1);",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownCleanup.cs",
+            "snippet": "TimeSpan cleanupCheckTime = TimeSpan.FromHours(1);",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 34,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "04519486-a6e5-432e-a79e-9a5d1aafe71c",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "TimeSpan cleanupCheckTime = TimeSpan.FromHours(1);",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownCleanup.cs",
+            "snippet": "TimeSpan cleanupCheckTime = TimeSpan.FromHours(1);",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 34,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "0ff75861-f862-4607-b10c-526695d394d2",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return TimeSpan.FromMinutes(minutes) \u002B TimeSpan.FromSeconds(seconds);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TimeSpanParser.cs",
+            "snippet": "return TimeSpan.FromMinutes(minutes) \u002B TimeSpan.FromSeconds(seconds);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 22,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a7de0612-7d3a-46a9-9fb3-f67c9fb0958d",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return TimeSpan.FromMinutes(minutes) \u002B TimeSpan.FromSeconds(seconds);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TimeSpanParser.cs",
+            "snippet": "return TimeSpan.FromMinutes(minutes) \u002B TimeSpan.FromSeconds(seconds);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 22,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "290c77c6-e5a0-42ce-886b-eb13a976b9ca",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "DateTime nextTime = m_dateTime.Now \u002B TimeSpan.FromDays(DAYS_BETWEEN_MAINTENANCE);",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "DateTime nextTime = m_dateTime.Now \u002B TimeSpan.FromDays(DAYS_BETWEEN_MAINTENANCE);",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 117,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "56a786b6-dbe5-4852-ab0a-85e30b64bcd1",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "DateTime nextTime = m_dateTime.Now \u002B TimeSpan.FromMinutes(MINUTES_PER_CALLBACK);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "DateTime nextTime = m_dateTime.Now \u002B TimeSpan.FromMinutes(MINUTES_PER_CALLBACK);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 111,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "46fe4398-7f36-4085-9cc8-057840da5c44",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_longWaitScheduler = callbackFactory.CreateScheduler(RunMaintenanceAsync, TimeSpan.FromDays(1));",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "m_longWaitScheduler = callbackFactory.CreateScheduler(RunMaintenanceAsync, TimeSpan.FromDays(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 43,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "9ea5d25a-a9c2-4ffa-b2c6-90b2673f1b43",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_callbackScheduler = callbackFactory.CreateScheduler\u003CQueue\u003CTownKey\u003E\u003E(ProcessQueueAsync, TimeSpan.FromMinutes(1));",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "m_callbackScheduler = callbackFactory.CreateScheduler\u003CQueue\u003CTownKey\u003E\u003E(ProcessQueueAsync, TimeSpan.FromMinutes(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 41,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "4ac3a3ea-0ec0-4700-aacf-ad7c1fc9ad45",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_longWaitScheduler = callbackFactory.CreateScheduler(RunMaintenanceAsync, TimeSpan.FromDays(1));",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "m_longWaitScheduler = callbackFactory.CreateScheduler(RunMaintenanceAsync, TimeSpan.FromDays(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 43,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6f3b9e82-4d8f-4abb-9ee7-e84052dc0da4",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Core\\Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_callbackScheduler = callbackFactory.CreateScheduler\u003CQueue\u003CTownKey\u003E\u003E(ProcessQueueAsync, TimeSpan.FromMinutes(1));",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Core\\TownMaintenance.cs",
+            "snippet": "m_callbackScheduler = callbackFactory.CreateScheduler\u003CQueue\u003CTownKey\u003E\u003E(ProcessQueueAsync, TimeSpan.FromMinutes(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 41,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Bot.Database\\Bot.Database.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "Bot.Database",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 21,
+        "numberOfCodeFiles": 21,
+        "linesTotal": 925,
+        "linesOfCode": 925,
+        "totalApiScanned": 893,
+        "minLinesOfCodeToChange": 1,
+        "maxLinesOfCodeToChange": 1
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "8b64371f-eae2-4eb6-8d6b-0462ffe67d9d",
+          "ruleId": "NuGet.0004",
+          "projectPath": "Bot.Database\\Bot.Database.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "MongoDB.Driver, 2.15.0\n\nRecommendation:\n\nMongoDB.Driver, 3.8.1",
+              "protected": "MongoDB.Driver, 2.15.0\n\nRecommendation:\n\nMongoDB.Driver, 3.8.1"
+            },
+            "kind": "File",
+            "path": "Bot.Database\\Bot.Database.csproj",
+            "snippet": "MongoDB.Driver, 2.15.0\n\nRecommendation:\n\nMongoDB.Driver, 3.8.1",
+            "protectedSnippet": "MongoDB.Driver, 2.15.0\n\nRecommendation:\n\nMongoDB.Driver, 3.8.1",
+            "label": "MongoDB.Driver 2.15.0",
+            "properties": {
+              "PackageId": "MongoDB.Driver",
+              "PackageVersion": "2.15.0",
+              "PackageNewVersion": "3.8.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "364fb144-e17b-4c3b-9c81-e98681773029",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.Database\\Bot.Database.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.Database\\Bot.Database.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "4af0ee7f-fd35-4b15-885e-5cba24ce7aaf",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Bot.Database\\Bot.Database.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return (builder.Lte(x =\u003E x.Day, timestamp.Date) \u0026 builder.Gt(x =\u003E x.Day, timestamp.Date.Subtract(TimeSpan.FromDays(1))));",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "Bot.Database\\CommandMetricDatabase.cs",
+            "snippet": "return (builder.Lte(x =\u003E x.Day, timestamp.Date) \u0026 builder.Gt(x =\u003E x.Day, timestamp.Date.Subtract(TimeSpan.FromDays(1))));",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 26,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Bot.DSharp\\Bot.DSharp.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Bot.DSharp",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 29,
+        "numberOfCodeFiles": 29,
+        "linesTotal": 1685,
+        "linesOfCode": 1685,
+        "totalApiScanned": 690,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "34b36af3-525b-463c-9dac-af249dacee53",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.DSharp\\Bot.DSharp.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.DSharp\\Bot.DSharp.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Bot.Main\\Bot.Main.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 4,
+      "properties": {
+        "appName": "Bot.Main",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 5,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 185,
+        "linesOfCode": 185,
+        "totalApiScanned": 217,
+        "minLinesOfCodeToChange": 3,
+        "maxLinesOfCodeToChange": 3
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "78c8965d-f63b-47e3-9886-087a2211db29",
+          "ruleId": "Project.0002",
+          "projectPath": "Bot.Main\\Bot.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Bot.Main\\Bot.Main.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "1f30bb20-1604-4230-ba59-b79e71bc1ffc",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: .NET runtime no longer provides default SIGTERM signal handler ",
+          "projectPath": "Bot.Main\\Bot.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;",
+              "protected": "E:System.AppDomain.ProcessExit"
+            },
+            "kind": "File",
+            "path": "Bot.Main\\Program.cs",
+            "snippet": "AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;",
+            "protectedSnippet": "E:System.AppDomain.ProcessExit",
+            "label": "E:System.AppDomain.ProcessExit",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/10.0/sigterm-signal-handler.md",
+                "isCustom": false
+              }
+            ],
+            "line": 99,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "1f991bf9-749b-4713-ab78-bdf36b697b85",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: .NET runtime no longer provides default SIGTERM signal handler ",
+          "projectPath": "Bot.Main\\Bot.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AppDomain.CurrentDomain.ProcessExit \u002B= CurrentDomain_ProcessExit;",
+              "protected": "E:System.AppDomain.ProcessExit"
+            },
+            "kind": "File",
+            "path": "Bot.Main\\Program.cs",
+            "snippet": "AppDomain.CurrentDomain.ProcessExit \u002B= CurrentDomain_ProcessExit;",
+            "protectedSnippet": "E:System.AppDomain.ProcessExit",
+            "label": "E:System.AppDomain.ProcessExit",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/10.0/sigterm-signal-handler.md",
+                "isCustom": false
+              }
+            ],
+            "line": 92,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "d696b479-f9e5-4e98-8dee-f3f0b5a6cc42",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Support for empty environment variables ",
+          "projectPath": "Bot.Main\\Bot.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Environment.SetEnvironmentVariable(parts[0], parts[1]);",
+              "protected": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)"
+            },
+            "kind": "File",
+            "path": "Bot.Main\\DotEnv.cs",
+            "snippet": "Environment.SetEnvironmentVariable(parts[0], parts[1]);",
+            "protectedSnippet": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)",
+            "label": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/empty-env-variable.md",
+                "isCustom": false
+              }
+            ],
+            "line": 23,
+            "column": 16
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Test.Bot.Base\\Test.Bot.Base.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 2,
+      "properties": {
+        "appName": "Test.Bot.Base",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 8,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 2178,
+        "linesOfCode": 275,
+        "totalApiScanned": 226,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "fa98d01b-0729-4eb4-a9e1-7745bdb4ce84",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Test.Bot.Base\\Test.Bot.Base.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "xunit, 2.4.1\n\nRecommendation:\n\nThis package will only be updated for security issues. All future feature work has moved onto v3.\n\nGuide for migrating from xUnit.net v2 to v3: https://xunit.net/docs/getting-started/v3/migration\nRemove xunit, and replace with new package xunit, 2.9.3",
+              "protected": "xunit, 2.4.1\n\nRecommendation:\n\nThis package will only be updated for security issues. All future feature work has moved onto v3.\n\nGuide for migrating from xUnit.net v2 to v3: https://xunit.net/docs/getting-started/v3/migration\nRemove xunit, and replace with new package xunit, 2.9.3"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Base\\Test.Bot.Base.csproj",
+            "snippet": "xunit, 2.4.1\n\nRecommendation:\n\nThis package will only be updated for security issues. All future feature work has moved onto v3.\n\nGuide for migrating from xUnit.net v2 to v3: https://xunit.net/docs/getting-started/v3/migration\nRemove xunit, and replace with new package xunit, 2.9.3",
+            "protectedSnippet": "xunit, 2.4.1\n\nRecommendation:\n\nThis package will only be updated for security issues. All future feature work has moved onto v3.\n\nGuide for migrating from xUnit.net v2 to v3: https://xunit.net/docs/getting-started/v3/migration\nRemove xunit, and replace with new package xunit, 2.9.3",
+            "label": "xunit 2.4.1",
+            "properties": {
+              "PackageId": "xunit",
+              "PackageVersion": "2.4.1",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "3fefcdce-0814-4df3-9d87-c2ee00ef67bb",
+          "ruleId": "Project.0002",
+          "projectPath": "Test.Bot.Base\\Test.Bot.Base.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Base\\Test.Bot.Base.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Test.Bot.Core\\Test.Bot.Core.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 58,
+      "properties": {
+        "appName": "Test.Bot.Core",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 33,
+        "numberOfCodeFiles": 30,
+        "linesTotal": 6795,
+        "linesOfCode": 4892,
+        "totalApiScanned": 11982,
+        "minLinesOfCodeToChange": 57,
+        "maxLinesOfCodeToChange": 57
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "ecb9033b-1c30-4267-8177-e8d084acd580",
+          "ruleId": "Project.0002",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Test.Bot.Core.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "9ee964e7-a73a-4497-8f25-c59b6af9ce47",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(25));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(25));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 260,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "629880ba-15c6-47ba-b514-9a841325c514",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 156,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "bf47a0ae-4e3d-407f-a53f-221318c8e663",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 151,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "e1a8ee3c-b97e-45b1-8e29-95274094bc87",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 143,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "87a36630-b67a-402a-9bce-4d9d1b0835fd",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 103,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "bd546503-05f6-4053-a22e-7515c586e11c",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 99,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "64e273cc-a11a-44c7-b046-5f032a40b9a6",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 95,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6e906ae6-805f-4043-a904-6026b9712e57",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromHours(13));",
+              "protected": "M:System.TimeSpan.FromHours(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\Lookup\\TestCharacterCaches.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromHours(13));",
+            "protectedSnippet": "M:System.TimeSpan.FromHours(System.Double)",
+            "label": "M:System.TimeSpan.FromHours(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 90,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "1310b97f-4a91-48b9-9eab-02859b0b7afc",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var expectedTimeSpan = TimeSpan.FromMinutes(mins) \u002B TimeSpan.FromSeconds(secs);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestTimeSpanParser.cs",
+            "snippet": "var expectedTimeSpan = TimeSpan.FromMinutes(mins) \u002B TimeSpan.FromSeconds(secs);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 93,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7af14333-9c9b-42fc-a81a-a0fe35dfe121",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var expectedTimeSpan = TimeSpan.FromMinutes(mins) \u002B TimeSpan.FromSeconds(secs);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestTimeSpanParser.cs",
+            "snippet": "var expectedTimeSpan = TimeSpan.FromMinutes(mins) \u002B TimeSpan.FromSeconds(secs);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 93,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "018bff27-4e35-438e-8e0c-be492d4802f0",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var expectedTimeSpan = TimeSpan.FromSeconds(secs);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestTimeSpanParser.cs",
+            "snippet": "var expectedTimeSpan = TimeSpan.FromSeconds(secs);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 70,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "2c3fdd87-5d60-46ef-b07f-e88e616eb668",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var expectedTimeSpan = TimeSpan.FromMinutes(mins);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestTimeSpanParser.cs",
+            "snippet": "var expectedTimeSpan = TimeSpan.FromMinutes(mins);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 40,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "4ec0dd78-4c5e-493e-97e6-309e3bc6ccf4",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 286,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "b13887bc-8887-49ea-b6e9-e311d4721840",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 284,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "2d09b7f1-59b0-43f0-9657-2695ad61005d",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 272,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "029926c6-8d15-4e9a-9a9b-662468e8ebf3",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 262,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6aa81864-db5c-48c6-ab90-a153238bbbd3",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 258,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3b57ac72-86c8-4fbd-bc73-2c170b16ae7d",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 253,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "94c8cee9-1285-4287-83f5-3003cacce9fe",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(10)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(10)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 251,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "9ae6d68b-4610-4d8a-bc6c-8180d704c11f",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 246,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7df7c5fb-f45a-4df2-bf5e-383f12c40933",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 244,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "10aeb13b-ffa7-49e3-8de9-6856f5772996",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(10));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(10));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 232,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "489f4255-c24e-44d2-994b-789032e12230",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 229,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "ae2d90ff-bddc-4edc-a45f-60504ce32e81",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 223,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "9d6b7086-5350-4469-aa25-d484d78e8847",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 221,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f66379e6-a21e-4609-ab7b-260f66d616af",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 208,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3c351f72-94ad-43e8-af88-1c9a661dec7e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 205,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "9c673b4a-d26e-460a-87be-d71c7a3e2332",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 202,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "04670392-c34d-4380-b7f5-adb60ba33ee5",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 200,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "43aa4715-b0b4-4873-acaa-ad71096cae11",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 188,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "5c28a43b-0ffd-4049-a9cb-8ec272c27220",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 186,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "81e62e41-4c4d-4cd3-8a5e-09d3ce71d558",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 176,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "adc412e7-ddd6-4d75-beea-08babd21a174",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 162,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "752f0102-e031-4ed6-bb7f-f178ced1418f",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(2)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 160,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "dea70058-1ffa-4b32-9325-4463f4195aa0",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 148,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "d1ec908c-332c-4ef7-a132-07ed0ad3c4fe",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 138,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "236154c5-90fd-4652-9309-e6a11fadf7d6",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(20));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(20));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 134,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "df2f25cd-4358-455b-a929-a42957fdba96",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 129,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7f2e3b75-df57-4ae0-bc10-c6352ba9da9c",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(10)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(10)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 127,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a6b92193-fbba-4d50-9009-3d068ed85baf",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 122,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "13da4172-ce42-44b3-80bd-e7090737eee1",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 120,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3f900c84-b83d-46c2-9938-62eeaf5b84c9",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(10));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(10));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 108,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "da559ae0-1ae8-405a-9dd5-c3199464c2b9",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "m_mockTask.Verify(t =\u003E t.Delay(It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1)), It.IsAny\u003CCancellationToken\u003E()), Times.AtLeastOnce);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 105,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "056b1e1d-58a8-44ef-8e04-9f968f282a06",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 99,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6e18ab5a-5a81-45f6-9383-d106ea99a564",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 97,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "78932bf4-c976-4953-8dba-03397bc97468",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 84,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "85a68707-e760-4ef7-a431-687c736dc4c9",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 81,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "0c963766-641c-48f9-981e-882556ca5472",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 78,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "706e4f97-6226-48bf-bb90-1921d56f81c6",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 76,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "2ba66c49-8a9c-4796-b123-278489bc043e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 64,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f5c95d09-4b1d-4c4c-a2f9-d9b18b03538a",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "helper.ScheduleCallback(GetTimeAfter(TimeSpan.FromSeconds(5)));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 62,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "85d7954b-bbbf-4dd7-a480-bf77007c08b6",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "var factory = csf.CreateScheduler(mockCb.Object, TimeSpan.FromSeconds(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 52,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f764de5c-9744-4c11-8f50-dc34f14d92ef",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "bool success = await m_delayReset.WaitOneAsync(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "bool success = await m_delayReset.WaitOneAsync(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 31,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "dc27e232-d237-4ad1-b977-5932cadf0720",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "bool success = await m_delayReset.WaitOneAsync(TimeSpan.FromSeconds(2));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestCallbackScheduler.cs",
+            "snippet": "bool success = await m_delayReset.WaitOneAsync(TimeSpan.FromSeconds(2));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 31,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "babe296c-8f60-4879-b9d9-7e13afbdd29b",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "AdvanceTime(TimeSpan.FromMinutes(6));",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestVoteTimer.cs",
+            "snippet": "AdvanceTime(TimeSpan.FromMinutes(6));",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 117,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "581255e3-283a-4052-ab82-d0da61bff537",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "CallbackSchedulerFactoryMock\r\n                .Setup(csf =\u003E csf.CreateScheduler(It.IsAny\u003CFunc\u003CTownKey, Task\u003E\u003E(), It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1))))\r\n                .Callback\u003CFunc\u003CTownKey, Task\u003E, TimeSpan\u003E((f, ts) =\u003E callback = f)\r\n                .Returns(TownKeyCallbackSchedulerMock.Object);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestVoteTimer.cs",
+            "snippet": "CallbackSchedulerFactoryMock\r\n                .Setup(csf =\u003E csf.CreateScheduler(It.IsAny\u003CFunc\u003CTownKey, Task\u003E\u003E(), It.Is\u003CTimeSpan\u003E(ts =\u003E ts == TimeSpan.FromSeconds(1))))\r\n                .Callback\u003CFunc\u003CTownKey, Task\u003E, TimeSpan\u003E((f, ts) =\u003E callback = f)\r\n                .Returns(TownKeyCallbackSchedulerMock.Object);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 102,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "c11b1768-ecef-44f7-b37b-cc26374bfd5b",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Support for empty environment variables ",
+          "projectPath": "Test.Bot.Core\\Test.Bot.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Environment.SetEnvironmentVariable(\u0022test_env_value\u0022, \u0022blah\u0022);",
+              "protected": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Core\\TestEnvironment.cs",
+            "snippet": "Environment.SetEnvironmentVariable(\u0022test_env_value\u0022, \u0022blah\u0022);",
+            "protectedSnippet": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)",
+            "label": "M:System.Environment.SetEnvironmentVariable(System.String,System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/empty-env-variable.md",
+                "isCustom": false
+              }
+            ],
+            "line": 19,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Test.Bot.Database\\Test.Bot.Database.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Test.Bot.Database",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 6,
+        "numberOfCodeFiles": 3,
+        "linesTotal": 2117,
+        "linesOfCode": 214,
+        "totalApiScanned": 437,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "ff295452-d5ee-4009-8dd4-030227660535",
+          "ruleId": "Project.0002",
+          "projectPath": "Test.Bot.Database\\Test.Bot.Database.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Test.Bot.Database\\Test.Bot.Database.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Test.Bot.DSharp\\Test.Bot.DSharp.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Test.Bot.DSharp",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 8,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 2273,
+        "linesOfCode": 370,
+        "totalApiScanned": 1042,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "2d252168-ed93-481f-b4c7-8e6d80dd9c76",
+          "ruleId": "Project.0002",
+          "projectPath": "Test.Bot.DSharp\\Test.Bot.DSharp.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Test.Bot.DSharp\\Test.Bot.DSharp.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Test.Main\\Test.Main.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Test.Main",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 4,
+        "numberOfCodeFiles": 1,
+        "linesTotal": 1940,
+        "linesOfCode": 37,
+        "totalApiScanned": 28,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "5238c917-918e-4231-8664-814ba5ff3fd5",
+          "ruleId": "Project.0002",
+          "projectPath": "Test.Main\\Test.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Test.Main\\Test.Main.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    }
+  ],
+  "rules": {
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "Project\u0027s target framework(s) needs to be changed to the new target framework that you selected for this upgrade.\n\nDuring upgrade target framework will be adjusted to corresponding platform when applicable. In some cases project would result in multiple target frameworks after the upgrade if it was using features that now have their own platforms in modern .NET frameworks (windows, iOS, Android etc).",
+      "label": "Project\u0027s target framework(s) needs to be changed",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Overview of porting from .NET Framework to .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET project SDKs",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API is source incompatible for selected .NET version: requires code changes to compile successfully when targeting a new version, such as removing obsolete APIs or changing method signatures.",
+      "label": "Source incompatible for selected .NET version",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "NuGet.0002": {
+      "id": "NuGet.0002",
+      "isFeature": false,
+      "description": "NuGet package upgrade is recommended for selected target framework.\n\nStandard .NET packages are recommended to have versions matching version of .NET that project targets.\n\nSome other packages also are known to work better for selected target frameworks.",
+      "label": "NuGet package upgrade is recommended",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262530",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0003": {
+      "id": "Api.0003",
+      "isFeature": false,
+      "description": "API has a behavioral change in selected .NET version: code and binaries may behave differently at runtime without needing recompilation, but the new behavior might be undesirable and require updates.",
+      "label": "Behavioral change in selected .NET version",
+      "severity": "Potential",
+      "effort": 1
+    },
+    "NuGet.0004": {
+      "id": "NuGet.0004",
+      "isFeature": false,
+      "description": "NuGet package contains security vulnerabilities.\n\nPackage needs to be upgraded to a newer version that addresses known security vulnerabilities.",
+      "label": "NuGet package contains security vulnerability",
+      "severity": "Optional",
+      "effort": 1
+    },
+    "NuGet.0005": {
+      "id": "NuGet.0005",
+      "isFeature": false,
+      "description": "NuGet package is deprecated.\n\nGo to its documentation and if there is a guidance for replacement of functionality provided by this package.",
+      "label": "NuGet package is deprecated",
+      "severity": "Optional",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262531",
+          "isCustom": false
+        }
+      ]
+    }
+  }
+}
