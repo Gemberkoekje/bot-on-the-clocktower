@@ -2,26 +2,29 @@
 using System;
 using Xunit;
 
-namespace Test.Bot.Core
+namespace Test.Bot.Core;
+
+public static class TestEnvironment
 {
-    public static class TestEnvironment
+    [Fact]
+    public static void Environment_NoKey_GetsNothing()
     {
-        [Fact]
-        public static void Environment_NoKey_GetsNothing()
-        {
-            BotEnvironment env = new();
-            var result = env.GetEnvironmentVariable("test_env_value");
-            Assert.Null(result);
-        }
+        Environment.SetEnvironmentVariable("test_env_value", null);
 
-        [Fact]
-        public static void Environment_HasKey_GetsResult()
-        {
-            Environment.SetEnvironmentVariable("test_env_value", "blah");
+        BotEnvironment env = new();
+        var result = env.GetEnvironmentVariable("test_env_value");
+        Assert.Null(result);
+    }
 
-            BotEnvironment env = new();
-            var result = env.GetEnvironmentVariable("test_env_value");
-            Assert.Equal("blah", result);
-        }
+    [Fact]
+    public static void Environment_HasKey_GetsResult()
+    {
+        Environment.SetEnvironmentVariable("test_env_value", "blah");
+
+        BotEnvironment env = new();
+        var result = env.GetEnvironmentVariable("test_env_value");
+        Assert.Equal("blah", result);
+
+        Environment.SetEnvironmentVariable("test_env_value", null);
     }
 }

@@ -20,6 +20,6 @@
 
   <ItemGroup>
     <None Remove="xunit.runner.visualstudio" />
-    <None Remove="xunit" />
+    <None Remove="xunit.v3" />
   </ItemGroup>
 </Project>
