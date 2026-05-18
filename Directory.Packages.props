@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+	<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<!-- Bot projects -->
+	<PackageVersion Include="Destructurama.ByIgnoring" Version="1.1.0" />
+	<PackageVersion Include="FuzzySharp" Version="2.0.2" />
+	<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+	<PackageVersion Include="MongoDB.Driver" Version="3.8.1" />
+	<PackageVersion Include="Moq" Version="4.20.72" />
+	<PackageVersion Include="SharpCompress" Version="0.48.1" />
+	<PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+	<PackageVersion Include="Serilog" Version="2.10.0" />
+	<PackageVersion Include="Serilog.Formatting.Compact" Version="1.1.0" />
+	<PackageVersion Include="Serilog.Sinks.Console" Version="4.0.1" />
+	<PackageVersion Include="Serilog.Sinks.Debug" Version="2.0.0" />
+	<PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
+	<PackageVersion Include="xunit.v3" Version="3.2.2" />
+	<PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+
+  </ItemGroup>
+</Project>
