@@ -3,13 +3,13 @@
   <Project Path="Bot.Base/Bot.Base.csproj" />
   <Project Path="Bot.Core/Bot.Core.csproj" />
   <Project Path="Bot.Database/Bot.Database.csproj" />
-  <Project Path="Bot.DSharp/Bot.DSharp.csproj" />
   <Project Path="Bot.Main/Bot.Main.csproj" />
-  <Project Path="DSharpPlus/DSharpPlus.SlashCommands/DSharpPlus.SlashCommands.csproj" />
-  <Project Path="DSharpPlus/DSharpPlus/DSharpPlus.csproj" />
+  <Project Path="Bot.Remora/Bot.Remora.csproj" />
   <Project Path="Test.Bot.Base/Test.Bot.Base.csproj" />
   <Project Path="Test.Bot.Core/Test.Bot.Core.csproj" />
   <Project Path="Test.Bot.Database/Test.Bot.Database.csproj" />
-  <Project Path="Test.Bot.DSharp/Test.Bot.DSharp.csproj" />
+  <Project Path="Test.Bot.Remora/Test.Bot.Remora.csproj" />
   <Project Path="Test.Main/Test.Main.csproj" />
 </Solution>
+
+

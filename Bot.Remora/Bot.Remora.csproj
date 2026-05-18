@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Remora.Discord.API" />
+    <PackageReference Include="Remora.Discord.Commands" />
+    <PackageReference Include="Remora.Discord.Gateway" />
+    <PackageReference Include="Remora.Discord.Interactivity" />
+    <PackageReference Include="Remora.Discord.Rest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bot.Api\Bot.Api.csproj" />
+    <ProjectReference Include="..\Bot.Base\Bot.Base.csproj" />
+  </ItemGroup>
+
+</Project>

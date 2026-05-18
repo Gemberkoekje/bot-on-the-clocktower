@@ -2,7 +2,7 @@
 using Bot.Base;
 using Bot.Core;
 using Bot.Database;
-using Bot.DSharp;
+using Bot.Remora;
 using Destructurama;
 using Serilog;
 using System;
@@ -18,13 +18,12 @@ namespace Bot.Main
             // Setup the global Serilog logger instance; if we want more granularity or not to use a single static logger, we can
             // instantiate individual loggers and put them into our services instead
             var logConfig = new LoggerConfiguration()
-                .Destructure.ByIgnoringProperties<DSharpMember>(x => x.Wrapped, x => x.Roles, x => x.IsBot)
-                .Destructure.ByIgnoringProperties<DSharpRole>(x => x.Wrapped, x => x.Mention)
-                .Destructure.ByTransforming<DSharpGuild>(x => new { Id = x.Id, Name = x.Name })
-                .Destructure.ByIgnoringProperties<DSharpChannel>(x => x.Wrapped, x => x.Users)
-                .Destructure.ByIgnoringProperties<DSharpChannelCategory>(x => x.Wrapped, x => x.Channels)
-                .Destructure.ByIgnoringProperties<DSharpInteractionContext>(x => x.Wrapped, x => x.Services)
-                .Destructure.ByIgnoringProperties<DSharpComponentContext>(x => x.Wrapped)
+                .Destructure.ByIgnoringProperties<RemoraMember>(x => x.Roles, x => x.CurrentVoiceChannel)
+                .Destructure.ByIgnoringProperties<RemoraRole>(x => x.Mention)
+                .Destructure.ByTransforming<RemoraGuild>(x => new { Id = x.Id, Name = x.Name })
+                .Destructure.ByIgnoringProperties<RemoraChannel>(x => x.Users)
+                .Destructure.ByIgnoringProperties<RemoraChannelCategory>(x => x.Channels)
+                .Destructure.ByIgnoringProperties<RemoraInteractionContext>(x => x.ComponentValues)
                 .Destructure.ByTransforming<TownRecord>(x => new { GuildId = x.GuildId, ControlChannelId = x.ControlChannelId, ControlChannelName = x.ControlChannel })
                 .Destructure.ByTransforming<Town>(x => new { Guild = x.Guild, ControlChannel = x.ControlChannel })
                 .Destructure.ByTransforming<Game>(x => new { TownKey = x.TownKey, Storytellers = x.Storytellers, VillagerCount = x.Villagers.Count })
@@ -64,10 +63,10 @@ namespace Bot.Main
             sp = Core.ServiceFactory.RegisterCoreServices(sp, ct);
             sp = Core.Lookup.LookupServiceFactory.RegisterCoreLookupServices(sp);
 
-            sp = DSharp.ServiceFactory.RegisterServices(sp);
+            sp = Remora.ServiceFactory.RegisterServices(sp);
 
-            var dsharpRunner = new BotSystemRunner(sp, new DSharpSystem());
-            await dsharpRunner.RunAsync();
+            var runner = new BotSystemRunner(sp, new RemoraSystem());
+            await runner.RunAsync();
         }
 
         public static IServiceProvider RegisterServices()
