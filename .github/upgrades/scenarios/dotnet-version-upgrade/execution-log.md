@@ -13,3 +13,8 @@ Created Directory.Packages.props with CPM enabled for all 13 packages. Stripped 
 
 Bumped all 11 projects from net6.0 to net10.0. Updated MongoDB.Driver to 3.8.1 (security fix), Newtonsoft.Json to 13.0.4, Moq to 4.20.72. Pinned SharpCompress 0.48.1 and Newtonsoft.Json 13.0.4 to fix transitive vulnerabilities from MongoDB.Driver 3.x and Moq. Replaced deprecated Uri.EscapeUriString with Uri.EscapeDataString in 3 files. Build: 0 errors, 0 warnings. All 337 tests pass.
 
+
+## [2026-05-18 20:04] 04-final-validation
+
+Final validation complete. Build: 0 errors, 0 warnings. All 337 tests pass across 5 test projects. Deferred items documented: enable nullable reference types across all projects, and upgrade xunit to v3.
+
