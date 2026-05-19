@@ -1,5 +1,6 @@
 ﻿using Bot.Api;
 using Bot.Api.Database;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,7 +29,9 @@ namespace Bot.Core
 
         protected async Task<ITown?> GetValidTownOrLogErrorAsync(ulong guildId, ulong controlChannelId, IProcessLogger processLogger)
         {
+            Console.WriteLine($"BotTownLookupHelper: GetValidTownOrLogErrorAsync called. GuildId={guildId}, ControlChannelId={controlChannelId}");
             var townRecordList = await m_townLookup.GetTownRecordsAsync(guildId);
+            Console.WriteLine($"BotTownLookupHelper: townRecordList count={townRecordList.Count()}, controlChannelIds=[{string.Join(", ", townRecordList.Select(r => r.ControlChannelId))}]");
             var townRec = townRecordList.Where(x => x.ControlChannelId == controlChannelId).FirstOrDefault();
             
             if (townRec == null)
@@ -47,9 +50,6 @@ namespace Bot.Core
             }
 
             var town = await m_townResolver.ResolveTownAsync(townRec);
-            if (town == null)
-                processLogger.LogMessage(InvalidTownMessage);
-
             return town;
         }
     }

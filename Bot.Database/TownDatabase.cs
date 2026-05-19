@@ -53,7 +53,9 @@ namespace Bot.Database
 		public async Task<bool> AddTownAsync(ITown town, IMember author)
 		{
 			var newRec = RecordFromTown(town, author);
+			Console.WriteLine($"TownDatabase: AddTownAsync called. Id={newRec.Id}, GuildId={newRec.GuildId}, ControlChannelId={newRec.ControlChannelId}, DayCategory={newRec.DayCategory}");
 			await UpdateRecordAsync(newRec);
+			Console.WriteLine($"TownDatabase: AddTownAsync completed. Id={newRec.Id}");
 			return true;
 		}
 
@@ -73,9 +75,11 @@ namespace Bot.Database
 
 		private async Task UpdateRecordAsync(TownRecord record)
 		{
+			Console.WriteLine($"TownDatabase: UpdateRecordAsync start. Id={record.Id}, GuildId={record.GuildId}, ControlChannelId={record.ControlChannelId}");
 			using var session = m_documentStore.LightweightSession();
 
 			TownRecord? existing = await session.LoadAsync<TownRecord>(record.Id);
+			Console.WriteLine($"TownDatabase: UpdateRecordAsync existing={existing?.Id ?? "null"}");
 			if (existing != null)
 			{
 				session.Delete(existing);
@@ -83,6 +87,7 @@ namespace Bot.Database
 
 			session.Store(record);
 			await session.SaveChangesAsync();
+			Console.WriteLine($"TownDatabase: UpdateRecordAsync saved. Id={record.Id}");
 		}
 
 		public async Task<ITownRecord?> GetTownRecordAsync(ulong guildId, ulong channelId)
@@ -94,9 +99,12 @@ namespace Bot.Database
 
 		public async Task<IEnumerable<ITownRecord>> GetTownRecordsAsync(ulong guildId)
 		{
+			Console.WriteLine($"TownDatabase: GetTownRecordsAsync called. GuildId={guildId}");
 			using var querySession = m_documentStore.QuerySession();
 			var records = await querySession.Query<TownRecord>().ToListAsync();
-			return records.Where(x => x.GuildId == guildId).ToList();
+			var filtered = records.Where(x => x.GuildId == guildId).ToList();
+			Console.WriteLine($"TownDatabase: GetTownRecordsAsync total={records.Count}, filtered={filtered.Count}, guildIds=[{string.Join(", ", records.Select(r => r.GuildId).Distinct())}]");
+			return filtered;
 		}
 
 		public async Task<IEnumerable<TownKey>> GetAllTowns()
