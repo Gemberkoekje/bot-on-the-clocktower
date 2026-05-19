@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Bot.Api;
 using Bot.Remora;
 using Moq;
 using OneOf;
@@ -218,17 +219,105 @@ namespace Test.Bot.Remora
         {
             CancellationToken cancellationToken = TestContext.Current.CancellationToken;
             RecordingDispatcher dispatcher = new();
+            RecordingComponentDispatcher componentDispatcher = new();
             Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
-            RemoraInteractionResponder responder = new(dispatcher, interactionApi.Object);
+            RemoraInteractionResponder responder = new(dispatcher, componentDispatcher, interactionApi.Object);
 
             Mock<IInteraction> slashInteraction = CreateSlashInteraction("test");
             await responder.RespondAsync(slashInteraction.Object, cancellationToken);
             Assert.Equal(1, dispatcher.CallCount);
             Assert.Same(slashInteraction.Object, dispatcher.LastInteraction);
+            Assert.Equal(0, componentDispatcher.CallCount);
 
-            Mock<IInteraction> componentInteraction = CreateInteraction(InteractionType.MessageComponent);
+            Mock<IInteraction> componentInteraction = CreateMessageComponentInteraction("component", "value");
             await responder.RespondAsync(componentInteraction.Object, cancellationToken);
-            Assert.Equal(1, dispatcher.CallCount);
+            Assert.Equal(1, componentDispatcher.CallCount);
+
+            Mock<IInteraction> modalInteraction = CreateModalSubmitInteraction("modal-id", ("field-1", "abc"));
+            await responder.RespondAsync(modalInteraction.Object, cancellationToken);
+            Assert.Equal(2, componentDispatcher.CallCount);
+        }
+
+        [Fact]
+        public static async Task Responder_ComponentUnknown_SendsEphemeralFallback()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            RecordingDispatcher slashDispatcher = new();
+            RecordingComponentDispatcher componentDispatcher = new() { ReturnValue = false };
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            RemoraInteractionResponder responder = new(slashDispatcher, componentDispatcher, interactionApi.Object);
+            Mock<IInteraction> componentInteraction = CreateMessageComponentInteraction("unknown-component");
+
+            await responder.RespondAsync(componentInteraction.Object, cancellationToken);
+
+            interactionApi.Verify(
+                api => api.CreateInteractionResponseAsync(
+                    componentInteraction.Object.ID,
+                    componentInteraction.Object.Token,
+                    It.Is<IInteractionResponse>(response => IsEphemeralErrorResponse(response)),
+                    default,
+                    cancellationToken),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task ComponentDispatcher_DispatchesKnownAndUnknownCustomIds()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IComponentService> componentService = new();
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            RemoraComponentDispatcher dispatcher = new(componentService.Object, interactionApi.Object);
+            IBotInteractionContext? seenContext = null;
+
+            componentService
+                .Setup(service => service.CallAsync(It.IsAny<IBotInteractionContext>()))
+                .Returns<IBotInteractionContext>(context =>
+                {
+                    seenContext = context;
+                    return Task.FromResult(context.ComponentCustomId == "known-component");
+                });
+
+            bool knownResult = await dispatcher.DispatchAsync(
+                CreateMessageComponentInteraction("known-component", "value-1", "value-2").Object,
+                cancellationToken);
+            bool unknownResult = await dispatcher.DispatchAsync(
+                CreateMessageComponentInteraction("unknown-component").Object,
+                cancellationToken);
+
+            Assert.True(knownResult);
+            Assert.False(unknownResult);
+            Assert.NotNull(seenContext);
+            Assert.Equal("unknown-component", seenContext!.ComponentCustomId);
+        }
+
+        [Fact]
+        public static async Task ComponentDispatcher_DispatchesModalSubmissionValues()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IComponentService> componentService = new();
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            RemoraComponentDispatcher dispatcher = new(componentService.Object, interactionApi.Object);
+            IBotInteractionContext? seenContext = null;
+
+            componentService
+                .Setup(service => service.CallAsync(It.IsAny<IBotInteractionContext>()))
+                .Returns<IBotInteractionContext>(context =>
+                {
+                    seenContext = context;
+                    return Task.FromResult(true);
+                });
+
+            bool handled = await dispatcher.DispatchAsync(
+                CreateModalSubmitInteraction(
+                    "modal-submit",
+                    ("field-1", "value-a"),
+                    ("field-2", "value-b")).Object,
+                cancellationToken);
+
+            Assert.True(handled);
+            Assert.NotNull(seenContext);
+            Assert.Equal("modal-submit", seenContext!.ComponentCustomId);
+            Assert.Equal(new[] { "value-a", "value-b" }, seenContext.ComponentValues);
         }
 
         [Fact]
@@ -276,12 +365,146 @@ namespace Test.Bot.Remora
         }
 
         [Fact]
+        public static async Task LiveContext_DoubleDefer_IsIdempotent()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            LiveRemoraInteractionContext context = new(
+                new RemoraGuild(1, "guild"),
+                new RemoraChannel(2, "channel"),
+                new RemoraMember(3, "member"),
+                interactionApi.Object,
+                new Snowflake(100),
+                new Snowflake(200),
+                "interaction-token",
+                cancellationToken);
+
+            await context.DeferInteractionResponse();
+            await context.DeferInteractionResponse();
+
+            interactionApi.Verify(
+                api => api.CreateInteractionResponseAsync(
+                    new Snowflake(200),
+                    "interaction-token",
+                    It.Is<IInteractionResponse>(r => r.Type == InteractionCallbackType.DeferredChannelMessageWithSource),
+                    default,
+                    cancellationToken),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task LiveContext_EditBeforeDefer_AutoDefers()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            LiveRemoraInteractionContext context = new(
+                new RemoraGuild(1, "guild"),
+                new RemoraChannel(2, "channel"),
+                new RemoraMember(3, "member"),
+                interactionApi.Object,
+                new Snowflake(100),
+                new Snowflake(200),
+                "interaction-token",
+                cancellationToken);
+
+            RemoraWebhookBuilder webhook = new();
+            webhook.WithContent("edited-content");
+            await context.EditResponseAsync(webhook);
+
+            interactionApi.Verify(
+                api => api.CreateInteractionResponseAsync(
+                    new Snowflake(200),
+                    "interaction-token",
+                    It.Is<IInteractionResponse>(r => r.Type == InteractionCallbackType.DeferredChannelMessageWithSource),
+                    default,
+                    cancellationToken),
+                Times.Once);
+
+            interactionApi.Verify(
+                api => api.EditOriginalInteractionResponseAsync(
+                    new Snowflake(100),
+                    "interaction-token",
+                    It.Is<Optional<string?>>(content => content.HasValue && content.Value == "edited-content"),
+                    default,
+                    default,
+                    default,
+                    default,
+                    default,
+                    cancellationToken),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task LiveContext_UpdateOriginalMessage_CallsUpdateInteractionResponse()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            LiveRemoraInteractionContext context = new(
+                new RemoraGuild(1, "guild"),
+                new RemoraChannel(2, "channel"),
+                new RemoraMember(3, "member"),
+                interactionApi.Object,
+                new Snowflake(100),
+                new Snowflake(200),
+                "interaction-token",
+                cancellationToken);
+
+            RemoraInteractionResponseBuilder builder = new();
+            builder.WithContent("updated-content");
+            builder.AddComponents(RemoraComponent.Button("button-id", "Press", IBotSystem.ButtonType.Primary, false, string.Empty));
+
+            await context.UpdateOriginalMessageAsync(builder);
+
+            interactionApi.Verify(
+                api => api.CreateInteractionResponseAsync(
+                    new Snowflake(200),
+                    "interaction-token",
+                    It.Is<IInteractionResponse>(response => response.Type == InteractionCallbackType.UpdateMessage),
+                    default,
+                    cancellationToken),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task LiveContext_ShowModal_CallsModalInteractionResponse()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            LiveRemoraInteractionContext context = new(
+                new RemoraGuild(1, "guild"),
+                new RemoraChannel(2, "channel"),
+                new RemoraMember(3, "member"),
+                interactionApi.Object,
+                new Snowflake(100),
+                new Snowflake(200),
+                "interaction-token",
+                cancellationToken);
+
+            RemoraInteractionResponseBuilder builder = new();
+            builder.WithCustomId("modal-id");
+            builder.WithTitle("Modal Title");
+            builder.AddComponents(RemoraComponent.TextInput("field-id", "Field Label", "Placeholder", "Initial value", true));
+
+            await context.ShowModalAsync(builder);
+
+            interactionApi.Verify(
+                api => api.CreateInteractionResponseAsync(
+                    new Snowflake(200),
+                    "interaction-token",
+                    It.Is<IInteractionResponse>(response => response.Type == InteractionCallbackType.Modal),
+                    default,
+                    cancellationToken),
+                Times.Once);
+        }
+
+        [Fact]
         public static async Task Responder_DispatchFailure_SendsEphemeralErrorAndDoesNotThrow()
         {
             CancellationToken cancellationToken = TestContext.Current.CancellationToken;
             ThrowingDispatcher dispatcher = new();
+            RecordingComponentDispatcher componentDispatcher = new();
             Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
-            RemoraInteractionResponder responder = new(dispatcher, interactionApi.Object);
+            RemoraInteractionResponder responder = new(dispatcher, componentDispatcher, interactionApi.Object);
             Mock<IInteraction> slashInteraction = CreateSlashInteraction("test");
 
             await responder.RespondAsync(slashInteraction.Object, cancellationToken);
@@ -372,6 +595,46 @@ namespace Test.Bot.Remora
             Mock<IInteraction> interaction = CreateInteraction(InteractionType.ApplicationCommand);
             interaction.SetupGet(i => i.Data).Returns(new Optional<OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>>(
                 OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>.FromT0(data.Object)));
+            return interaction;
+        }
+
+        private static Mock<IInteraction> CreateMessageComponentInteraction(string customId, params string[] values)
+        {
+            MessageComponentData data = new(
+                customId,
+                ComponentType.StringSelect,
+                default,
+                values.Length == 0
+                    ? default
+                    : new Optional<OneOf<IReadOnlyList<Snowflake>, IReadOnlyList<string>>>(values));
+
+            Mock<IInteraction> interaction = CreateInteraction(InteractionType.MessageComponent);
+            interaction.SetupGet(i => i.Data).Returns(new Optional<OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>>(
+                OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>.FromT1(data)));
+            return interaction;
+        }
+
+        private static Mock<IInteraction> CreateModalSubmitInteraction(string customId, params (string fieldId, string value)[] fields)
+        {
+            IReadOnlyList<IPartialMessageComponent> fieldComponents = fields
+                .Select(field => (IPartialMessageComponent)new PartialTextInputComponent(
+                    new Optional<string>(field.fieldId),
+                    new Optional<string>(field.value),
+                    default,
+                    default,
+                    default,
+                    default,
+                    default,
+                    default,
+                    default))
+                .ToArray();
+
+            PartialActionRowComponent row = new(new Optional<IReadOnlyList<IPartialMessageComponent>>(fieldComponents), default);
+            ModalSubmitData data = new(customId, new IPartialMessageComponent[] { row });
+
+            Mock<IInteraction> interaction = CreateInteraction(InteractionType.ModalSubmit);
+            interaction.SetupGet(i => i.Data).Returns(new Optional<OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>>(
+                OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>.FromT2(data)));
             return interaction;
         }
 
@@ -539,6 +802,19 @@ namespace Test.Bot.Remora
             public Task DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
             {
                 throw new InvalidOperationException("boom");
+            }
+        }
+
+        private sealed class RecordingComponentDispatcher : IRemoraComponentDispatcher
+        {
+            public int CallCount { get; private set; }
+
+            public bool ReturnValue { get; set; } = true;
+
+            public Task<bool> DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
+            {
+                CallCount++;
+                return Task.FromResult(ReturnValue);
             }
         }
     }

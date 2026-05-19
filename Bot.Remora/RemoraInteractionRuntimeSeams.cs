@@ -18,7 +18,7 @@ namespace Bot.Remora
 
     internal interface IRemoraComponentDispatcher
     {
-        Task<bool> DispatchAsync(string customId, IReadOnlyCollection<string> values, CancellationToken cancellationToken = default);
+        Task<bool> DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default);
     }
 
     internal sealed class NoOpRemoraInteractionResponder : IRemoraInteractionResponder
@@ -41,7 +41,7 @@ namespace Bot.Remora
 
     internal sealed class NoOpRemoraComponentDispatcher : IRemoraComponentDispatcher
     {
-        public Task<bool> DispatchAsync(string customId, IReadOnlyCollection<string> values, CancellationToken cancellationToken = default)
+        public Task<bool> DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
             Debug.WriteLine("Bot.Remora: component dispatcher is not yet wired.");
             return Task.FromResult(false);

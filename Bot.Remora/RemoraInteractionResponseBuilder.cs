@@ -16,6 +16,10 @@ namespace Bot.Remora
 
         public string Content { get; private set; } = string.Empty;
 
+        internal IReadOnlyList<IBotComponent> Components => m_components;
+
+        internal IReadOnlyList<IEmbed> Embeds => m_embeds;
+
         public IInteractionResponseBuilder WithTitle(string title)
         {
             Title = title;

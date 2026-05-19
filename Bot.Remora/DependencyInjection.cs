@@ -19,7 +19,7 @@ namespace Bot.Remora
             services.AddSingleton<IColorBuilder, RemoraColorBuilder>();
             services.AddSingleton<IRemoraInteractionResponder, RemoraInteractionResponder>();
             services.AddSingleton<IRemoraSlashCommandDispatcher, RemoraSlashCommandDispatcher>();
-            services.AddSingleton<IRemoraComponentDispatcher, NoOpRemoraComponentDispatcher>();
+            services.AddSingleton<IRemoraComponentDispatcher, RemoraComponentDispatcher>();
 
             services.AddDiscordGateway(
                 sp => sp.GetRequiredService<IEnvironment>().GetEnvironmentVariable("DISCORD_TOKEN"),
