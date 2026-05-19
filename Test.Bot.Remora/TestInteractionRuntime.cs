@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bot.Remora;
@@ -70,6 +71,146 @@ namespace Test.Bot.Remora
             await Assert.ThrowsAsync<ArgumentException>(() => dispatcher.DispatchAsync(
                 CreateSlashInteraction("test", BuildOption("name", "value"), BuildOption("enabled", "wrong")).Object,
                 cancellationToken));
+        }
+
+        [Fact]
+        public static async Task Dispatcher_EntityOptionBinding_PresentAndOptional()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            RecordingCommand command = new(
+                "entity",
+                new[]
+                {
+                    new RemoraSlashCommandParameter("member", "desc", RemoraSlashCommandParameterType.User, true),
+                    new RemoraSlashCommandParameter("role", "desc", RemoraSlashCommandParameterType.Role, true),
+                    new RemoraSlashCommandParameter("chatChannel", "desc", RemoraSlashCommandParameterType.Channel, true),
+                    new RemoraSlashCommandParameter("nightCategory", "desc", RemoraSlashCommandParameterType.Channel, false),
+                    new RemoraSlashCommandParameter("optionalUser", "desc", RemoraSlashCommandParameterType.User, false),
+                });
+
+            RemoraSlashCommandRegistry registry = new();
+            registry.AddSource(new StubSource(command));
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            RemoraSlashCommandDispatcher dispatcher = new(registry, interactionApi.Object);
+
+            IApplicationCommandInteractionDataResolved resolved = CreateResolvedData(
+                users: new Dictionary<Snowflake, IUser>
+                {
+                    [new Snowflake(11)] = BuildUser(11, "member-user"),
+                },
+                members: new Dictionary<Snowflake, IPartialGuildMember>
+                {
+                    [new Snowflake(11)] = BuildPartialGuildMember(
+                        nickname: new Optional<string?>("member-nick"),
+                        roleIds: new Optional<IReadOnlyList<Snowflake>>(new[] { new Snowflake(31) })),
+                },
+                roles: new Dictionary<Snowflake, global::Remora.Discord.API.Abstractions.Objects.IRole>
+                {
+                    [new Snowflake(21)] = BuildRole(21, "storyteller"),
+                    [new Snowflake(31)] = BuildRole(31, "registered-role"),
+                },
+                channels: new Dictionary<Snowflake, IPartialChannel>
+                {
+                    [new Snowflake(41)] = BuildChannel(41, "chat", ChannelType.GuildText),
+                    [new Snowflake(42)] = BuildChannel(42, "night", ChannelType.GuildCategory),
+                });
+
+            await dispatcher.DispatchAsync(
+                CreateSlashInteraction(
+                    "entity",
+                    new Optional<IApplicationCommandInteractionDataResolved>(resolved),
+                    BuildSnowflakeOption("member", ApplicationCommandOptionType.User, 11),
+                    BuildSnowflakeOption("role", ApplicationCommandOptionType.Role, 21),
+                    BuildSnowflakeOption("chatChannel", ApplicationCommandOptionType.Channel, 41),
+                    BuildSnowflakeOption("nightCategory", ApplicationCommandOptionType.Channel, 42)).Object,
+                cancellationToken);
+
+            Assert.True(command.WasInvoked);
+            Assert.IsType<ResolvedMemberAdapter>(command.LastArguments["member"]);
+            Assert.IsType<ResolvedRoleAdapter>(command.LastArguments["role"]);
+            Assert.IsType<ResolvedChannelAdapter>(command.LastArguments["chatChannel"]);
+            Assert.IsType<ResolvedChannelCategoryAdapter>(command.LastArguments["nightCategory"]);
+            Assert.False(command.LastArguments.ContainsKey("optionalUser"));
+
+            global::Bot.Api.IMember member = Assert.IsAssignableFrom<global::Bot.Api.IMember>(command.LastArguments["member"]);
+            Assert.Equal((ulong)11, member.Id);
+            Assert.Equal("member-nick", member.DisplayName);
+            Assert.Single(member.Roles);
+            Assert.Equal((ulong)31, member.Roles.First().Id);
+
+            global::Bot.Api.IRole role = Assert.IsAssignableFrom<global::Bot.Api.IRole>(command.LastArguments["role"]);
+            Assert.Equal((ulong)21, role.Id);
+            Assert.Equal("storyteller", role.Name);
+        }
+
+        [Fact]
+        public static async Task Dispatcher_EntityOptionBinding_MissingResolvedAndWrongTypeThrows()
+        {
+            CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+            RemoraSlashCommandRegistry registry = new();
+            registry.AddSource(new StubSource(new RecordingCommand(
+                "entity",
+                new[] { new RemoraSlashCommandParameter("member", "desc", RemoraSlashCommandParameterType.User, true) })));
+
+            Mock<IDiscordRestInteractionAPI> interactionApi = CreateInteractionApiMock();
+            RemoraSlashCommandDispatcher dispatcher = new(registry, interactionApi.Object);
+
+            IApplicationCommandInteractionDataResolved missingUserResolved = CreateResolvedData(
+                users: new Dictionary<Snowflake, IUser>(),
+                members: new Dictionary<Snowflake, IPartialGuildMember>(),
+                roles: new Dictionary<Snowflake, global::Remora.Discord.API.Abstractions.Objects.IRole>(),
+                channels: new Dictionary<Snowflake, IPartialChannel>());
+
+            await Assert.ThrowsAsync<ArgumentException>(() => dispatcher.DispatchAsync(
+                CreateSlashInteraction(
+                    "entity",
+                    new Optional<IApplicationCommandInteractionDataResolved>(missingUserResolved),
+                    BuildSnowflakeOption("member", ApplicationCommandOptionType.User, 11)).Object,
+                cancellationToken));
+
+            await Assert.ThrowsAsync<ArgumentException>(() => dispatcher.DispatchAsync(
+                CreateSlashInteraction(
+                    "entity",
+                    BuildOption("member", "not-a-snowflake")).Object,
+                cancellationToken));
+        }
+
+        [Fact]
+        public static async Task ResolvedAdapters_MutatingOperationsThrowNotSupported()
+        {
+            global::Bot.Api.IMember member = new ResolvedMemberAdapter(
+                BuildUser(100, "user"),
+                nickname: new Optional<string?>("display"),
+                roleIds: default,
+                resolvedRoles: new Dictionary<Snowflake, global::Remora.Discord.API.Abstractions.Objects.IRole>());
+            global::Bot.Api.IRole role = new ResolvedRoleAdapter(BuildRole(200, "role"));
+            global::Bot.Api.IChannel channel = new ResolvedChannelAdapter(BuildChannel(300, "channel", ChannelType.GuildText));
+            global::Bot.Api.IChannelCategory category = new ResolvedChannelCategoryAdapter(BuildChannel(400, "category", ChannelType.GuildCategory));
+
+            await Assert.ThrowsAsync<NotSupportedException>(() => member.MoveToChannelAsync(channel));
+            await Assert.ThrowsAsync<NotSupportedException>(() => member.GrantRoleAsync(role));
+            await Assert.ThrowsAsync<NotSupportedException>(() => member.RevokeRoleAsync(role));
+            await Assert.ThrowsAsync<NotSupportedException>(() => member.SendMessageAsync("test"));
+            await Assert.ThrowsAsync<NotSupportedException>(() => member.SetDisplayName("renamed"));
+            await Assert.ThrowsAsync<NotSupportedException>(() => role.DeleteAsync());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.AddOverwriteAsync(member, global::Bot.Api.IBaseChannel.Permissions.AccessChannels));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.AddOverwriteAsync(role, global::Bot.Api.IBaseChannel.Permissions.AccessChannels));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.RemoveOverwriteAsync(role));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.SendMessageAsync("test"));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.SendMessageAsync(Mock.Of<global::Bot.Api.IEmbed>()));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.SendMessageAsync(Mock.Of<global::Bot.Api.IMessageBuilder>()));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.RestrictOverwriteToMembersAsync(
+                Array.Empty<global::Bot.Api.IMember>(),
+                global::Bot.Api.IBaseChannel.Permissions.AccessChannels,
+                Array.Empty<global::Bot.Api.IMember>()));
+            await Assert.ThrowsAsync<NotSupportedException>(() => channel.DeleteAsync());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() => category.AddOverwriteAsync(member, global::Bot.Api.IBaseChannel.Permissions.AccessChannels));
+            await Assert.ThrowsAsync<NotSupportedException>(() => category.AddOverwriteAsync(role, global::Bot.Api.IBaseChannel.Permissions.AccessChannels));
+            await Assert.ThrowsAsync<NotSupportedException>(() => category.RemoveOverwriteAsync(role));
+            await Assert.ThrowsAsync<NotSupportedException>(() => category.DeleteAsync());
+            Assert.Null(category.GetChannelByName("missing"));
         }
 
         [Fact]
@@ -215,9 +356,18 @@ namespace Test.Bot.Remora
 
         private static Mock<IInteraction> CreateSlashInteraction(string name, params IApplicationCommandInteractionDataOption[] options)
         {
+            return CreateSlashInteraction(name, default, options);
+        }
+
+        private static Mock<IInteraction> CreateSlashInteraction(
+            string name,
+            Optional<IApplicationCommandInteractionDataResolved> resolved,
+            params IApplicationCommandInteractionDataOption[] options)
+        {
             Mock<IApplicationCommandData> data = new();
             data.SetupGet(d => d.Name).Returns(name);
             data.SetupGet(d => d.Options).Returns(new Optional<IReadOnlyList<IApplicationCommandInteractionDataOption>>(options));
+            data.SetupGet(d => d.Resolved).Returns(resolved);
 
             Mock<IInteraction> interaction = CreateInteraction(InteractionType.ApplicationCommand);
             interaction.SetupGet(i => i.Data).Returns(new Optional<OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData>>(
@@ -268,6 +418,65 @@ namespace Test.Bot.Remora
                 new Optional<OneOf<string, long, bool, Snowflake, double>>(value),
                 default,
                 default);
+        }
+
+        private static IApplicationCommandInteractionDataOption BuildSnowflakeOption(string name, ApplicationCommandOptionType type, ulong value)
+        {
+            return new ApplicationCommandInteractionDataOption(
+                name,
+                type,
+                new Optional<OneOf<string, long, bool, Snowflake, double>>(new Snowflake(value)),
+                default,
+                default);
+        }
+
+        private static IUser BuildUser(ulong id, string username)
+        {
+            Mock<IUser> user = new();
+            user.SetupGet(u => u.ID).Returns(new Snowflake(id));
+            user.SetupGet(u => u.Username).Returns(username);
+            user.SetupGet(u => u.IsBot).Returns(new Optional<bool>(false));
+            return user.Object;
+        }
+
+        private static IPartialGuildMember BuildPartialGuildMember(Optional<string?> nickname, Optional<IReadOnlyList<Snowflake>> roleIds)
+        {
+            Mock<IPartialGuildMember> member = new();
+            member.SetupGet(m => m.Nickname).Returns(nickname);
+            member.SetupGet(m => m.Roles).Returns(roleIds);
+            return member.Object;
+        }
+
+        private static global::Remora.Discord.API.Abstractions.Objects.IRole BuildRole(ulong id, string name)
+        {
+            Mock<global::Remora.Discord.API.Abstractions.Objects.IRole> role = new();
+            role.SetupGet(r => r.ID).Returns(new Snowflake(id));
+            role.SetupGet(r => r.Name).Returns(name);
+            return role.Object;
+        }
+
+        private static IPartialChannel BuildChannel(ulong id, string name, ChannelType type)
+        {
+            Mock<IPartialChannel> channel = new();
+            channel.SetupGet(c => c.ID).Returns(new Optional<Snowflake>(new Snowflake(id)));
+            channel.SetupGet(c => c.Name).Returns(new Optional<string?>(name));
+            channel.SetupGet(c => c.Type).Returns(new Optional<ChannelType>(type));
+            channel.SetupGet(c => c.Position).Returns(new Optional<int>(1));
+            return channel.Object;
+        }
+
+        private static IApplicationCommandInteractionDataResolved CreateResolvedData(
+            IReadOnlyDictionary<Snowflake, IUser> users,
+            IReadOnlyDictionary<Snowflake, IPartialGuildMember> members,
+            IReadOnlyDictionary<Snowflake, global::Remora.Discord.API.Abstractions.Objects.IRole> roles,
+            IReadOnlyDictionary<Snowflake, IPartialChannel> channels)
+        {
+            Mock<IApplicationCommandInteractionDataResolved> resolved = new();
+            resolved.SetupGet(r => r.Users).Returns(new Optional<IReadOnlyDictionary<Snowflake, IUser>>(users));
+            resolved.SetupGet(r => r.Members).Returns(new Optional<IReadOnlyDictionary<Snowflake, IPartialGuildMember>>(members));
+            resolved.SetupGet(r => r.Roles).Returns(new Optional<IReadOnlyDictionary<Snowflake, global::Remora.Discord.API.Abstractions.Objects.IRole>>(roles));
+            resolved.SetupGet(r => r.Channels).Returns(new Optional<IReadOnlyDictionary<Snowflake, IPartialChannel>>(channels));
+            return resolved.Object;
         }
 
         private sealed class StubSource : IRemoraSlashCommandSource
