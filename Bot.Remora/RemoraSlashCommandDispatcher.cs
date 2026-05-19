@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 using OneOf;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 
 namespace Bot.Remora
 {
     internal sealed class RemoraSlashCommandDispatcher : IRemoraSlashCommandDispatcher
     {
-        private const string UnsupportedEntityMessage = "This command uses user/role/channel options that are not available yet. Please try a command with only text/boolean/number inputs.";
-
         private readonly IDiscordRestInteractionAPI m_interactionApi;
         private readonly RemoraSlashCommandRegistry m_registry;
         private IReadOnlyDictionary<string, IRemoraSlashCommand>? m_commands;
@@ -43,24 +40,7 @@ namespace Bot.Remora
             LiveRemoraInteractionContext context = CreateContext(interaction, cancellationToken);
             await context.DeferInteractionResponse();
 
-            if (HasEntityParameters(command))
-            {
-                Console.WriteLine($"RemoraSlashCommandDispatcher: command '{command.Name}' uses entity parameters; responding with phase-1 unsupported message.");
-                await m_interactionApi.CreateFollowupMessageAsync(
-                    interaction.ApplicationID,
-                    interaction.Token,
-                    new Optional<string>(UnsupportedEntityMessage),
-                    default,
-                    default,
-                    default,
-                    default,
-                    default,
-                    new Optional<MessageFlags>(MessageFlags.Ephemeral),
-                    cancellationToken);
-                return;
-            }
-
-            IReadOnlyDictionary<string, object> arguments = BindPrimitiveArguments(command, slashData);
+            IReadOnlyDictionary<string, object> arguments = BindArguments(command, slashData);
             await command.InvokeAsync(context, arguments);
 
             stopwatch.Stop();
@@ -85,15 +65,7 @@ namespace Bot.Remora
             return true;
         }
 
-        private static bool HasEntityParameters(IRemoraSlashCommand command)
-        {
-            return command.Parameters.Any(parameter =>
-                parameter.ParameterType == RemoraSlashCommandParameterType.User
-                || parameter.ParameterType == RemoraSlashCommandParameterType.Role
-                || parameter.ParameterType == RemoraSlashCommandParameterType.Channel);
-        }
-
-        private static IReadOnlyDictionary<string, object> BindPrimitiveArguments(IRemoraSlashCommand command, IApplicationCommandData slashData)
+        private static IReadOnlyDictionary<string, object> BindArguments(IRemoraSlashCommand command, IApplicationCommandData slashData)
         {
             IReadOnlyList<IApplicationCommandInteractionDataOption> options = slashData.Options.HasValue
                 ? slashData.Options.Value
@@ -108,13 +80,6 @@ namespace Bot.Remora
             Dictionary<string, object> bound = new(StringComparer.Ordinal);
             foreach (RemoraSlashCommandParameter parameter in command.Parameters)
             {
-                if (parameter.ParameterType != RemoraSlashCommandParameterType.String
-                    && parameter.ParameterType != RemoraSlashCommandParameterType.Boolean
-                    && parameter.ParameterType != RemoraSlashCommandParameterType.Integer)
-                {
-                    continue;
-                }
-
                 if (!optionMap.TryGetValue(parameter.Name, out var option))
                 {
                     if (parameter.IsRequired)
@@ -125,7 +90,7 @@ namespace Bot.Remora
                     continue;
                 }
 
-                if (!TryBindPrimitiveOption(parameter, option, out object value))
+                if (!TryBindOption(parameter, option, slashData, out object value))
                 {
                     throw new ArgumentException($"Option '{option.Name}' has an unsupported value for parameter type '{parameter.ParameterType}'.");
                 }
@@ -136,7 +101,11 @@ namespace Bot.Remora
             return bound;
         }
 
-        private static bool TryBindPrimitiveOption(RemoraSlashCommandParameter parameter, IApplicationCommandInteractionDataOption option, out object value)
+        private static bool TryBindOption(
+            RemoraSlashCommandParameter parameter,
+            IApplicationCommandInteractionDataOption option,
+            IApplicationCommandData slashData,
+            out object value)
         {
             value = string.Empty;
             if (!option.Value.HasValue)
@@ -170,9 +139,132 @@ namespace Bot.Remora
                         return true;
                     }
                     break;
+
+                case RemoraSlashCommandParameterType.User:
+                    return TryBindMemberOption(option, slashData, out value);
+
+                case RemoraSlashCommandParameterType.Role:
+                    return TryBindRoleOption(option, slashData, out value);
+
+                case RemoraSlashCommandParameterType.Channel:
+                    return TryBindChannelOption(option, slashData, out value);
             }
 
             return false;
+        }
+
+        private static bool TryBindMemberOption(IApplicationCommandInteractionDataOption option, IApplicationCommandData slashData, out object value)
+        {
+            value = string.Empty;
+            if (!TryGetResolvedData(slashData, out IApplicationCommandInteractionDataResolved resolved))
+            {
+                return false;
+            }
+
+            if (!TryGetOptionSnowflake(option, out Snowflake memberId))
+            {
+                return false;
+            }
+
+            if (!resolved.Users.HasValue || !resolved.Users.Value.TryGetValue(memberId, out IUser? user) || user is null)
+            {
+                return false;
+            }
+
+            Optional<string?> nickname = default;
+            Optional<IReadOnlyList<Snowflake>> roleIds = default;
+            if (resolved.Members.HasValue && resolved.Members.Value.TryGetValue(memberId, out IPartialGuildMember? member) && member is not null)
+            {
+                nickname = member.Nickname;
+                roleIds = member.Roles;
+            }
+
+            IReadOnlyDictionary<Snowflake, IRole> roles = resolved.Roles.HasValue
+                ? resolved.Roles.Value
+                : new Dictionary<Snowflake, IRole>();
+
+            value = new ResolvedMemberAdapter(user, nickname, roleIds, roles);
+            return true;
+        }
+
+        private static bool TryBindRoleOption(IApplicationCommandInteractionDataOption option, IApplicationCommandData slashData, out object value)
+        {
+            value = string.Empty;
+            if (!TryGetResolvedData(slashData, out IApplicationCommandInteractionDataResolved resolved))
+            {
+                return false;
+            }
+
+            if (!TryGetOptionSnowflake(option, out Snowflake roleId))
+            {
+                return false;
+            }
+
+            if (!resolved.Roles.HasValue || !resolved.Roles.Value.TryGetValue(roleId, out IRole? role) || role is null)
+            {
+                return false;
+            }
+
+            value = new ResolvedRoleAdapter(role);
+            return true;
+        }
+
+        private static bool TryBindChannelOption(IApplicationCommandInteractionDataOption option, IApplicationCommandData slashData, out object value)
+        {
+            value = string.Empty;
+            if (!TryGetResolvedData(slashData, out IApplicationCommandInteractionDataResolved resolved))
+            {
+                return false;
+            }
+
+            if (!TryGetOptionSnowflake(option, out Snowflake channelId))
+            {
+                return false;
+            }
+
+            if (!resolved.Channels.HasValue || !resolved.Channels.Value.TryGetValue(channelId, out IPartialChannel? channel) || channel is null)
+            {
+                return false;
+            }
+
+            if (channel.Type.HasValue && channel.Type.Value == ChannelType.GuildCategory)
+            {
+                value = new ResolvedChannelCategoryAdapter(channel);
+                return true;
+            }
+
+            value = new ResolvedChannelAdapter(channel);
+            return true;
+        }
+
+        private static bool TryGetResolvedData(IApplicationCommandData slashData, out IApplicationCommandInteractionDataResolved resolved)
+        {
+            resolved = default!;
+            if (!slashData.Resolved.HasValue)
+            {
+                return false;
+            }
+
+            resolved = slashData.Resolved.Value;
+            return true;
+        }
+
+        private static bool TryGetOptionSnowflake(IApplicationCommandInteractionDataOption option, out Snowflake snowflake)
+        {
+            snowflake = default;
+            if (!option.Value.HasValue)
+            {
+                return false;
+            }
+
+            OneOf<string, long, bool, Snowflake, double> raw = option.Value.Value;
+            if (!raw.TryPickT3(out Snowflake id, out _))
+            {
+                return false;
+            }
+
+            snowflake = id;
+            return true;
         }
 
         private LiveRemoraInteractionContext CreateContext(IInteraction interaction, CancellationToken cancellationToken)

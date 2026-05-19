@@ -114,8 +114,8 @@ Phase 0 → Phase 1 → Phase 2
 
 ---
 
-## ⬜ Phase 2 — Entity argument binding
-**Status: Pending** (requires Phase 1)
+## ✅ Phase 2 — Entity argument binding
+**Status: Complete (this branch)**
 
 **Goal:** Resolve `IMember`, `IRole`, `IChannel`, `IChannelCategory` from the interaction `Resolved` payload.
 
@@ -128,6 +128,25 @@ Phase 0 → Phase 1 → Phase 2
 **Tests:** Binder per entity type (present, missing, wrong type, optional). Mutating adapters throw documented exception.
 
 **Acceptance:** Build + tests green. A member/role/channel command runs end-to-end without cast failures.
+
+**Delivered:**
+- `RemoraSlashCommandDispatcher` now binds `User`, `Role`, and `Channel` parameters from `IApplicationCommandData.Resolved`.
+- Added read-only resolved adapters:
+  - `ResolvedMemberAdapter`
+  - `ResolvedRoleAdapter`
+  - `ResolvedChannelAdapter`
+  - `ResolvedChannelCategoryAdapter`
+- Channel category routing implemented via resolved `ChannelType.GuildCategory` (Discord type 4), allowing `IChannelCategory` arguments to bind correctly from channel options.
+- Mutating operations on resolved adapters now throw `NotSupportedException` with a consistent phase-2 message.
+- Added focused runtime tests for:
+  - Entity binding success path and optional arguments.
+  - Missing/invalid resolved entity payload failure cases.
+  - Read-only adapter mutation guards.
+
+**Files changed:**
+- `Bot.Remora/RemoraSlashCommandDispatcher.cs`
+- `Bot.Remora/ResolvedRemoraAdapters.cs` *(new)*
+- `Test.Bot.Remora/TestInteractionRuntime.cs`
 
 ---
 
