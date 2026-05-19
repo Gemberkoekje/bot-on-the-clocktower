@@ -13,32 +13,85 @@ namespace Bot.Remora
     internal sealed class RemoraInteractionResponder : IRemoraInteractionResponder
     {
         private const string ErrorMessage = "Sorry, something went wrong while processing that command.";
+        private const string UnknownComponentMessage = "Sorry, that interaction is no longer available.";
 
-        private readonly IRemoraSlashCommandDispatcher m_dispatcher;
+        private readonly IRemoraSlashCommandDispatcher m_slashDispatcher;
+        private readonly IRemoraComponentDispatcher m_componentDispatcher;
         private readonly IDiscordRestInteractionAPI m_interactionApi;
 
-        public RemoraInteractionResponder(IRemoraSlashCommandDispatcher dispatcher, IDiscordRestInteractionAPI interactionApi)
+        public RemoraInteractionResponder(
+            IRemoraSlashCommandDispatcher slashDispatcher,
+            IRemoraComponentDispatcher componentDispatcher,
+            IDiscordRestInteractionAPI interactionApi)
         {
-            m_dispatcher = dispatcher;
+            m_slashDispatcher = slashDispatcher;
+            m_componentDispatcher = componentDispatcher;
             m_interactionApi = interactionApi;
         }
 
         public async Task RespondAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
-            if (interaction.Type != InteractionType.ApplicationCommand)
-            {
-                Console.WriteLine($"RemoraInteractionResponder: ignored interaction type {interaction.Type}.");
-                return;
-            }
-
             try
             {
-                await m_dispatcher.DispatchAsync(interaction, cancellationToken);
+                switch (interaction.Type)
+                {
+                    case InteractionType.ApplicationCommand:
+                        await m_slashDispatcher.DispatchAsync(interaction, cancellationToken);
+                        return;
+
+                    case InteractionType.MessageComponent:
+                    case InteractionType.ModalSubmit:
+                        bool wasHandled = await m_componentDispatcher.DispatchAsync(interaction, cancellationToken);
+                        if (!wasHandled)
+                        {
+                            await SendUnknownComponentResponseAsync(interaction, cancellationToken);
+                        }
+                        return;
+
+                    default:
+                        Console.WriteLine($"RemoraInteractionResponder: ignored interaction type {interaction.Type}.");
+                        return;
+                }
             }
             catch (Exception error)
             {
-                Console.Error.WriteLine($"RemoraInteractionResponder: slash dispatch failed for interaction {interaction.ID.Value}. {error}");
+                Console.Error.WriteLine($"RemoraInteractionResponder: dispatch failed for interaction {interaction.ID.Value}. {error}");
                 await SendErrorResponseAsync(interaction, cancellationToken);
+            }
+        }
+
+        private async Task SendUnknownComponentResponseAsync(IInteraction interaction, CancellationToken cancellationToken)
+        {
+            try
+            {
+                InteractionMessageCallbackData callbackData = new(
+                    default,
+                    new Optional<string>(UnknownComponentMessage),
+                    default,
+                    default,
+                    new Optional<MessageFlags>(MessageFlags.Ephemeral),
+                    default,
+                    default);
+
+                InteractionResponse callback = new(
+                    InteractionCallbackType.ChannelMessageWithSource,
+                    new Optional<OneOf<IInteractionMessageCallbackData, IInteractionAutocompleteCallbackData, IInteractionModalCallbackData>>(callbackData));
+
+                Result callbackResult = await m_interactionApi.CreateInteractionResponseAsync(
+                    interaction.ID,
+                    interaction.Token,
+                    callback,
+                    default,
+                    cancellationToken);
+
+                if (!callbackResult.IsSuccess)
+                {
+                    Console.Error.WriteLine($"RemoraInteractionResponder: failed unknown-component response for interaction {interaction.ID.Value}. {callbackResult.Error}");
+                }
+            }
+            catch (Exception error)
+            {
+                Console.Error.WriteLine($"RemoraInteractionResponder: failed to send unknown-component response for interaction {interaction.ID.Value}. {error}");
             }
         }
 

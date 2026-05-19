@@ -24,6 +24,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns(DiscordToken);
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(DeployTypeDev);
             services.AddSingleton(env.Object);
+            services.AddSingleton(new Mock<IComponentService>().Object);
             services.AddRemoraServices();
 
             using var sp = services.BuildServiceProvider();
@@ -41,6 +42,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns(DiscordToken);
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(DeployTypeDev);
             services.AddSingleton(env.Object);
+            services.AddSingleton(new Mock<IComponentService>().Object);
             services.AddRemoraServices();
 
             using var sp = services.BuildServiceProvider();

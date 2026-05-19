@@ -150,8 +150,8 @@ Phase 0 → Phase 1 → Phase 2
 
 ---
 
-## ⬜ Phase 3 — Component interactions & modal flows
-**Status: Pending** (requires Phase 1)
+## ✅ Phase 3 — Component interactions & modal flows
+**Status: Complete (this branch)**
 
 **Goal:** Route button/select/modal interactions through `IComponentService` and finish the context lifecycle.
 
@@ -165,6 +165,35 @@ Phase 0 → Phase 1 → Phase 2
 **Tests:** Component dispatch (known/unknown IDs), modal show + submission (mocked REST), idempotency rules.
 
 **Acceptance:** Build + tests green. A button-driven flow round-trips in `dev` mode.
+
+**Delivered:**
+- Responder routing expanded to handle `InteractionType.MessageComponent` and `InteractionType.ModalSubmit`, with graceful fallback ephemeral responses when a component ID is unknown.
+- Added real `RemoraComponentDispatcher` implementation:
+  - Parses interaction payloads for message component and modal submit types.
+  - Resolves custom IDs and submission values (including modal text input extraction).
+  - Builds `LiveRemoraInteractionContext` and dispatches through `IComponentService`.
+  - Emits structured logs including custom ID and modal submission keys.
+- `LiveRemoraInteractionContext` now fully supports interaction lifecycle completion:
+  - `UpdateOriginalMessageAsync(...)` implemented using `InteractionCallbackType.UpdateMessage`.
+  - `ShowModalAsync(...)` implemented using `InteractionCallbackType.Modal`.
+  - `DeferInteractionResponse()` remains idempotent.
+  - `EditResponseAsync(...)` now auto-defers when called before explicit defer.
+- Added focused `Test.Bot.Remora` coverage for:
+  - Responder routing of slash/component/modal interactions.
+  - Unknown component fallback response behavior.
+  - Component dispatcher known/unknown custom ID behavior.
+  - Modal submission value dispatch.
+  - Live context defer idempotency, edit-before-defer auto-defer, update-message callback, and modal callback flows.
+
+**Files changed:**
+- `Bot.Remora/DependencyInjection.cs`
+- `Bot.Remora/LiveRemoraInteractionContext.cs`
+- `Bot.Remora/RemoraComponentDispatcher.cs` *(new)*
+- `Bot.Remora/RemoraInteractionResponder.cs`
+- `Bot.Remora/RemoraInteractionResponseBuilder.cs`
+- `Bot.Remora/RemoraInteractionRuntimeSeams.cs`
+- `Test.Bot.Remora/TestInteractionRuntime.cs`
+- `Test.Bot.Remora/TestServices.cs`
 
 ---
 
