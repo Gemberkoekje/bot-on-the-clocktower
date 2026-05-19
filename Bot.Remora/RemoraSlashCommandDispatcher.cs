@@ -14,13 +14,15 @@ namespace Bot.Remora
     internal sealed class RemoraSlashCommandDispatcher : IRemoraSlashCommandDispatcher
     {
         private readonly IDiscordRestInteractionAPI m_interactionApi;
+        private readonly IDiscordRestGuildAPI? m_guildApi;
         private readonly RemoraSlashCommandRegistry m_registry;
         private IReadOnlyDictionary<string, IRemoraSlashCommand>? m_commands;
 
-        public RemoraSlashCommandDispatcher(RemoraSlashCommandRegistry registry, IDiscordRestInteractionAPI interactionApi)
+        public RemoraSlashCommandDispatcher(RemoraSlashCommandRegistry registry, IDiscordRestInteractionAPI interactionApi, IDiscordRestGuildAPI? guildApi = null)
         {
             m_registry = registry;
             m_interactionApi = interactionApi;
+            m_guildApi = guildApi;
         }
 
         public async Task DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
@@ -291,7 +293,10 @@ namespace Bot.Remora
                 memberName = interaction.User.Value.Username ?? memberName;
             }
 
-            RemoraGuild guild = new(guildId, $"guild-{guildId}");
+            string guildName = $"guild-{guildId}";
+            RemoraGuild guild = m_guildApi is not null && guildId != 0UL
+                ? new RemoraGuild(guildId, guildName, m_guildApi)
+                : new RemoraGuild(guildId, guildName);
             RemoraChannel channel = new(channelId, channelName);
             RemoraMember member = new(memberId, memberName);
 
