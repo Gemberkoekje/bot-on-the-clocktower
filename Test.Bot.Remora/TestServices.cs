@@ -29,5 +29,27 @@ namespace Test.Bot.Remora
             Assert.NotNull(service);
             Assert.IsType(serviceImpl, service);
         }
+
+        [Fact]
+        public void RegisterServices_ResolvesRemoraInteractionRuntimeSeams()
+        {
+            var services = new ServiceCollection();
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
+            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
+            services.AddSingleton(env.Object);
+            services.AddRemoraServices();
+
+            using var sp = services.BuildServiceProvider();
+            var remoraAssembly = typeof(DependencyInjection).Assembly;
+
+            var responderType = remoraAssembly.GetType("Bot.Remora.IRemoraInteractionResponder", throwOnError: true)!;
+            var slashDispatcherType = remoraAssembly.GetType("Bot.Remora.IRemoraSlashCommandDispatcher", throwOnError: true)!;
+            var componentDispatcherType = remoraAssembly.GetType("Bot.Remora.IRemoraComponentDispatcher", throwOnError: true)!;
+
+            Assert.NotNull(sp.GetService(responderType));
+            Assert.NotNull(sp.GetService(slashDispatcherType));
+            Assert.NotNull(sp.GetService(componentDispatcherType));
+        }
     }
 }
