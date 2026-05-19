@@ -74,6 +74,7 @@ namespace Bot.Remora
         private const int GuildMemberPageSize = 1000;
         private const string WriteNotSupportedMessage = "RemoraGuild write operations are not implemented yet (planned for later runtime phases).";
         private readonly IDiscordRestGuildAPI? m_guildApi;
+        private readonly IDiscordRestChannelAPI? m_channelApi;
         private readonly object m_sync = new();
         private Dictionary<ulong, IRole> m_roles;
         private Dictionary<ulong, IMember> m_members;
@@ -89,6 +90,7 @@ namespace Bot.Remora
             Id = id;
             Name = name;
             m_guildApi = null;
+            m_channelApi = null;
 
             m_roles = roles != null ? roles.ToDictionary(r => r.Id, r => r) : new Dictionary<ulong, IRole>();
             m_members = members != null ? members.ToDictionary(m => m.Id, m => m) : new Dictionary<ulong, IMember>();
@@ -100,11 +102,12 @@ namespace Bot.Remora
             EnsureEveryoneRolePresent();
         }
 
-        public RemoraGuild(ulong id, string name, IDiscordRestGuildAPI guildApi)
+        public RemoraGuild(ulong id, string name, IDiscordRestGuildAPI guildApi, IDiscordRestChannelAPI? channelApi = null)
         {
             Id = id;
             Name = name;
             m_guildApi = guildApi ?? throw new ArgumentNullException(nameof(guildApi));
+            m_channelApi = channelApi;
             m_roles = new Dictionary<ulong, IRole>();
             m_members = new Dictionary<ulong, IMember>();
             m_channels = new Dictionary<ulong, IChannel>();
@@ -280,7 +283,7 @@ namespace Bot.Remora
                 bool isVoice = discordChannel.Type == global::Remora.Discord.API.Abstractions.Objects.ChannelType.GuildVoice
                     || discordChannel.Type == global::Remora.Discord.API.Abstractions.Objects.ChannelType.GuildStageVoice;
                 int position = discordChannel.Position.HasValue ? discordChannel.Position.Value : 0;
-                RemoraChannel channel = new(channelId, channelName, isVoice, position);
+                RemoraChannel channel = new(channelId, channelName, isVoice, position, channelApi: m_channelApi);
                 channels[channelId] = channel;
 
                 if (discordChannel.ParentID.HasValue && discordChannel.ParentID.Value.HasValue)
