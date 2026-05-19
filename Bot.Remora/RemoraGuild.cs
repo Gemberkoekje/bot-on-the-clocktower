@@ -370,7 +370,7 @@ namespace Bot.Remora
 
         private void EnsureEveryoneRolePresent()
         {
-            m_everyoneRole = m_roles.Values.FirstOrDefault(IsEveryoneRole) ?? new RemoraRole(Id, "@everyone");
+            m_everyoneRole = m_roles.Values.FirstOrDefault(IsEveryoneRole) ?? new RemoraRole(Id, "everyone");
             if (!m_roles.ContainsKey(m_everyoneRole.Id))
             {
                 m_roles[m_everyoneRole.Id] = m_everyoneRole;
