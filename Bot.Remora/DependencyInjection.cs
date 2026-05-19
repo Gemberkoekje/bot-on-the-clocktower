@@ -1,6 +1,8 @@
 using Bot.Api;
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.Gateway;
+using Remora.Discord.Gateway.Extensions;
 
 namespace Bot.Remora
 {
@@ -15,7 +17,12 @@ namespace Bot.Remora
         {
             services.AddSingleton<IBotSystem, RemoraSystem>();
             services.AddSingleton<IColorBuilder, RemoraColorBuilder>();
-            services.AddSingleton<IRemoraCommandRegistrar, NoOpRemoraCommandRegistrar>();
+
+            services.AddDiscordGateway(
+                sp => sp.GetRequiredService<IEnvironment>().GetEnvironmentVariable("DISCORD_TOKEN"),
+                _ => { });
+
+            services.AddSingleton<IRemoraCommandRegistrar, RemoraCommandRegistrar>();
 
             services.AddSingleton(sp =>
             {
@@ -32,7 +39,8 @@ namespace Bot.Remora
                 sp.GetRequiredService<IEnvironment>(),
                 sp.GetService(typeof(IComponentService)) as IComponentService,
                 sp.GetService(typeof(IRemoraCommandRegistrar)) as IRemoraCommandRegistrar,
-                sp.GetService(typeof(RemoraSlashCommandRegistry)) as RemoraSlashCommandRegistry));
+                sp.GetService(typeof(RemoraSlashCommandRegistry)) as RemoraSlashCommandRegistry,
+                sp.GetService(typeof(DiscordGatewayClient)) as DiscordGatewayClient));
 
             return services;
         }

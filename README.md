@@ -58,6 +58,7 @@ If you'd like to run your own instance of this bot for development or private us
    - ✅ View Channels
    - ✅ Send Messages
    - ✅ Manage Messages
+   - ✅ Use Slash Commands
 4. Copy the generated URL at the bottom
 5. Open the URL in your browser and select your test server
 6. Click **"Authorize"**
@@ -170,6 +171,15 @@ When the bot starts successfully, you should see:
 
 Try running `/createtown` in your server to verify everything works!
 
+### If slash commands do not appear
+
+- Confirm the bot was invited with both OAuth scopes: `bot` and `applications.commands`.
+- Confirm `Use Slash Commands` is allowed in the server/channel for the members running commands.
+- Check startup logs for command registration mode:
+  - `dev`: commands are registered to configured `Discord:DevGuildIds` (should appear quickly).
+  - `prod`: commands are registered globally (Discord propagation can take time).
+- If running in `dev`, confirm logs show your expected guild ID (and name) being targeted.
+
 # Invite the Public Bot
 
 If you just want to use the bot without running your own instance, **\>\>** [invite the public bot](https://discord.com/api/oauth2/authorize?client_id=795055055509651456&permissions=419441680&scope=applications.commands%20bot) **\<\<**
@@ -257,6 +267,7 @@ The bot requests the following permissions:
 | Manage Messages | To delete `/evil` command messages so players can't see who's evil |
 | View Channels | Required for many operations |
 | Send Messages | Required for many operations |
+| Use Slash Commands | Required for users to invoke slash commands with the bot |
 
 # Support
 

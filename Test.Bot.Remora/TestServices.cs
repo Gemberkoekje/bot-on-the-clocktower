@@ -12,7 +12,7 @@ namespace Test.Bot.Remora
     {
         [Theory]
         [InlineData(typeof(IColorBuilder), typeof(RemoraColorBuilder))]
-        [InlineData(typeof(IRemoraCommandRegistrar), typeof(NoOpRemoraCommandRegistrar))]
+        [InlineData(typeof(IRemoraCommandRegistrar), typeof(RemoraCommandRegistrar))]
         [InlineData(typeof(RemoraSlashCommandRegistry), typeof(RemoraSlashCommandRegistry))]
         public void RegisterServices_CreatesAllRequiredServices(Type serviceInterface, Type serviceImpl)
         {

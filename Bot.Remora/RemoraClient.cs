@@ -1,7 +1,9 @@
 using Bot.Api;
+using Remora.Discord.Gateway;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bot.Remora
@@ -13,6 +15,10 @@ namespace Bot.Remora
         private readonly IComponentService m_componentService;
         private readonly IRemoraCommandRegistrar m_commandRegistrar;
         private readonly RemoraSlashCommandRegistry? m_commandRegistry;
+        private readonly DiscordGatewayClient? m_gatewayClient;
+
+        private CancellationTokenSource? m_gatewayStop;
+        private Task? m_gatewayTask;
 
         public RemoraCommandRegistrationPlan CommandRegistrationPlan { get; }
 
@@ -25,12 +31,14 @@ namespace Bot.Remora
             IEnvironment environment,
             IComponentService? componentService = null,
             IRemoraCommandRegistrar? commandRegistrar = null,
-            RemoraSlashCommandRegistry? commandRegistry = null)
+            RemoraSlashCommandRegistry? commandRegistry = null,
+            DiscordGatewayClient? gatewayClient = null)
         {
             m_token = environment.GetEnvironmentVariable("DISCORD_TOKEN") ?? string.Empty;
             m_componentService = componentService ?? new NoOpComponentService();
             m_commandRegistrar = commandRegistrar ?? new NoOpRemoraCommandRegistrar();
             m_commandRegistry = commandRegistry;
+            m_gatewayClient = gatewayClient;
 
             if (string.IsNullOrWhiteSpace(m_token))
             {
@@ -52,16 +60,67 @@ namespace Bot.Remora
         {
             if (!IsConnected)
             {
+                Console.WriteLine("RemoraClient: connecting and registering Discord commands.");
                 await ApplyCommandRegistrationPlanAsync();
+
+                if (m_gatewayClient is not null)
+                {
+                    m_gatewayStop = new CancellationTokenSource();
+                    m_gatewayTask = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await m_gatewayClient.RunAsync(m_gatewayStop.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+                        catch (Exception e)
+                        {
+                            Console.Error.WriteLine($"RemoraClient: Discord gateway task faulted. {e}");
+                        }
+                    });
+
+                    Console.WriteLine("RemoraClient: Discord gateway run loop started.");
+                }
+                else
+                {
+                    Console.WriteLine("RemoraClient: Discord gateway client is not available; bot will remain offline.");
+                }
+
                 IsConnected = true;
                 Connected?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
+            if (!IsConnected)
+            {
+                return;
+            }
+
             IsConnected = false;
-            return Task.CompletedTask;
+
+            if (m_gatewayStop is not null)
+            {
+                m_gatewayStop.Cancel();
+            }
+
+            if (m_gatewayTask is not null)
+            {
+                try
+                {
+                    await m_gatewayTask;
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
+
+            m_gatewayStop?.Dispose();
+            m_gatewayStop = null;
+            m_gatewayTask = null;
         }
 
         public Task<IGuild?> GetGuildAsync(ulong guildId)
@@ -94,19 +153,25 @@ namespace Bot.Remora
         {
             IReadOnlyCollection<IRemoraSlashCommand> commands = ResolveCommandsForRegistration();
 
+            Console.WriteLine($"RemoraClient: Command registration plan: DeployType={CommandRegistrationPlan.DeployType}, CommandCount={commands.Count}.");
+
             if (CommandRegistrationPlan.DeployType.Equals("dev", StringComparison.Ordinal))
             {
+                string guildIdList = string.Join(", ", CommandRegistrationPlan.DevGuildIds);
+                Console.WriteLine($"RemoraClient: Dev mode detected. Registering slash commands to configured dev guild IDs: [{guildIdList}].");
                 await m_commandRegistrar.RegisterGuildCommandsAsync(CommandRegistrationPlan.DevGuildIds, commands);
                 return;
             }
 
             if (CommandRegistrationPlan.ClearDevGuildCommands)
             {
+                Console.WriteLine($"RemoraClient: Prod mode startup cleanup enabled. Clearing commands from {CommandRegistrationPlan.DevGuildIds.Count} dev guild(s) before global registration.");
                 await m_commandRegistrar.ClearGuildCommandsAsync(CommandRegistrationPlan.DevGuildIds);
             }
 
             if (CommandRegistrationPlan.RegisterGlobalCommands)
             {
+                Console.WriteLine("RemoraClient: Registering global slash commands.");
                 await m_commandRegistrar.RegisterGlobalCommandsAsync(commands);
             }
         }

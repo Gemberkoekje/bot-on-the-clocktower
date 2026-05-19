@@ -106,7 +106,7 @@
             services.AddBotGameplayServices();
             services.AddRemoraServices();
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
 
             var runner = sp.GetRequiredService<BotSystemRunner>();
             await runner.RunAsync();
