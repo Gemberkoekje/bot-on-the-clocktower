@@ -204,7 +204,8 @@ namespace Bot.Remora
 
         private static DiscordPermissionSet ToDiscordPermissionSet(IBaseChannel.Permissions permissions)
         {
-            return new DiscordPermissionSet(new BigInteger((long)permissions));
+            ulong rawPermissions = Convert.ToUInt64(permissions);
+            return new DiscordPermissionSet(new BigInteger(rawPermissions));
         }
 
         private static void EnsureSuccess(IResult result, string message)
@@ -214,7 +215,7 @@ namespace Bot.Remora
                 return;
             }
 
-            throw new InvalidOperationException($"{message} {result.Error}");
+            throw new InvalidOperationException($"{message}: {result.Error}");
         }
     }
 }

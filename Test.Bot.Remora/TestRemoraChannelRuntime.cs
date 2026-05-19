@@ -92,7 +92,7 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(33),
                     new Snowflake(100),
-                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.ViewChannel)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => HasPermission(allow, DiscordPermission.ViewChannel)),
                     It.IsAny<Optional<IDiscordPermissionSet?>>(),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Member),
                     It.IsAny<Optional<string>>(),
@@ -102,8 +102,8 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(33),
                     new Snowflake(200),
-                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.MoveMembers)),
-                    It.Is<Optional<IDiscordPermissionSet?>>(deny => deny.HasValue && deny.Value!.HasPermission(DiscordPermission.Stream)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => HasPermission(allow, DiscordPermission.MoveMembers)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(deny => HasPermission(deny, DiscordPermission.Stream)),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Role),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()),
@@ -129,7 +129,7 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(77),
                     new Snowflake(1),
-                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.ViewChannel)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => HasPermission(allow, DiscordPermission.ViewChannel)),
                     It.IsAny<Optional<IDiscordPermissionSet?>>(),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Member),
                     It.IsAny<Optional<string>>(),
@@ -217,6 +217,11 @@ namespace Test.Bot.Remora
                 .ReturnsAsync(Result.FromSuccess());
 
             return channelApi;
+        }
+
+        private static bool HasPermission(Optional<IDiscordPermissionSet?> permissions, DiscordPermission permission)
+        {
+            return permissions.HasValue && permissions.Value is not null && permissions.Value.HasPermission(permission);
         }
     }
 }
