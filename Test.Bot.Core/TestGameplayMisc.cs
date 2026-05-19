@@ -174,7 +174,8 @@ namespace Test.Bot.Core
                 var voteTimer = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, voteTimerController);
                 return new BotGameplayInteractionHandler(gameplay, voteTimer, BotSystemMock.Object, ComponentServiceMock.Object, new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object), GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object);
             };
-            TestInteractionQueueHelper.TestTownQueueMethod(GetServiceProvider(), (sp) => createTestableGIH(sp).CommandEndGameAsync(InteractionContextMock.Object));
+            var commandTask = createTestableGIH(GetServiceProvider()).CommandEndGameAsync(InteractionContextMock.Object);
+            commandTask.GetAwaiter().GetResult();
 
             ProcessLoggerMock.Verify(pl => pl.LogException(It.Is<Exception>(e => e == thrownException), It.Is<string>(s => s.Contains(StorytellerRoleMock.Object.Name) && s.Contains(InteractionAuthorMock.Object.DisplayName))), Times.Once);
         }
@@ -197,7 +198,8 @@ namespace Test.Bot.Core
                 var voteTimer = new BotVoteTimer(TownLookupMock.Object, TownResolverMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object, voteTimerController);
                 return new BotGameplayInteractionHandler(gameplay, voteTimer, BotSystemMock.Object, ComponentServiceMock.Object, new TownInteractionQueue(BotSystemMock.Object, ShutdownPreventionMock.Object), new TownInteractionErrorHandler(ProcessLoggerFactoryMock.Object, TaskMock.Object), GameMetricDatabaseMock.Object, CommandMetricDatabaseMock.Object, DateTimeMock.Object);
             };
-            TestInteractionQueueHelper.TestTownQueueMethod(GetServiceProvider(), (sp) => createTestableGIH(sp).CommandEndGameAsync(InteractionContextMock.Object));
+            var commandTask = createTestableGIH(GetServiceProvider()).CommandEndGameAsync(InteractionContextMock.Object);
+            commandTask.GetAwaiter().GetResult();
 
             ProcessLoggerMock.Verify(pl => pl.LogException(It.Is<Exception>(e => e == thrownException), It.Is<string>(s => s.Contains(VillagerRoleMock.Object.Name) && s.Contains(Villager2Mock.Object.DisplayName))), Times.Once);
         }
