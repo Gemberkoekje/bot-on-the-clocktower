@@ -293,9 +293,10 @@ namespace Bot.Remora
                 memberName = interaction.User.Value.Username ?? memberName;
             }
 
+            string guildName = $"guild-{guildId}";
             RemoraGuild guild = m_guildApi is not null && guildId != 0UL
-                ? new RemoraGuild(guildId, $"guild-{guildId}", m_guildApi)
-                : new RemoraGuild(guildId, $"guild-{guildId}");
+                ? new RemoraGuild(guildId, guildName, m_guildApi)
+                : new RemoraGuild(guildId, guildName);
             RemoraChannel channel = new(channelId, channelName);
             RemoraMember member = new(memberId, memberName);
 

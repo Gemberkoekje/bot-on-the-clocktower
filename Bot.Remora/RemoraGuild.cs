@@ -241,7 +241,7 @@ namespace Bot.Remora
 
         private async Task<Dictionary<ulong, IRole>> LoadRolesAsync()
         {
-            Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IRole>> result = await m_guildApi!.GetGuildRolesAsync(new Snowflake(Id), CancellationToken.None);
+            Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IRole>> result = await m_guildApi!.GetGuildRolesAsync(new Snowflake(Id), CancellationToken.None).ConfigureAwait(false);
             EnsureSuccess(result, "Failed to fetch guild roles.");
 
             Dictionary<ulong, IRole> roles = new();
@@ -257,7 +257,7 @@ namespace Bot.Remora
 
         private async Task<(Dictionary<ulong, IChannel> channels, Dictionary<ulong, IChannelCategory> categories)> LoadChannelsAsync()
         {
-            Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IChannel>> result = await m_guildApi!.GetGuildChannelsAsync(new Snowflake(Id), CancellationToken.None);
+            Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IChannel>> result = await m_guildApi!.GetGuildChannelsAsync(new Snowflake(Id), CancellationToken.None).ConfigureAwait(false);
             EnsureSuccess(result, "Failed to fetch guild channels.");
 
             Dictionary<ulong, IChannel> channels = new();
@@ -320,7 +320,7 @@ namespace Bot.Remora
                     new Snowflake(Id),
                     new Optional<int>(GuildMemberPageSize),
                     after,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
                 EnsureSuccess(result, "Failed to fetch guild members.");
 
                 IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IGuildMember> page = result.Entity;
@@ -370,7 +370,7 @@ namespace Bot.Remora
 
         private void EnsureEveryoneRolePresent()
         {
-            m_everyoneRole = m_roles.Values.FirstOrDefault(IsEveryoneRole) ?? new RemoraRole(Id, "everyone");
+            m_everyoneRole = m_roles.Values.FirstOrDefault(IsEveryoneRole) ?? new RemoraRole(Id, "@everyone");
             if (!m_roles.ContainsKey(m_everyoneRole.Id))
             {
                 m_roles[m_everyoneRole.Id] = m_everyoneRole;

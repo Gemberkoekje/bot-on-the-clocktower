@@ -9,6 +9,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Xunit;
+using DiscordChannel = Remora.Discord.API.Abstractions.Objects.IChannel;
+using DiscordRole = Remora.Discord.API.Abstractions.Objects.IRole;
 
 namespace Test.Bot.Remora
 {
@@ -115,18 +117,18 @@ namespace Test.Bot.Remora
                 It.IsAny<CancellationToken>()), Times.Exactly(2));
         }
 
-        private static void SetupRoles(Mock<IDiscordRestGuildAPI> guildApi, ulong guildId, params global::Remora.Discord.API.Abstractions.Objects.IRole[] roles)
+        private static void SetupRoles(Mock<IDiscordRestGuildAPI> guildApi, ulong guildId, params DiscordRole[] roles)
         {
             guildApi
                 .Setup(api => api.GetGuildRolesAsync(new Snowflake(guildId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IRole>>.FromSuccess(roles));
+                .ReturnsAsync(Result<IReadOnlyList<DiscordRole>>.FromSuccess(roles));
         }
 
-        private static void SetupChannels(Mock<IDiscordRestGuildAPI> guildApi, ulong guildId, params global::Remora.Discord.API.Abstractions.Objects.IChannel[] channels)
+        private static void SetupChannels(Mock<IDiscordRestGuildAPI> guildApi, ulong guildId, params DiscordChannel[] channels)
         {
             guildApi
                 .Setup(api => api.GetGuildChannelsAsync(new Snowflake(guildId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<IReadOnlyList<global::Remora.Discord.API.Abstractions.Objects.IChannel>>.FromSuccess(channels));
+                .ReturnsAsync(Result<IReadOnlyList<DiscordChannel>>.FromSuccess(channels));
         }
 
         private static void SetupMembersSinglePage(Mock<IDiscordRestGuildAPI> guildApi, ulong guildId, params IGuildMember[] members)
@@ -140,7 +142,7 @@ namespace Test.Bot.Remora
                 .ReturnsAsync(Result<IReadOnlyList<IGuildMember>>.FromSuccess(members));
         }
 
-        private static global::Remora.Discord.API.Abstractions.Objects.IRole BuildRole(ulong id, string name, ulong botRoleId = 0)
+        private static DiscordRole BuildRole(ulong id, string name, ulong botRoleId = 0)
         {
             Mock<global::Remora.Discord.API.Abstractions.Objects.IRole> role = new();
             role.SetupGet(r => r.ID).Returns(new Snowflake(id));
@@ -158,9 +160,9 @@ namespace Test.Bot.Remora
             return tags.Object;
         }
 
-        private static global::Remora.Discord.API.Abstractions.Objects.IChannel BuildChannel(ulong id, string name, ChannelType type, ulong parentId = 0, int position = 0)
+        private static DiscordChannel BuildChannel(ulong id, string name, ChannelType type, ulong parentId = 0, int position = 0)
         {
-            Mock<global::Remora.Discord.API.Abstractions.Objects.IChannel> channel = new();
+            Mock<DiscordChannel> channel = new();
             channel.SetupGet(c => c.ID).Returns(new Snowflake(id));
             channel.SetupGet(c => c.Type).Returns(type);
             channel.SetupGet(c => c.Name).Returns(new Optional<string?>(name));
