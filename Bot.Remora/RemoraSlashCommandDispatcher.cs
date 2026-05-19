@@ -15,14 +15,20 @@ namespace Bot.Remora
     {
         private readonly IDiscordRestInteractionAPI m_interactionApi;
         private readonly IDiscordRestGuildAPI? m_guildApi;
+        private readonly IDiscordRestChannelAPI? m_channelApi;
         private readonly RemoraSlashCommandRegistry m_registry;
         private IReadOnlyDictionary<string, IRemoraSlashCommand>? m_commands;
 
-        public RemoraSlashCommandDispatcher(RemoraSlashCommandRegistry registry, IDiscordRestInteractionAPI interactionApi, IDiscordRestGuildAPI? guildApi = null)
+        public RemoraSlashCommandDispatcher(
+            RemoraSlashCommandRegistry registry,
+            IDiscordRestInteractionAPI interactionApi,
+            IDiscordRestGuildAPI? guildApi = null,
+            IDiscordRestChannelAPI? channelApi = null)
         {
             m_registry = registry;
             m_interactionApi = interactionApi;
             m_guildApi = guildApi;
+            m_channelApi = channelApi;
         }
 
         public async Task DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
@@ -295,9 +301,9 @@ namespace Bot.Remora
 
             string guildName = $"guild-{guildId}";
             RemoraGuild guild = m_guildApi is not null && guildId != 0UL
-                ? new RemoraGuild(guildId, guildName, m_guildApi)
+                ? new RemoraGuild(guildId, guildName, m_guildApi, m_channelApi)
                 : new RemoraGuild(guildId, guildName);
-            RemoraChannel channel = new(channelId, channelName);
+            RemoraChannel channel = new(channelId, channelName, channelApi: m_channelApi);
             RemoraMember member = new(memberId, memberName);
 
             return new LiveRemoraInteractionContext(

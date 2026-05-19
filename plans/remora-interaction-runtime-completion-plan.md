@@ -234,8 +234,8 @@ Phase 0 → Phase 1 → Phase 2
 
 ---
 
-## ⬜ Phase 5 — Live `RemoraChannel` write operations
-**Status: Pending** (requires Phase 4)
+## ✅ Phase 5 — Live `RemoraChannel` write operations
+**Status: Complete (this branch)**
 
 **Goal:** REST-backed channel writes (send messages, permission overwrites, create/delete).
 
@@ -247,6 +247,26 @@ Phase 0 → Phase 1 → Phase 2
 **Tests:** Per-method REST call assertions, error mapping (permissions, not-found).
 
 **Acceptance:** Build + tests green. `/createTown` succeeds in `dev` mode.
+
+**Delivered:**
+- `RemoraChannel` now supports a live runtime mode backed by `IDiscordRestChannelAPI` for write paths while preserving in-memory behavior for non-live contexts:
+  - `SendMessageAsync(...)` now calls Discord REST `CreateMessageAsync` in live mode.
+  - `AddOverwriteAsync(...)` and `RemoveOverwriteAsync(...)` now call Discord REST overwrite endpoints in live mode.
+  - `RestrictOverwriteToMembersAsync(...)` now applies member overwrite adds/removals through Discord REST in live mode.
+  - `DeleteAsync(...)` now calls Discord REST channel delete in live mode.
+- `RemoraSlashCommandDispatcher` now receives and propagates `IDiscordRestChannelAPI` into runtime adapters, so interaction context channels and live guild-loaded channels use REST-backed channel writes.
+- `RemoraGuild` now passes channel REST support into `RemoraChannel` adapters created from live guild channel reads.
+- Added focused `Test.Bot.Remora` coverage for:
+  - REST call assertions across channel write operations.
+  - Member overwrite restriction behavior for allowed vs removed members.
+  - Error mapping when REST calls fail.
+
+**Files changed:**
+- `Bot.Remora/RemoraChannel.cs`
+- `Bot.Remora/RemoraGuild.cs`
+- `Bot.Remora/RemoraSlashCommandDispatcher.cs`
+- `Test.Bot.Remora/TestRemoraChannelRuntime.cs` *(new)*
+- `plans/remora-interaction-runtime-completion-plan.md`
 
 ---
 
