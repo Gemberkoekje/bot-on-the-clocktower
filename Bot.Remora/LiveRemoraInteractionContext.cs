@@ -180,6 +180,7 @@ namespace Bot.Remora
                 throw new InvalidOperationException($"Failed to show modal: {result.Error}");
             }
 
+            // Modal responses acknowledge the interaction and prevent further defer/respond attempts.
             IsDeferred = true;
         }
 

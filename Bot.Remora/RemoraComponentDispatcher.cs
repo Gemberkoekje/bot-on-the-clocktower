@@ -24,47 +24,46 @@ namespace Bot.Remora
 
         public async Task<bool> DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
-            if (!TryResolveInteractionData(interaction, out string customId, out IReadOnlyList<string> values, out IReadOnlyList<string> modalSubmissionKeys))
+            if (!TryResolveInteractionData(interaction, out ResolvedInteractionData data))
             {
-                throw new InvalidOperationException("Interaction payload does not contain component or modal data.");
+                throw new InvalidOperationException($"Interaction {interaction.ID.Value} of type {interaction.Type} does not contain component or modal data.");
             }
 
-            LiveRemoraInteractionContext context = CreateContext(interaction, customId, values, cancellationToken);
+            LiveRemoraInteractionContext context = CreateContext(interaction, data.CustomId, data.Values, cancellationToken);
             bool handled = await m_componentService.CallAsync(context);
 
             Console.WriteLine(
-                $"RemoraComponentDispatcher: interactionType={interaction.Type}, interactionId={interaction.ID.Value}, guildId={context.Guild.Id}, channelId={context.Channel.Id}, memberId={context.Member.Id}, customId='{customId}', valueCount={values.Count}, modalSubmissionKeys='{string.Join(",", modalSubmissionKeys)}', handled={handled}.");
+                $"RemoraComponentDispatcher: interactionType={interaction.Type}, interactionId={interaction.ID.Value}, guildId={context.Guild.Id}, channelId={context.Channel.Id}, memberId={context.Member.Id}, customId='{data.CustomId}', valueCount={data.Values.Count}, modalSubmissionKeys='{string.Join(",", data.ModalSubmissionKeys)}', handled={handled}.");
 
             return handled;
         }
 
-        private static bool TryResolveInteractionData(
-            IInteraction interaction,
-            out string customId,
-            out IReadOnlyList<string> values,
-            out IReadOnlyList<string> modalSubmissionKeys)
+        private static bool TryResolveInteractionData(IInteraction interaction, out ResolvedInteractionData data)
         {
-            customId = string.Empty;
-            values = Array.Empty<string>();
-            modalSubmissionKeys = Array.Empty<string>();
+            data = new ResolvedInteractionData(string.Empty, Array.Empty<string>(), Array.Empty<string>());
             if (!interaction.Data.HasValue)
             {
                 return false;
             }
 
-            OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData> data = interaction.Data.Value;
+            OneOf<IApplicationCommandData, IMessageComponentData, IModalSubmitData> payload = interaction.Data.Value;
 
-            if (data.TryPickT1(out IMessageComponentData componentData, out var rest))
+            if (payload.TryPickT1(out IMessageComponentData componentData, out var rest))
             {
-                customId = componentData.CustomID ?? string.Empty;
-                values = ExtractMessageComponentValues(componentData);
+                data = new ResolvedInteractionData(
+                    componentData.CustomID ?? string.Empty,
+                    ExtractMessageComponentValues(componentData),
+                    Array.Empty<string>());
                 return true;
             }
 
             if (rest.TryPickT1(out IModalSubmitData modalData, out _))
             {
-                customId = modalData.CustomID ?? string.Empty;
-                values = ExtractModalSubmitValues(modalData, out modalSubmissionKeys);
+                IReadOnlyList<string> values = ExtractModalSubmitValues(modalData, out IReadOnlyList<string> modalSubmissionKeys);
+                data = new ResolvedInteractionData(
+                    modalData.CustomID ?? string.Empty,
+                    values,
+                    modalSubmissionKeys);
                 return true;
             }
 
@@ -170,6 +169,22 @@ namespace Bot.Remora
                 cancellationToken: cancellationToken,
                 componentCustomId: componentCustomId,
                 componentValues: componentValues);
+        }
+
+        private readonly struct ResolvedInteractionData
+        {
+            public ResolvedInteractionData(string customId, IReadOnlyList<string> values, IReadOnlyList<string> modalSubmissionKeys)
+            {
+                CustomId = customId;
+                Values = values;
+                ModalSubmissionKeys = modalSubmissionKeys;
+            }
+
+            public string CustomId { get; }
+
+            public IReadOnlyList<string> Values { get; }
+
+            public IReadOnlyList<string> ModalSubmissionKeys { get; }
         }
     }
 }

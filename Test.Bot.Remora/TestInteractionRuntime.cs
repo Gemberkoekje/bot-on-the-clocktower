@@ -239,7 +239,7 @@ namespace Test.Bot.Remora
         }
 
         [Fact]
-        public static async Task Responder_ComponentUnknown_SendsEphemeralFallback()
+        public static async Task Responder_ComponentUnknown_ShouldSendEphemeralFallback()
         {
             CancellationToken cancellationToken = TestContext.Current.CancellationToken;
             RecordingDispatcher slashDispatcher = new();
@@ -531,7 +531,10 @@ namespace Test.Bot.Remora
                 return false;
             }
 
-            return callbackData.Flags.HasValue && callbackData.Flags.Value.HasFlag(MessageFlags.Ephemeral);
+            return callbackData.Flags.HasValue
+                && callbackData.Flags.Value.HasFlag(MessageFlags.Ephemeral)
+                && callbackData.Content.HasValue
+                && !string.IsNullOrWhiteSpace(callbackData.Content.Value);
         }
 
         private static Mock<IDiscordRestInteractionAPI> CreateInteractionApiMock()
