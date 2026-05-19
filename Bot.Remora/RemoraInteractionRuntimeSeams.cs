@@ -24,7 +24,7 @@ namespace Bot.Remora
     {
         public Task RespondAsync(CancellationToken cancellationToken = default)
         {
-            Debug.WriteLine("Bot.Remora interaction responder is not yet wired.");
+            Debug.WriteLine("Bot.Remora: interaction responder is not yet wired.");
             return Task.CompletedTask;
         }
     }
@@ -33,7 +33,7 @@ namespace Bot.Remora
     {
         public Task DispatchAsync(string commandName, IReadOnlyDictionary<string, object> arguments, CancellationToken cancellationToken = default)
         {
-            Debug.WriteLine("Bot.Remora slash command dispatcher is not yet wired.");
+            Debug.WriteLine("Bot.Remora: slash command dispatcher is not yet wired.");
             return Task.CompletedTask;
         }
     }
@@ -42,7 +42,7 @@ namespace Bot.Remora
     {
         public Task<bool> DispatchAsync(string customId, IReadOnlyCollection<string> values, CancellationToken cancellationToken = default)
         {
-            Debug.WriteLine("Bot.Remora component dispatcher is not yet wired.");
+            Debug.WriteLine("Bot.Remora: component dispatcher is not yet wired.");
             return Task.FromResult(false);
         }
     }
