@@ -8,12 +8,10 @@ using Moq;
 using OneOf;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.API.Abstractions.Rest.FileData;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Xunit;
-using DiscordChannel = Remora.Discord.API.Abstractions.Objects.IChannel;
 using DiscordEmbed = Remora.Discord.API.Abstractions.Objects.IEmbed;
 using DiscordMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
@@ -94,8 +92,8 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(33),
                     new Snowflake(100),
-                    It.Is<Optional<IDiscordPermissionSet>>(allow => allow.HasValue && allow.Value.HasPermission(DiscordPermission.ViewChannel)),
-                    It.IsAny<Optional<IDiscordPermissionSet>>(),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.ViewChannel)),
+                    It.IsAny<Optional<IDiscordPermissionSet?>>(),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Member),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()),
@@ -104,8 +102,8 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(33),
                     new Snowflake(200),
-                    It.Is<Optional<IDiscordPermissionSet>>(allow => allow.HasValue && allow.Value.HasPermission(DiscordPermission.MoveMembers)),
-                    It.Is<Optional<IDiscordPermissionSet>>(deny => deny.HasValue && deny.Value.HasPermission(DiscordPermission.Stream)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.MoveMembers)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(deny => deny.HasValue && deny.Value!.HasPermission(DiscordPermission.Stream)),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Role),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()),
@@ -131,8 +129,8 @@ namespace Test.Bot.Remora
                 api => api.EditChannelPermissionsAsync(
                     new Snowflake(77),
                     new Snowflake(1),
-                    It.Is<Optional<IDiscordPermissionSet>>(allow => allow.HasValue && allow.Value.HasPermission(DiscordPermission.ViewChannel)),
-                    It.IsAny<Optional<IDiscordPermissionSet>>(),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => allow.HasValue && allow.Value!.HasPermission(DiscordPermission.ViewChannel)),
+                    It.IsAny<Optional<IDiscordPermissionSet?>>(),
                     It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Member),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()),
@@ -198,8 +196,8 @@ namespace Test.Bot.Remora
                 .Setup(api => api.EditChannelPermissionsAsync(
                     It.IsAny<Snowflake>(),
                     It.IsAny<Snowflake>(),
-                    It.IsAny<Optional<IDiscordPermissionSet>>(),
-                    It.IsAny<Optional<IDiscordPermissionSet>>(),
+                    It.IsAny<Optional<IDiscordPermissionSet?>>(),
+                    It.IsAny<Optional<IDiscordPermissionSet?>>(),
                     It.IsAny<Optional<PermissionOverwriteType>>(),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()))
@@ -216,7 +214,7 @@ namespace Test.Bot.Remora
                     It.IsAny<Snowflake>(),
                     It.IsAny<Optional<string>>(),
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<DiscordChannel>.FromSuccess(Mock.Of<DiscordChannel>()));
+                .ReturnsAsync(Result.FromSuccess());
 
             return channelApi;
         }

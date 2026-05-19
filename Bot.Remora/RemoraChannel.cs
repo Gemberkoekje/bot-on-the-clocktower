@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
@@ -55,9 +54,9 @@ namespace Bot.Remora
             IResult result = await m_channelApi.EditChannelPermissionsAsync(
                 new Snowflake(Id),
                 new Snowflake(member.Id),
-                new Optional<IDiscordPermissionSet>(ToDiscordPermissionSet(allow)),
-                new Optional<IDiscordPermissionSet>(ToDiscordPermissionSet(deny)),
-                new Optional<PermissionOverwriteType>(PermissionOverwriteType.Member),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(ToDiscordPermissionSet(allow)),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(ToDiscordPermissionSet(deny)),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType>(global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType.Member),
                 default,
                 default).ConfigureAwait(false);
             EnsureSuccess(result, "Failed to add member permission overwrite.");
@@ -74,9 +73,9 @@ namespace Bot.Remora
             IResult result = await m_channelApi.EditChannelPermissionsAsync(
                 new Snowflake(Id),
                 new Snowflake(role.Id),
-                new Optional<IDiscordPermissionSet>(ToDiscordPermissionSet(allow)),
-                new Optional<IDiscordPermissionSet>(ToDiscordPermissionSet(deny)),
-                new Optional<PermissionOverwriteType>(PermissionOverwriteType.Role),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(ToDiscordPermissionSet(allow)),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(ToDiscordPermissionSet(deny)),
+                new Optional<global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType>(global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType.Role),
                 default,
                 default).ConfigureAwait(false);
             EnsureSuccess(result, "Failed to add role permission overwrite.");
@@ -164,9 +163,9 @@ namespace Bot.Remora
                         IResult setResult = await m_channelApi.EditChannelPermissionsAsync(
                             new Snowflake(Id),
                             new Snowflake(memberId),
-                            new Optional<IDiscordPermissionSet>(ToDiscordPermissionSet(permission)),
-                            new Optional<IDiscordPermissionSet>(DiscordPermissionSet.Empty),
-                            new Optional<PermissionOverwriteType>(PermissionOverwriteType.Member),
+                            new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(ToDiscordPermissionSet(permission)),
+                            new Optional<global::Remora.Discord.API.Abstractions.Objects.IDiscordPermissionSet?>(DiscordPermissionSet.Empty),
+                            new Optional<global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType>(global::Remora.Discord.API.Abstractions.Objects.PermissionOverwriteType.Member),
                             default,
                             default).ConfigureAwait(false);
                         EnsureSuccess(setResult, "Failed to set member permission overwrite.");
@@ -196,7 +195,7 @@ namespace Bot.Remora
                 return;
             }
 
-            IResult<global::Remora.Discord.API.Abstractions.Objects.IChannel> result = await m_channelApi.DeleteChannelAsync(
+            IResult result = await m_channelApi.DeleteChannelAsync(
                 new Snowflake(Id),
                 string.IsNullOrWhiteSpace(reason) ? default : new Optional<string>(reason),
                 default).ConfigureAwait(false);
