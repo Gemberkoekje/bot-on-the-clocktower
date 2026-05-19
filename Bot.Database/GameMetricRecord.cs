@@ -3,7 +3,7 @@ using System;
 
 namespace Bot.Database
 {
-    internal class GameMetricRecord : IGameMetricRecord
+    public class GameMetricRecord : IGameMetricRecord
     {
         public int TownHash { get; set; }
 

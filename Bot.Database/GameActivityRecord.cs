@@ -3,7 +3,7 @@ using System;
 
 namespace Bot.Database
 {
-    internal class GameActivityRecord : IGameActivityRecord
+    public class GameActivityRecord : IGameActivityRecord
     {
         public string Id { get; set; } = string.Empty;
 

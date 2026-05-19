@@ -3,7 +3,7 @@ using System;
 
 namespace Bot.Database
 {
-    internal class AnnouncementRecord : IAnnouncementRecord
+    public class AnnouncementRecord : IAnnouncementRecord
     {
         public string Id { get; set; } = string.Empty;
 
