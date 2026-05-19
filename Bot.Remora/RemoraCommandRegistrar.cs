@@ -154,6 +154,7 @@ namespace Bot.Remora
             {
                 RemoraSlashCommandParameterType.String => ApplicationCommandOptionType.String,
                 RemoraSlashCommandParameterType.Boolean => ApplicationCommandOptionType.Boolean,
+                RemoraSlashCommandParameterType.Integer => ApplicationCommandOptionType.Integer,
                 RemoraSlashCommandParameterType.User => ApplicationCommandOptionType.User,
                 RemoraSlashCommandParameterType.Role => ApplicationCommandOptionType.Role,
                 RemoraSlashCommandParameterType.Channel => ApplicationCommandOptionType.Channel,
