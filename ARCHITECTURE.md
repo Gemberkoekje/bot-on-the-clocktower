@@ -118,6 +118,27 @@ Singletons are used throughout — there is no per-request scope because a Disco
   - **prod**: clear dev-guild commands and register globally.
   `IRemoraCommandRegistrar` is the abstraction that actually applies the plan against the Discord REST API.
 
+### Runtime interaction inventory (Phase 0 seam baseline)
+
+The interaction runtime completion work uses the following Remora touchpoints from the versions pinned in `Directory.Packages.props`:
+
+- **Gateway dispatch surface (`Remora.Discord.Gateway` 13.0.1):**
+  - `Remora.Discord.Gateway.Responders.IResponder<TGatewayEvent>` for event-specific responders.
+  - `Remora.Discord.API.Gateway.Events.InteractionCreate` as the incoming interaction gateway event payload.
+- **Interaction response REST surface (`Remora.Discord.Rest` 53.0.0):**
+  - `Remora.Discord.API.Abstractions.Rest.IDiscordRestInteractionAPI.CreateInteractionResponseAsync(...)` for initial interaction callbacks.
+  - `...EditOriginalInteractionResponseAsync(...)` for editing deferred/original responses.
+  - `...CreateFollowupMessageAsync(...)` for follow-up responses.
+- **Webhook REST surface (`Remora.Discord.API.Abstractions.Rest.IDiscordRestWebhookAPI`):**
+  - `EditWebhookMessageAsync(...)` / `ExecuteWebhookAsync(...)` for webhook-backed message response paths.
+
+As a preparation step, `Bot.Remora` now includes internal no-op DI seams:
+- `IRemoraInteractionResponder`
+- `IRemoraSlashCommandDispatcher`
+- `IRemoraComponentDispatcher`
+
+These are registered as no-op implementations and currently only emit debug-level "not yet wired" logs. They are intentionally additive and do not change runtime behavior until later phases.
+
 ### Interaction flow
 
 1. A user runs `/createTown Ravenswood Bluff`.

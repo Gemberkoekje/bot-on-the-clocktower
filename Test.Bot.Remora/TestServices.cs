@@ -10,6 +10,9 @@ namespace Test.Bot.Remora
 {
     public class TestServices : TestBase
     {
+        private const string DiscordToken = "token";
+        private const string DeployTypeDev = "dev";
+
         [Theory]
         [InlineData(typeof(IColorBuilder), typeof(RemoraColorBuilder))]
         [InlineData(typeof(IRemoraCommandRegistrar), typeof(RemoraCommandRegistrar))]
@@ -18,8 +21,8 @@ namespace Test.Bot.Remora
         {
             var services = new ServiceCollection();
             var env = new Mock<IEnvironment>();
-            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
-            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
+            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns(DiscordToken);
+            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(DeployTypeDev);
             services.AddSingleton(env.Object);
             services.AddRemoraServices();
 
@@ -28,6 +31,23 @@ namespace Test.Bot.Remora
 
             Assert.NotNull(service);
             Assert.IsType(serviceImpl, service);
+        }
+
+        [Fact]
+        public void RegisterServices_ResolvesRemoraInteractionRuntimeSeams()
+        {
+            var services = new ServiceCollection();
+            var env = new Mock<IEnvironment>();
+            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns(DiscordToken);
+            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(DeployTypeDev);
+            services.AddSingleton(env.Object);
+            services.AddRemoraServices();
+
+            using var sp = services.BuildServiceProvider();
+
+            Assert.NotNull(sp.GetService<IRemoraInteractionResponder>());
+            Assert.NotNull(sp.GetService<IRemoraSlashCommandDispatcher>());
+            Assert.NotNull(sp.GetService<IRemoraComponentDispatcher>());
         }
     }
 }

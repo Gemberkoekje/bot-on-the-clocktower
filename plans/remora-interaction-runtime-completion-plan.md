@@ -1,146 +1,216 @@
-# Remora Interaction Runtime Completion Plan
+# Remora Interaction Runtime Completion — Phased Plan
 
-## Goal
-Implement the missing runtime path so registered slash commands are actually executed and acknowledged in Discord (no more "The application did not respond").
+## Background
 
-## Current Gaps (Confirmed)
-1. Slash command registration works, but incoming interactions are not dispatched to `IRemoraSlashCommand` handlers.
-2. No gateway responder is wired to process `InteractionCreate` events.
-3. Current `Bot.Remora` wrappers (`RemoraGuild`, `RemoraChannel`, `RemoraMember`, etc.) are mostly in-memory stubs and do not map to live Discord state/API operations.
-4. Interaction response lifecycle (defer, edit original response, modal/update flows) is not implemented against Discord REST endpoints.
-5. Argument binding from Discord interaction options to handler argument types (`string`, `bool`, `IMember`, `IRole`, `IChannel`, `IChannelCategory`) is incomplete.
+Slash command registration works, but incoming interactions are not dispatched to `IRemoraSlashCommand` handlers, producing "The application did not respond" for every command. This plan completes the missing runtime path incrementally through nine reviewable, individually-shippable phases.
 
-## Scope
-- Complete command execution for slash interactions.
-- Complete component interaction execution path.
-- Keep existing command surface (`IRemoraSlashCommand`) and registration plan behavior (`dev`/`prod`).
-- Add robust diagnostics and tests for all runtime interaction plumbing.
+### Confirmed gaps
+1. No gateway responder wired to process `InteractionCreate` events.
+2. Incoming interactions are never dispatched to `IRemoraSlashCommand` handlers.
+3. `RemoraGuild`, `RemoraChannel`, `RemoraMember`, etc. are in-memory stubs with no REST backing.
+4. Interaction response lifecycle (defer → edit → modal/update) is not implemented.
+5. Argument binding from Discord options to handler types is incomplete.
 
-## Non-Goals
-- Reworking command definitions in `Remora*SlashCommands`.
-- Changing deployment model (`dev` guild registration vs `prod` global registration).
-- Broad refactor outside `Bot.Remora` and required integration points.
+---
 
-## Design Overview
+## Guiding principles
 
-### 1) Add a gateway interaction responder
-Implement a responder that listens for interaction gateway events and routes:
-- slash commands -> command dispatcher
-- component interactions -> `IComponentService`
+- One PR per phase. Each phase must build green, pass existing tests, and add its own unit tests.
+- Never break the existing command surface (`IRemoraSlashCommand`) or the registration plan (`dev`/`prod`).
+- New code lives behind interfaces inside `Bot.Remora`; no changes to `Bot.Core`/`Bot.Api`.
+- Each phase ends with structured logs that make the next phase debuggable.
+- No nullables: prefer `Result`/sentinel patterns.
+- Implicit usings are disabled — every new file must declare `System.*` usings explicitly.
+- Warnings must be resolved per phase; suppress via `.globalconfig` only with a justification comment.
+- DI style: explicit constructor injection throughout.
 
-Responder responsibilities:
-- Identify interaction type.
-- Build a real `IBotInteractionContext` backed by interaction token, IDs, and REST clients.
-- Invoke the corresponding command/component callback.
-- Ensure an ACK/defer is always sent within Discord timeout requirements.
-- Return success/failure results with structured logging.
+---
 
-### 2) Add slash command dispatcher
-Implement a service that:
-- builds a normalized command lookup from `RemoraSlashCommandRegistry.ResolveCommands()`;
-- maps interaction command names to `IRemoraSlashCommand`;
-- parses options recursively (including sub-option shapes if present);
-- resolves typed values from interaction `Resolved` payload:
-  - users/members -> `IMember`
-  - roles -> `IRole`
-  - channels -> `IChannel` / `IChannelCategory` (when applicable)
-- invokes `InvokeAsync(context, arguments)`.
+## Phase dependency graph
 
-### 3) Implement real interaction context + response operations
-Replace stub-like behavior with Discord-backed operations:
-- `DeferInteractionResponse()` -> send interaction callback (deferred type).
-- `EditResponseAsync(...)` -> edit original interaction response via webhook endpoints.
-- `UpdateOriginalMessageAsync(...)` for component updates.
-- `ShowModalAsync(...)` using modal callback response.
+```
+Phase 0 → Phase 1 → Phase 2
+                  → Phase 3
+                  → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
+```
 
-Maintain state flags (`IsDeferred`) and idempotency guardrails.
+---
 
-### 4) Implement live Discord entity adapters
-Add/upgrade wrappers that represent real Discord entities and operations:
-- guild: role/channel lookup and creation via REST
-- channel: send messages, overwrite management, deletes
-- member: move voice, role grant/revoke, nicknames, DM
-- role/category types where required
+## ✅ Phase 0 — Runtime inventory & DI seam
+**Status: Complete** (commit `81770f4`)
 
-Adapters should only expose capabilities needed by `Bot.Api` interfaces.
+**Goal:** Land scaffolding that lets later phases plug in without churn, and confirm exactly which Remora APIs will be used.
 
-### 5) Wire DI and gateway responder registration
-In `AddRemoraServices`:
-- register dispatcher + runtime adapter services;
-- register responder using gateway responder extension;
-- ensure required REST abstractions are available;
-- ensure responder is instantiated with command registry + services.
+**Delivered:**
+- Architecture inventory added to `ARCHITECTURE.md`:
+  - Gateway responder surface: `IResponder<TGatewayEvent>`, concrete event `InteractionCreate`.
+  - Interaction REST surface: `IDiscordRestInteractionAPI` — `CreateInteractionResponseAsync`, `EditOriginalInteractionResponseAsync`, `CreateFollowupMessageAsync`.
+  - Webhook REST surface: `IDiscordRestWebhookAPI` — `EditWebhookMessageAsync`, `ExecuteWebhookAsync`.
+- Internal runtime seam interfaces added to `Bot.Remora/RemoraInteractionRuntimeSeams.cs`:
+  - `IRemoraInteractionResponder`
+  - `IRemoraSlashCommandDispatcher`
+  - `IRemoraComponentDispatcher`
+- No-op implementations registered in `Bot.Remora/DependencyInjection.cs` (emit debug-level "not yet wired" messages; behavior unchanged).
+- `Bot.Remora/Properties/AssemblyInfo.cs` with `InternalsVisibleTo("Test.Bot.Remora")`.
+- `Test.Bot.Remora/TestServices.cs` smoke test: DI resolves all three seam types.
 
-### 6) Observability and failure handling
-Add logs for:
-- incoming interaction type, command name, guild/channel/member IDs;
-- argument binding failures and missing resolved entities;
-- ACK/defer/send/edit operations and REST failures;
-- command execution duration and terminal status.
-
-Add fallback user-visible ephemeral error response when command execution fails before reply.
-
-## Implementation Steps
-1. **Inventory runtime touchpoints**
-   - Confirm exact Remora event and REST APIs used for interaction callback/edit/followup.
-2. **Create interaction responder**
-   - Add `IResponder<...InteractionCreate...>` implementation and basic routing skeleton.
-3. **Create slash dispatch service**
-   - Add command map, command lookup, and option extraction/binding pipeline.
-4. **Build live interaction context**
-   - Implement defer/edit/update/modal against Discord interaction endpoints.
-5. **Implement/upgrade entity adapters**
-   - Replace in-memory stubs with REST-backed behavior needed by handlers.
-6. **Implement component interaction routing**
-   - Map component custom IDs/values and invoke `IComponentService`.
-7. **DI wiring**
-   - Register responder + dispatcher + supporting services in `DependencyInjection`.
-8. **Error/timeout hardening**
-   - Ensure guaranteed ACK path and graceful error responses.
-9. **Unit tests (Bot.Remora)**
-   - Add tests for dispatch routing, argument binding, and failure modes.
-10. **Integration-style tests (targeted)**
-   - Validate command callback invocation from synthetic interaction payloads.
-11. **Manual verification checklist**
-   - dev mode guild command invocation;
-   - prod mode global invocation;
-   - component callback behavior.
-12. **Documentation updates**
-   - Update `ARCHITECTURE.md` and `README.md` with runtime interaction behavior + troubleshooting.
-
-## File Targets (Expected)
-- `Bot.Remora/DependencyInjection.cs`
-- `Bot.Remora/RemoraClient.cs` (only if lifecycle hooks need adjustment)
-- `Bot.Remora/RemoraInteractionContext.cs`
-- `Bot.Remora/RemoraInteractionResponseBuilder.cs` (if needed)
-- `Bot.Remora/RemoraChannel.cs`
-- `Bot.Remora/RemoraGuild.cs`
-- `Bot.Remora/RemoraMember.cs`
-- `Bot.Remora/RemoraRole.cs`
-- `Bot.Remora/*Responder*.cs` (new)
-- `Bot.Remora/*Dispatcher*.cs` (new)
-- `Test.Bot.Remora/*` (new/updated tests)
-- `README.md`
+**Files changed:**
 - `ARCHITECTURE.md`
+- `Bot.Remora/DependencyInjection.cs`
+- `Bot.Remora/RemoraInteractionRuntimeSeams.cs` *(new)*
+- `Bot.Remora/Properties/AssemblyInfo.cs` *(new)*
+- `Test.Bot.Remora/TestServices.cs`
 
-## Validation Checklist
-- Build succeeds.
-- Existing Remora tests pass.
-- New dispatch tests pass.
-- Slash commands return responses instead of timeout.
-- `/createtown` and one gameplay command execute successfully in a real guild.
-- Logs clearly show:
-  - deploy mode,
-  - registration target(s),
-  - incoming interaction routing,
-  - response lifecycle operations.
+---
 
-## Risks
-- Remora API surface differences across package versions may require adapter shims.
-- Discord interaction timing constraints can cause intermittent timeouts if defer path is delayed.
-- Entity resolution complexity (member/role/channel mapping) can create edge-case failures in large guilds.
+## ⬜ Phase 1 — Slash command dispatch for primitive arguments
+**Status: Pending**
 
-## Rollout Recommendation
-1. Implement and validate in `dev` mode with one known guild ID.
-2. Run command smoke tests (`/createtown`, `/game`, `/vote`, `/towninfo`).
-3. Promote to `prod` once interaction execution and logs are stable.
+**Goal:** Make registered slash commands actually execute and reply (fixes "did not respond").
+
+**Includes:**
+- Real `IRemoraInteractionResponder` registered as a Remora `IResponder<InteractionCreate>` (slash subtype only).
+- Real `IRemoraSlashCommandDispatcher`:
+  - Name → `IRemoraSlashCommand` map from `RemoraSlashCommandRegistry.ResolveCommands()`.
+  - Primitive argument binding: `string`, `bool`, `int`/`long` options.
+  - Entity parameters skipped (logged + absent; affected commands get a friendly ephemeral message).
+- Live interaction context (`LiveRemoraInteractionContext` or upgraded `RemoraInteractionContext`) backed by REST:
+  - `DeferInteractionResponse()` → `DeferredChannelMessageWithSource` callback.
+  - `EditResponseAsync(...)` → `EditOriginalInteractionResponseAsync` via webhook.
+  - `UpdateOriginalMessageAsync`/`ShowModalAsync` → stub `NotSupportedException` until Phase 3.
+- Guaranteed ACK path: defer always sent within 3-second budget; ephemeral error if dispatch throws first.
+- Structured logging: interaction type, command name, guild/channel/member IDs, timing, terminal status.
+- DI wiring: replace no-op implementations with real ones in `AddRemoraServices`.
+
+**Tests (`Test.Bot.Remora`):**
+- Dispatcher: command name resolution (case sensitivity, unknown command).
+- Dispatcher: primitive option binding (present, missing, wrong type).
+- Responder: routes slash → dispatcher; ignores components (logs).
+- Context: defer→edit lifecycle calls correct REST abstraction (mocked).
+- Failure path: handler throws → ephemeral error sent, no unhandled exception escapes.
+
+**Acceptance:** Build + tests green. A string/bool-arg command (e.g. `/announce`) runs end-to-end in `dev` mode.
+
+---
+
+## ⬜ Phase 2 — Entity argument binding
+**Status: Pending** (requires Phase 1)
+
+**Goal:** Resolve `IMember`, `IRole`, `IChannel`, `IChannelCategory` from the interaction `Resolved` payload.
+
+**Includes:**
+- Extend the dispatcher binder to map option values + `Resolved` to `Bot.Api` interface types.
+- Read-only resolved adapters: `ResolvedMemberAdapter`, `ResolvedRoleAdapter`, `ResolvedChannelAdapter`, `ResolvedChannelCategoryAdapter` (mutating ops throw `NotSupportedException`).
+- Channel type 4 detection → route to `IChannelCategory` adapter.
+- Additive `RemoraSlashCommandParameterType` enum value if needed to distinguish channel vs. category.
+
+**Tests:** Binder per entity type (present, missing, wrong type, optional). Mutating adapters throw documented exception.
+
+**Acceptance:** Build + tests green. A member/role/channel command runs end-to-end without cast failures.
+
+---
+
+## ⬜ Phase 3 — Component interactions & modal flows
+**Status: Pending** (requires Phase 1)
+
+**Goal:** Route button/select/modal interactions through `IComponentService` and finish the context lifecycle.
+
+**Includes:**
+- Responder extended for component and modal interaction subtypes.
+- Real `IRemoraComponentDispatcher`: resolve custom IDs + values, build context, invoke `IComponentService`.
+- Finish `UpdateOriginalMessageAsync` (component update) and `ShowModalAsync` (modal response) against REST.
+- `IsDeferred` idempotency: double defer is a no-op; edit before defer auto-defers.
+- Logging: custom IDs, modal submission keys.
+
+**Tests:** Component dispatch (known/unknown IDs), modal show + submission (mocked REST), idempotency rules.
+
+**Acceptance:** Build + tests green. A button-driven flow round-trips in `dev` mode.
+
+---
+
+## ⬜ Phase 4 — Live `RemoraGuild` adapter (read paths)
+**Status: Pending** (requires Phase 1)
+
+**Goal:** Replace in-memory stubs in `RemoraGuild` with REST-backed reads.
+
+**Includes:**
+- Inject REST guild API abstraction into `RemoraGuild`.
+- Implement read methods used by `Bot.Core` (enumerate channels/roles/members, find by ID/name).
+- Keep write methods throwing `NotSupportedException` until Phase 5.
+- Cache only if `Bot.Core` requires snapshot semantics; otherwise leave caching out and document.
+
+**Tests:** Each read method against mocked REST (happy path, not-found, paging).
+
+**Acceptance:** Build + tests green. Read-only commands (e.g. `/townInfo`) work end-to-end.
+
+---
+
+## ⬜ Phase 5 — Live `RemoraChannel` write operations
+**Status: Pending** (requires Phase 4)
+
+**Goal:** REST-backed channel writes (send messages, permission overwrites, create/delete).
+
+**Includes:**
+- Implement `IChannel` methods consumed by `Bot.Core`, one at a time, each behind unit tests with mocked REST.
+- Respect rate limits via what Remora already provides.
+- Preserve `IChannel` method signatures exactly.
+
+**Tests:** Per-method REST call assertions, error mapping (permissions, not-found).
+
+**Acceptance:** Build + tests green. `/createTown` succeeds in `dev` mode.
+
+---
+
+## ⬜ Phase 6 — Live `RemoraMember` operations
+**Status: Pending** (requires Phase 5)
+
+**Goal:** REST-backed member writes: voice move, role grant/revoke, nickname, DM.
+
+**Includes:**
+- Implement each `IMember` mutating method against the REST member API.
+- DM channel acquisition via REST + message send.
+- Map Discord error codes (missing permissions, not in voice) to existing `Bot.Api` error semantics — no new exception types.
+
+**Tests:** Per-method REST call assertions and error mapping.
+
+**Acceptance:** Build + tests green. A voice-movement command (e.g. `/night`) works in `dev` mode.
+
+---
+
+## ⬜ Phase 7 — Live `RemoraRole` / `RemoraChannelCategory` & loose ends
+**Status: Pending** (requires Phase 6)
+
+**Goal:** Finish remaining adapter operations and remove `NotSupportedException` stubs from hot paths.
+
+**Includes:**
+- Role create/delete/edit if consumed by `Bot.Core`; otherwise leave read-only and document.
+- Category operations used by setup commands.
+- Decide whether Phase 2 resolved adapters are replaced by live adapters or kept as a dual model; document explicitly in `ARCHITECTURE.md`.
+
+**Tests:** Coverage for each newly live method.
+
+**Acceptance:** No `NotSupportedException` on hot command paths. `/createTown`, `/game`, `/vote`, `/townInfo` all work in `dev` mode.
+
+---
+
+## ⬜ Phase 8 — Hardening, observability, documentation
+**Status: Pending** (requires Phase 7)
+
+**Goal:** Production-readiness pass; promote from `dev` to `prod`.
+
+**Includes:**
+- Timeout/cancellation review across responder and dispatcher.
+- Consistent structured logging fields (correlation ID per interaction).
+- Metrics counters if the project already uses any (no new dependency).
+- `ARCHITECTURE.md`: runtime interaction lifecycle diagram in prose.
+- `README.md`: troubleshooting section ("did not respond", missing permissions, dev vs prod registration).
+- Confirm `prod` global registration path still works.
+- Smoke-test checklist in PR description, executed by the maintainer against a real guild.
+
+**Acceptance:** Docs landed. Maintainer signs off on live smoke tests.
+
+---
+
+## Manual validation note
+
+The sandbox cannot exercise a live Discord guild. Every phase's "end-to-end in `dev` mode" acceptance criterion must be executed by a maintainer before merge. Unit tests in `Test.Bot.Remora` are the automated gate.
