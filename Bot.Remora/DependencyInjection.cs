@@ -1,6 +1,10 @@
 using Bot.Api;
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
 
@@ -17,34 +21,42 @@ namespace Bot.Remora
         {
             services.AddSingleton<IBotSystem, RemoraSystem>();
             services.AddSingleton<IColorBuilder, RemoraColorBuilder>();
-            services.AddSingleton<IRemoraInteractionResponder, RemoraInteractionResponder>();
-            services.AddSingleton<IRemoraSlashCommandDispatcher, RemoraSlashCommandDispatcher>();
-            services.AddSingleton<IRemoraComponentDispatcher, RemoraComponentDispatcher>();
+            services.AddSingleton<ILiveRemoraInteractionContextFactory, LiveRemoraInteractionContextFactory>();
 
             services.AddDiscordGateway(
                 sp => sp.GetRequiredService<IEnvironment>().GetEnvironmentVariable("DISCORD_TOKEN"),
                 _ => { });
-            services.AddResponder<RemoraGatewayInteractionResponder>();
 
-            services.AddSingleton<IRemoraCommandRegistrar, RemoraCommandRegistrar>();
-
-            services.AddSingleton(sp =>
+            services.Configure<DiscordGatewayClientOptions>(options =>
             {
-                RemoraSlashCommandRegistry registry = new();
-                registry.AddSource(() => new RemoraGameSlashCommands(sp.GetRequiredService<IBotGameplayInteractionHandler>()));
-                registry.AddSource(() => new RemoraMessagingSlashCommands(sp.GetRequiredService<IBotMessaging>()));
-                registry.AddSource(() => new RemoraLookupSlashCommands(sp.GetRequiredService<IBotLookupService>()));
-                registry.AddSource(() => new RemoraMiscSlashCommands(sp.GetRequiredService<IAnnouncer>()));
-                registry.AddSource(() => new RemoraSetupSlashCommands(sp.GetRequiredService<IBotSetup>()));
-                return registry;
+                options.Intents = GatewayIntents.Guilds
+                    | GatewayIntents.GuildMembers
+                    | GatewayIntents.GuildVoiceStates
+                    | GatewayIntents.GuildMessages
+                    | GatewayIntents.MessageContents;
             });
+
+            // Minimal proof-of-life: use Remora's canonical command pipeline for /ping.
+            // AddDiscordCommands(enableSlash: true) registers Remora's own InteractionResponder,
+            // SlashService, and command tree. While we validate the pipeline end-to-end, we
+            // intentionally do NOT register our custom RemoraGatewayInteractionResponder so it
+            // does not race Remora's own dispatch.
+            services.AddDiscordCommands(true)
+                .AddCommandTree()
+                    .WithCommandGroup<PingCommand>()
+                    .WithCommandGroup<CreateTownCommand>()
+                    .WithCommandGroup<GameCommands>()
+                    .WithCommandGroup<MessagingCommands>()
+                    .WithCommandGroup<LookupCommands>()
+                    .WithCommandGroup<MiscCommands>()
+                    .WithCommandGroup<SetupCommands>()
+                .Finish();
 
             services.AddSingleton<IBotClient>(sp => new RemoraClient(
                 sp.GetRequiredService<IEnvironment>(),
                 sp.GetService(typeof(IComponentService)) as IComponentService,
-                sp.GetService(typeof(IRemoraCommandRegistrar)) as IRemoraCommandRegistrar,
-                sp.GetService(typeof(RemoraSlashCommandRegistry)) as RemoraSlashCommandRegistry,
-                sp.GetService(typeof(DiscordGatewayClient)) as DiscordGatewayClient));
+                sp.GetService(typeof(DiscordGatewayClient)) as DiscordGatewayClient,
+                sp.GetService(typeof(global::Remora.Discord.Commands.Services.SlashService)) as global::Remora.Discord.Commands.Services.SlashService));
 
             return services;
         }

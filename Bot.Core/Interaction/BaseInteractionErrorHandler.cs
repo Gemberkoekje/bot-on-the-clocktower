@@ -59,6 +59,7 @@ namespace Bot.Core.Interaction
             }
             catch (Exception e)
             {
+                Console.Error.WriteLine($"BaseInteractionErrorHandler: interaction processing failed for key '{GetFriendlyStringForKey(key)}'. {e}");
                 await TrySendExceptionToAuthorAsync(key, requester, e, GetFriendlyStringForKey);
             }
 

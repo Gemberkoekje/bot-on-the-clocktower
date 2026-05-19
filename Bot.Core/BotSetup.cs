@@ -180,6 +180,10 @@ namespace Bot.Core
             var tdesc = new TownDescription();
             tdesc.PopulateFromTownName(townName, guild, ctx.Member, true);
 
+            var botRole = guild.BotRole;
+            Console.WriteLine($"BotSetup: PerformDestroyTown starting. TownName={townName}, GuildId={guild.Id}, GuildName={guild.Name}, BotRole={botRole?.Name ?? "NOT FOUND"}, BotRoleId={botRole?.Id ?? 0}");
+            Console.WriteLine($"BotSetup: TownDescription populated. DayCategoryName={tdesc.DayCategoryName}, NightCategoryName={tdesc.NightCategoryName}, ControlChannelName={tdesc.ControlChannelName}, ChatChannelName={tdesc.ChatChannelName}");
+
             List<string> notDeletedUnfamiliar = new();
             List<string> notDeleted = new();
 
@@ -189,6 +193,7 @@ namespace Bot.Core
             var nightCat = guild.GetCategoryByName(tdesc.NightCategoryName!);
             if(nightCat != null)
             {
+                Console.WriteLine($"BotSetup: Night category found. Name={nightCat.Name}, Id={nightCat.Id}, ChannelCount={nightCat.Channels.Count}");
                 var toDestroy = new List<IChannel>();
                 foreach(var channel in nightCat.Channels)
                 {
@@ -200,11 +205,13 @@ namespace Bot.Core
 
                 foreach(var channel in toDestroy)
                 {
+                    Console.WriteLine($"BotSetup: Deleting night channel. Name={channel.Name}, Id={channel.Id}");
                     await channel.DeleteAsync();
                 }
 
                 if(nightCat.Channels.Count == 0)
                 {
+                    Console.WriteLine($"BotSetup: Deleting night category. Name={nightCat.Name}, Id={nightCat.Id}");
                     await nightCat.DeleteAsync();
                 }
                 else
@@ -217,19 +224,39 @@ namespace Bot.Core
                     success = false;
                 }
             }
+            else
+            {
+                Console.WriteLine($"BotSetup: Night category not found. Expected name={tdesc.NightCategoryName}");
+            }
 
             var dayCat = guild.GetCategoryByName(tdesc.DayCategoryName);
             if(dayCat != null)
             {
+                Console.WriteLine($"BotSetup: Day category found. Name={dayCat.Name}, Id={dayCat.Id}, ChannelCount={dayCat.Channels.Count}");
+                foreach (var ch in dayCat.Channels)
+                {
+                    Console.WriteLine($"BotSetup:   Channel in day category: Name={ch.Name}, Id={ch.Id}, IsText={ch.IsText}, IsVoice={ch.IsVoice}");
+                }
+
                 var chatChan = dayCat.GetChannelByName(ChannelHelper.MakeTextChannelName(tdesc.ChatChannelName));
                 if(chatChan != null && chatChan.IsText)
                 {
+                    Console.WriteLine($"BotSetup: Found chat channel to delete. Name={chatChan.Name}, Id={chatChan.Id}, IsText={chatChan.IsText}. BotRole={botRole?.Name ?? "NOT FOUND"}, BotRoleId={botRole?.Id ?? 0}");
                     await chatChan.DeleteAsync();
+                    Console.WriteLine($"BotSetup: Chat channel deletion completed.");
+                }
+                else
+                {
+                    if (chatChan == null)
+                        Console.WriteLine($"BotSetup: Chat channel not found. Expected name={ChannelHelper.MakeTextChannelName(tdesc.ChatChannelName)}");
+                    else
+                        Console.WriteLine($"BotSetup: Chat channel found but IsText={chatChan.IsText}, skipping delete.");
                 }
 
                 var townSquare = dayCat.GetChannelByName(tdesc.TownSquareName);
                 if(townSquare != null && townSquare.IsVoice)
                 {
+                    Console.WriteLine($"BotSetup: Deleting town square. Name={townSquare.Name}, Id={townSquare.Id}");
                     await townSquare.DeleteAsync();
                 }
 
@@ -238,6 +265,7 @@ namespace Bot.Core
                     var chan = dayCat.GetChannelByName(s);
                     if(chan != null && chan.IsVoice)
                     {
+                        Console.WriteLine($"BotSetup: Deleting extra day channel. Name={chan.Name}, Id={chan.Id}");
                         await chan.DeleteAsync();
                     }
                 }
@@ -247,6 +275,7 @@ namespace Bot.Core
                 {
                     if(success && dayCat.Channels.Count == 1)
                     {
+                        Console.WriteLine($"BotSetup: Deleting control channel. Name={controlChan.Name}, Id={controlChan.Id}");
                         await controlChan.DeleteAsync();
                     }
                     else
@@ -258,6 +287,7 @@ namespace Bot.Core
 
                 if(dayCat.Channels.Count == 0)
                 {
+                    Console.WriteLine($"BotSetup: Deleting day category. Name={dayCat.Name}, Id={dayCat.Id}");
                     await dayCat.DeleteAsync();
                 }
                 else
@@ -268,6 +298,7 @@ namespace Bot.Core
             }
             else
             {
+                Console.WriteLine($"BotSetup: Day category not found. Expected name={tdesc.DayCategoryName}");
                 return InteractionResult.FromMessage($"Couldn't find a town named **{townName}** on this server!");
             }
 
@@ -277,6 +308,7 @@ namespace Bot.Core
                 var gameVillager = guild.GetRoleByName(tdesc.VillagerRoleName);
                 if(gameVillager != null)
                 {
+                    Console.WriteLine($"BotSetup: Deleting villager role. Name={gameVillager.Name}, Id={gameVillager.Id}");
                     await gameVillager.DeleteAsync();
                 }
                 else
@@ -287,6 +319,7 @@ namespace Bot.Core
                 var gameStoryteller = guild.GetRoleByName(tdesc.StorytellerRoleName);
                 if( gameStoryteller != null)
                 {
+                    Console.WriteLine($"BotSetup: Deleting storyteller role. Name={gameStoryteller.Name}, Id={gameStoryteller.Id}");
                     await gameStoryteller.DeleteAsync();
                 }
                 else
@@ -392,6 +425,18 @@ namespace Bot.Core
         {
             IGuild guild = townDesc.Guild;
 
+            Serilog.Log.Information(
+                "CreateTown: starting for guild {GuildName} ({GuildId}); guildPlayerRolePresent={GuildPlayerRolePresent}, guildStRolePresent={GuildStRolePresent}, dayCategory='{DayCategory}', nightCategory='{NightCategory}', controlChannel='{ControlChannel}', townSquare='{TownSquare}', chatChannel='{ChatChannel}'",
+                guild.Name,
+                guild.Id,
+                guildPlayerRole != null,
+                guildStRole != null,
+                townDesc.DayCategoryName,
+                townDesc.NightCategoryName,
+                townDesc.ControlChannelName,
+                townDesc.TownSquareName,
+                townDesc.ChatChannelName);
+
             Town newTown = new();
             newTown.Guild = guild;
 
@@ -400,6 +445,8 @@ namespace Bot.Core
             if (botRole == null)
                 throw new CreateTownException($"Could not find bot role!");
             var everyoneRole = guild.EveryoneRole;
+
+            Console.WriteLine($"BotSetup: CreateTown acquired bot role. BotRoleName={botRole.Name}, BotRoleId={botRole.Id}, EveryoneRoleName={everyoneRole.Name}, EveryoneRoleId={everyoneRole.Id}");
 
             // Make sure things aren't null
             townDesc.FallbackToDefaults();
@@ -419,19 +466,26 @@ namespace Bot.Core
             if (newTown.DayCategory == null)
                 throw new CreateTownException($"Could not find or create day category '{townDesc.DayCategoryName}'");
             await newTown.DayCategory.AddOverwriteAsync(newTown.VillagerRole, Permissions.AccessChannels);
-            await newTown.DayCategory.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.MoveMembers);
+            Serilog.Log.Information("CreateTown: day category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.DayCategory.Name, newTown.DayCategory.Id, newTown.VillagerRole.Name, Permissions.AccessChannels, Permissions.None);
+            await newTown.DayCategory.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.MoveMembers | Permissions.ManageChannels);
+            Serilog.Log.Information("CreateTown: day category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.DayCategory.Name, newTown.DayCategory.Id, botRole.Name, Permissions.AccessChannels | Permissions.MoveMembers | Permissions.ManageChannels, Permissions.None);
             await newTown.DayCategory.AddOverwriteAsync(newTown.StorytellerRole, Permissions.MoveMembers);
+            Serilog.Log.Information("CreateTown: day category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.DayCategory.Name, newTown.DayCategory.Id, newTown.StorytellerRole.Name, Permissions.MoveMembers, Permissions.None);
 
             newTown.ControlChannel = await ChannelHelper.GetOrCreateTextChannel(guild, newTown.DayCategory, townDesc.ControlChannelName!);
             if (newTown.ControlChannel == null)
                 throw new CreateTownException($"Could not find or create control channel '{townDesc.ControlChannelName}'");
-            await newTown.ControlChannel.AddOverwriteAsync(botRole, Permissions.AccessChannels);
+            await newTown.ControlChannel.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.ManageChannels);
+            Serilog.Log.Information("CreateTown: control channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.ControlChannel.Name, newTown.ControlChannel.Id, botRole.Name, Permissions.AccessChannels | Permissions.ManageChannels, Permissions.None);
             await newTown.ControlChannel.RemoveOverwriteAsync(newTown.VillagerRole);
+            Serilog.Log.Information("CreateTown: control channel overwrite removed for {ChannelName} ({ChannelId}) -> {RoleName}", newTown.ControlChannel.Name, newTown.ControlChannel.Id, newTown.VillagerRole.Name);
 
             if (guildStRole != null)
             {
                 await newTown.ControlChannel.AddOverwriteAsync(guildStRole, Permissions.AccessChannels);
+                Serilog.Log.Information("CreateTown: control channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.ControlChannel.Name, newTown.ControlChannel.Id, guildStRole.Name, Permissions.AccessChannels, Permissions.None);
                 await newTown.ControlChannel.AddOverwriteAsync(everyoneRole, allow: Permissions.None, deny: Permissions.AccessChannels);
+                Serilog.Log.Information("CreateTown: control channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.ControlChannel.Name, newTown.ControlChannel.Id, everyoneRole.Name, Permissions.None, Permissions.AccessChannels);
             }
 
             newTown.TownSquare = await ChannelHelper.GetOrCreateVoiceChannel(guild, newTown.DayCategory, townDesc.TownSquareName!);
@@ -441,7 +495,9 @@ namespace Bot.Core
             if (guildPlayerRole != null)
             {
                 await newTown.TownSquare.AddOverwriteAsync(guildPlayerRole, Permissions.AccessChannels);
+                Serilog.Log.Information("CreateTown: town square overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.TownSquare.Name, newTown.TownSquare.Id, guildPlayerRole.Name, Permissions.AccessChannels, Permissions.None);
                 await newTown.DayCategory.AddOverwriteAsync(everyoneRole, allow: Permissions.None, deny: Permissions.AccessChannels);
+                Serilog.Log.Information("CreateTown: day category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.DayCategory.Name, newTown.DayCategory.Id, everyoneRole.Name, Permissions.None, Permissions.AccessChannels);
             }
 
             // Chat channel is optional
@@ -451,10 +507,16 @@ namespace Bot.Core
                 if (newTown.ChatChannel == null)
                     throw new CreateTownException($"Could not find or create chat channel '{townDesc.ChatChannelName}'");
 
-                await newTown.ChatChannel.AddOverwriteAsync(botRole, Permissions.AccessChannels);
+                Console.WriteLine($"BotSetup: About to apply chat channel overwrite. ChannelName={newTown.ChatChannel.Name}, ChannelId={newTown.ChatChannel.Id}, BotRoleName={botRole.Name}, BotRoleId={botRole.Id}, Allow={Permissions.AccessChannels | Permissions.ManageChannels}");
+                await newTown.ChatChannel.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.ManageChannels);
+                Console.WriteLine($"BotSetup: Chat channel overwrite applied successfully. ChannelName={newTown.ChatChannel.Name}, ChannelId={newTown.ChatChannel.Id}");
+                Serilog.Log.Information("CreateTown: chat channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.ChatChannel.Name, newTown.ChatChannel.Id, botRole.Name, Permissions.AccessChannels | Permissions.ManageChannels, Permissions.None);
 
                 if (guildPlayerRole == null)
+                {
                     await newTown.ChatChannel.AddOverwriteAsync(everyoneRole, allow: Permissions.None, deny: Permissions.AccessChannels);
+                    Serilog.Log.Information("CreateTown: chat channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.ChatChannel.Name, newTown.ChatChannel.Id, everyoneRole.Name, Permissions.None, Permissions.AccessChannels);
+                }
             }
 
             foreach (var chanName in DefaultExtraDayChannels)
@@ -464,7 +526,10 @@ namespace Bot.Core
                     throw new CreateTownException($"Could not find or create extra day channel '{chanName}'");
 
                 if (guildPlayerRole == null)
+                {
                     await newChan.AddOverwriteAsync(everyoneRole, allow: Permissions.None, deny: Permissions.AccessChannels);
+                    Serilog.Log.Information("CreateTown: extra day channel overwrite applied for {ChannelName} ({ChannelId}) -> {RoleName}: allow={Allow}, deny={Deny}", newChan.Name, newChan.Id, everyoneRole.Name, Permissions.None, Permissions.AccessChannels);
+                }
             }
 
             // Night category is optional
@@ -475,12 +540,16 @@ namespace Bot.Core
                     throw new CreateTownException($"Could not find or create night category '{townDesc.NightCategoryName}'");
 
                 await newTown.NightCategory.AddOverwriteAsync(newTown.StorytellerRole, Permissions.AccessChannels | Permissions.MoveMembers);
-                await newTown.NightCategory.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.MoveMembers);
+                Serilog.Log.Information("CreateTown: night category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.NightCategory.Name, newTown.NightCategory.Id, newTown.StorytellerRole.Name, Permissions.AccessChannels | Permissions.MoveMembers, Permissions.None);
+                await newTown.NightCategory.AddOverwriteAsync(botRole, Permissions.AccessChannels | Permissions.MoveMembers | Permissions.ManageChannels);
+                Serilog.Log.Information("CreateTown: night category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.NightCategory.Name, newTown.NightCategory.Id, botRole.Name, Permissions.AccessChannels | Permissions.MoveMembers | Permissions.ManageChannels, Permissions.None);
                 await newTown.NightCategory.AddOverwriteAsync(everyoneRole, allow: Permissions.None, deny: Permissions.AccessChannels);
+                Serilog.Log.Information("CreateTown: night category overwrite applied for {CategoryName} ({CategoryId}) -> {RoleName}: allow={Allow}, deny={Deny}", newTown.NightCategory.Name, newTown.NightCategory.Id, everyoneRole.Name, Permissions.None, Permissions.AccessChannels);
 
                 for (int i = 0; i < IBotSetup.NumCottages; i++)
                 {
                     await guild.CreateVoiceChannelAsync(IBotSetup.DefaultCottageName, newTown.NightCategory);
+                    Serilog.Log.Information("CreateTown: created night cottage channel {ChannelName} in category {CategoryName} ({CategoryId})", IBotSetup.DefaultCottageName, newTown.NightCategory.Name, newTown.NightCategory.Id);
                 }
             }
 

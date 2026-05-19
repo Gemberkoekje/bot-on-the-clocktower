@@ -17,6 +17,8 @@ namespace Bot.Database
 			m_documentStore = documentStore;
 		}
 
+		private static string BuildTownRecordId(ulong guildId, ulong controlChannelId) => $"{guildId}:{controlChannelId}";
+
 		private static TownRecord RecordFromTownAndAuthorInfo(ITown town, ulong authorId, string? authorName)
 		{
 			var guildId = town.Guild?.Id ?? 0;
@@ -73,9 +75,7 @@ namespace Bot.Database
 		{
 			using var session = m_documentStore.LightweightSession();
 
-			var existing = await session.Query<TownRecord>()
-				.FirstOrDefaultAsync(x => x.GuildId == record.GuildId && x.ControlChannelId == record.ControlChannelId);
-
+			TownRecord? existing = await session.LoadAsync<TownRecord>(record.Id);
 			if (existing != null)
 			{
 				session.Delete(existing);
@@ -88,17 +88,15 @@ namespace Bot.Database
 		public async Task<ITownRecord?> GetTownRecordAsync(ulong guildId, ulong channelId)
 		{
 			using var querySession = m_documentStore.QuerySession();
-			return await querySession.Query<TownRecord>()
-				.FirstOrDefaultAsync(x => x.GuildId == guildId && x.ControlChannelId == channelId);
+			string id = BuildTownRecordId(guildId, channelId);
+			return await querySession.LoadAsync<TownRecord>(id);
 		}
 
 		public async Task<IEnumerable<ITownRecord>> GetTownRecordsAsync(ulong guildId)
 		{
 			using var querySession = m_documentStore.QuerySession();
-			var records = await querySession.Query<TownRecord>()
-				.Where(x => x.GuildId == guildId)
-				.ToListAsync();
-			return records;
+			var records = await querySession.Query<TownRecord>().ToListAsync();
+			return records.Where(x => x.GuildId == guildId).ToList();
 		}
 
 		public async Task<IEnumerable<TownKey>> GetAllTowns()
@@ -111,8 +109,8 @@ namespace Bot.Database
 		public async Task<bool> DeleteTownAsync(TownKey townKey)
 		{
 			using var session = m_documentStore.LightweightSession();
-			var existing = await session.Query<TownRecord>()
-				.FirstOrDefaultAsync(x => x.GuildId == townKey.GuildId && x.ControlChannelId == townKey.ControlChannelId);
+			string id = BuildTownRecordId(townKey.GuildId, townKey.ControlChannelId);
+			TownRecord? existing = await session.LoadAsync<TownRecord>(id);
 
 			if (existing == null)
 			{
@@ -127,8 +125,8 @@ namespace Bot.Database
 		public async Task<ITownRecord?> GetTownRecordByNameAsync(ulong guildId, string townName)
 		{
 			using var querySession = m_documentStore.QuerySession();
-			return await querySession.Query<TownRecord>()
-				.FirstOrDefaultAsync(x => x.GuildId == guildId && x.DayCategory == townName);
+			var records = await querySession.Query<TownRecord>().ToListAsync();
+			return records.FirstOrDefault(x => x.GuildId == guildId && x.DayCategory == townName);
 		}
 
 		public class MissingGuildInfoDatabaseException : Exception { }

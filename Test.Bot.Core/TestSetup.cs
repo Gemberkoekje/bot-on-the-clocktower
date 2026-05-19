@@ -3,6 +3,7 @@ using Bot.Api.Database;
 using Bot.Core;
 using Bot.Core.Interaction;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -35,10 +36,24 @@ namespace Test.Bot.Core
         private readonly Mock<ICommandMetricDatabase> CommandMetricDatabaseMock;
         private readonly Mock<IDateTime> DateTimeMock;
         private readonly Mock<IGuildInteractionWrapper> InteractionWrapperMock;
+        private readonly Mock<IRole> BotRoleMock;
+        private readonly Mock<IChannelCategory> DayCategoryMock;
+        private readonly Mock<IChannelCategory> NightCategoryMock;
+        private readonly Mock<IChannel> ControlChannelMock;
+        private readonly Mock<IChannel> ChatChannelMock;
+        private readonly Mock<IChannel> TownSquareMock;
         private TownDescription TownDesc;
 
         public TestSetup()
         {
+            BotRoleMock = MakeRole("Bot on the Clocktower Test");
+            BotRoleMock.SetupGet(x => x.IsThisBot).Returns(true);
+            DayCategoryMock = MakeChannelCategory(DayCatName);
+            NightCategoryMock = MakeChannelCategory(NightCatName);
+            TownSquareMock = MakeChannel(TownSquareName);
+            ControlChannelMock = MakeChannel(ControlChannelName);
+            ChatChannelMock = MakeChannel(ChatChannelName);
+
             TownMock = MakeTown();
             AuthorMock = MakeAuthor();
             GuildMock = MakeGuild();
@@ -72,9 +87,12 @@ namespace Test.Bot.Core
             Mock<IChannel> chan = new(MockBehavior.Strict) { Name = name };
             chan.SetupGet(x => x.Name).Returns(name);
             chan.SetupGet(x => x.Id).Returns((ulong)name.GetHashCode());
+            chan.SetupGet(x => x.IsText).Returns(!name.Equals(TownSquareName, StringComparison.Ordinal));
+            chan.SetupGet(x => x.IsVoice).Returns(name.Equals(TownSquareName, StringComparison.Ordinal) || name.Equals("Dark Alley", StringComparison.Ordinal) || name.Equals("Library", StringComparison.Ordinal) || name.Equals("Graveyard", StringComparison.Ordinal) || name.Equals("Pie Shop", StringComparison.Ordinal));
             chan.Setup(x => x.AddOverwriteAsync(It.IsAny<IMember>(), It.IsAny<IBaseChannel.Permissions>(), It.IsAny<IBaseChannel.Permissions>())).Returns(Task.CompletedTask);
             chan.Setup(x => x.AddOverwriteAsync(It.IsAny<IRole>(), It.IsAny<IBaseChannel.Permissions>(), It.IsAny<IBaseChannel.Permissions>())).Returns(Task.CompletedTask);
             chan.Setup(x => x.RemoveOverwriteAsync(It.IsAny<IRole>())).Returns(Task.CompletedTask);
+            chan.Setup(x => x.DeleteAsync(It.IsAny<string?>())).Returns(Task.CompletedTask);
             return chan;
         }
 
@@ -85,6 +103,8 @@ namespace Test.Bot.Core
             cat.SetupGet(x => x.Id).Returns((ulong)name.GetHashCode());
             cat.Setup(x => x.AddOverwriteAsync(It.IsAny<IMember>(), It.IsAny<IBaseChannel.Permissions>(), It.IsAny<IBaseChannel.Permissions>())).Returns(Task.CompletedTask);
             cat.Setup(x => x.AddOverwriteAsync(It.IsAny<IRole>(), It.IsAny<IBaseChannel.Permissions>(), It.IsAny<IBaseChannel.Permissions>())).Returns(Task.CompletedTask);
+            cat.Setup(x => x.RemoveOverwriteAsync(It.IsAny<IRole>())).Returns(Task.CompletedTask);
+            cat.Setup(x => x.DeleteAsync(It.IsAny<string?>())).Returns(Task.CompletedTask);
             cat.SetupGet(x => x.Channels).Returns(new List<IChannel>());
             return cat;
         }
@@ -97,14 +117,14 @@ namespace Test.Bot.Core
             return role;
         }
 
-        public static Mock<ITown> MakeTown()
+        public Mock<ITown> MakeTown()
         {
             Mock<ITown> town = new();
-            town.SetupGet(x => x.DayCategory).Returns(MakeChannelCategory(DayCatName).Object);
-            town.SetupGet(x => x.NightCategory).Returns(MakeChannelCategory(NightCatName).Object);
-            town.SetupGet(x => x.TownSquare).Returns(MakeChannel(TownSquareName).Object);
-            town.SetupGet(x => x.ControlChannel).Returns(MakeChannel(ControlChannelName).Object);
-            town.SetupGet(x => x.ChatChannel).Returns(MakeChannel(ChatChannelName).Object);
+            town.SetupGet(x => x.DayCategory).Returns(DayCategoryMock.Object);
+            town.SetupGet(x => x.NightCategory).Returns(NightCategoryMock.Object);
+            town.SetupGet(x => x.TownSquare).Returns(TownSquareMock.Object);
+            town.SetupGet(x => x.ControlChannel).Returns(ControlChannelMock.Object);
+            town.SetupGet(x => x.ChatChannel).Returns(ChatChannelMock.Object);
             town.SetupGet(x => x.StorytellerRole).Returns(MakeRole(StorytellerName).Object);
             town.SetupGet(x => x.VillagerRole).Returns(MakeRole(VillagerName).Object);
             return town;
@@ -122,20 +142,19 @@ namespace Test.Bot.Core
         {
             Mock<IGuild> guild = new(MockBehavior.Strict);
             guild.SetupGet(x => x.Id).Returns(MockGuildId);
-            guild.Setup(x => x.CreateTextChannelAsync(It.IsAny<string>(), It.IsAny<IChannelCategory?>())).ReturnsAsync((string name, IChannelCategory cat) => MakeChannel(name).Object); 
-            guild.Setup(x => x.CreateVoiceChannelAsync(It.IsAny<string>(), It.IsAny<IChannelCategory?>())).ReturnsAsync((string name, IChannelCategory cat) => MakeChannel(name).Object);
-            guild.Setup(x => x.CreateCategoryAsync(It.IsAny<string>())).ReturnsAsync((string name) => MakeChannelCategory(name).Object);
+            guild.SetupGet(x => x.Name).Returns("Test Guild");
+            guild.Setup(x => x.CreateTextChannelAsync(It.IsAny<string>(), It.IsAny<IChannelCategory?>())).ReturnsAsync((string name, IChannelCategory cat) => name == ChatChannelName ? ChatChannelMock.Object : name == ControlChannelName ? ControlChannelMock.Object : MakeChannel(name).Object); 
+            guild.Setup(x => x.CreateVoiceChannelAsync(It.IsAny<string>(), It.IsAny<IChannelCategory?>())).ReturnsAsync((string name, IChannelCategory cat) => name == TownSquareName ? TownSquareMock.Object : MakeChannel(name).Object);
+            guild.Setup(x => x.CreateCategoryAsync(It.IsAny<string>())).ReturnsAsync((string name) => name == DayCatName ? DayCategoryMock.Object : name == NightCatName ? NightCategoryMock.Object : MakeChannelCategory(name).Object);
             guild.Setup(x => x.CreateRoleAsync(It.IsAny<string>(), It.IsAny<Color>())).ReturnsAsync((string name, Color c) => MakeRole(name).Object);
             guild.SetupGet(x => x.EveryoneRole).Returns(MakeRole("Everyone").Object);
 
             guild.SetupGet(x => x.ChannelCategories).Returns(new List<IChannelCategory>());
             guild.SetupGet(x => x.Channels).Returns(new List<IChannel>());
 
-            Mock<IRole> botRole = MakeRole("Bot on the Clocktower Test");
-            botRole.SetupGet(x => x.IsThisBot).Returns(true);
-            guild.SetupGet(x => x.BotRole).Returns(botRole.Object);
+            guild.SetupGet(x => x.BotRole).Returns(BotRoleMock.Object);
 
-            var roleList = new Dictionary<ulong, IRole> { { botRole.Object.Id, botRole.Object } };
+            var roleList = new Dictionary<ulong, IRole> { { BotRoleMock.Object.Id, BotRoleMock.Object } };
             guild.SetupGet(x => x.Roles).Returns(roleList);
             return guild;
         }
@@ -219,6 +238,14 @@ namespace Test.Bot.Core
             GuildMock.Verify(x => x.CreateTextChannelAsync(It.Is<string>(s => s == ControlChannelName), It.IsAny<IChannelCategory?>()), Times.Once);
         }
 
+        private void VerifyManageChannelsOverwrites()
+        {
+            DayCategoryMock.Verify(x => x.AddOverwriteAsync(BotRoleMock.Object, It.Is<IBaseChannel.Permissions>(p => p.HasFlag(IBaseChannel.Permissions.ManageChannels)), It.IsAny<IBaseChannel.Permissions>()), Times.Once);
+            ControlChannelMock.Verify(x => x.AddOverwriteAsync(BotRoleMock.Object, It.Is<IBaseChannel.Permissions>(p => p.HasFlag(IBaseChannel.Permissions.ManageChannels)), It.IsAny<IBaseChannel.Permissions>()), Times.Once);
+            ChatChannelMock.Verify(x => x.AddOverwriteAsync(BotRoleMock.Object, It.Is<IBaseChannel.Permissions>(p => p.HasFlag(IBaseChannel.Permissions.ManageChannels)), It.IsAny<IBaseChannel.Permissions>()), Times.Once);
+            NightCategoryMock.Verify(x => x.AddOverwriteAsync(BotRoleMock.Object, It.Is<IBaseChannel.Permissions>(p => p.HasFlag(IBaseChannel.Permissions.ManageChannels)), It.IsAny<IBaseChannel.Permissions>()), Times.Once);
+        }
+
         private void VerifyOptionalChannels(IBotSetup _)
         {
             GuildMock.Verify(x => x.CreateTextChannelAsync(It.Is<string>(s => s == ChatChannelName), It.IsAny<IChannelCategory?>()), Times.Once);
@@ -234,6 +261,7 @@ namespace Test.Bot.Core
             VerifyRequiredChannels(bs);
             VerifyOptionalChannels(bs);
             VerifyRequiredRoles(bs);
+            VerifyManageChannelsOverwrites();
         }
 
 
@@ -246,6 +274,7 @@ namespace Test.Bot.Core
 
             VerifyRequiredChannels(bs);
             VerifyRequiredRoles(bs);
+            GuildMock.Verify(x => x.CreateTextChannelAsync(It.Is<string>(s => s == ChatChannelName), It.IsAny<IChannelCategory?>()), Times.Once);
             // Make sure night stuff DIDN'T happen
             GuildMock.Verify(x => x.CreateCategoryAsync(It.Is<string>(s => s == NightCatName)), Times.Never);
             GuildMock.Verify(x => x.CreateVoiceChannelAsync(It.Is<string>(s => s == IBotSetup.DefaultCottageName), It.IsAny<IChannelCategory?>()), Times.Never);

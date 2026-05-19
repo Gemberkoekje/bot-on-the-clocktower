@@ -31,31 +31,38 @@ namespace Bot.Remora
 
         public async Task RespondAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
+            Console.WriteLine($"RemoraInteractionResponder: begin. InteractionId={interaction.ID.Value}, Type={interaction.Type}, ApplicationId={interaction.ApplicationID.Value}, GuildId={(interaction.GuildID.HasValue ? interaction.GuildID.Value.Value : 0UL)}.");
+
             try
             {
                 switch (interaction.Type)
                 {
                     case InteractionType.ApplicationCommand:
+                        Console.WriteLine($"RemoraInteractionResponder: routing to slash dispatcher. InteractionId={interaction.ID.Value}.");
                         await m_slashDispatcher.DispatchAsync(interaction, cancellationToken);
+                        Console.WriteLine($"RemoraInteractionResponder: slash dispatch completed. InteractionId={interaction.ID.Value}.");
                         return;
 
                     case InteractionType.MessageComponent:
                     case InteractionType.ModalSubmit:
+                        Console.WriteLine($"RemoraInteractionResponder: routing to component dispatcher. InteractionId={interaction.ID.Value}, InteractionType={interaction.Type}.");
                         bool wasHandled = await m_componentDispatcher.DispatchAsync(interaction, cancellationToken);
+                        Console.WriteLine($"RemoraInteractionResponder: component dispatcher returned. InteractionId={interaction.ID.Value}, WasHandled={wasHandled}.");
                         if (!wasHandled)
                         {
+                            Console.WriteLine($"RemoraInteractionResponder: sending unknown-component fallback. InteractionId={interaction.ID.Value}.");
                             await SendUnknownComponentResponseAsync(interaction, cancellationToken);
                         }
                         return;
 
                     default:
-                        Console.WriteLine($"RemoraInteractionResponder: ignored interaction type {interaction.Type}.");
+                        Console.WriteLine($"RemoraInteractionResponder: ignored interaction type. InteractionId={interaction.ID.Value}, Type={interaction.Type}.");
                         return;
                 }
             }
             catch (Exception error)
             {
-                Console.Error.WriteLine($"RemoraInteractionResponder: dispatch failed for interaction {interaction.ID.Value}. {error}");
+                Console.Error.WriteLine($"RemoraInteractionResponder: dispatch failed. InteractionId={interaction.ID.Value}, Type={interaction.Type}. {error}");
                 await SendErrorResponseAsync(interaction, cancellationToken);
             }
         }
@@ -86,12 +93,16 @@ namespace Bot.Remora
 
                 if (!callbackResult.IsSuccess)
                 {
-                    Console.Error.WriteLine($"RemoraInteractionResponder: failed unknown-component response for interaction {interaction.ID.Value}. {callbackResult.Error}");
+                    Console.Error.WriteLine($"RemoraInteractionResponder: failed unknown-component response. InteractionId={interaction.ID.Value}. {callbackResult.Error}");
+                }
+                else
+                {
+                    Console.WriteLine($"RemoraInteractionResponder: unknown-component fallback sent. InteractionId={interaction.ID.Value}.");
                 }
             }
             catch (Exception error)
             {
-                Console.Error.WriteLine($"RemoraInteractionResponder: failed to send unknown-component response for interaction {interaction.ID.Value}. {error}");
+                Console.Error.WriteLine($"RemoraInteractionResponder: failed to send unknown-component response. InteractionId={interaction.ID.Value}. {error}");
             }
         }
 
@@ -121,8 +132,11 @@ namespace Bot.Remora
 
                 if (callbackResult.IsSuccess)
                 {
+                    Console.WriteLine($"RemoraInteractionResponder: sent primary error response callback. InteractionId={interaction.ID.Value}.");
                     return;
                 }
+
+                Console.Error.WriteLine($"RemoraInteractionResponder: primary error callback failed; attempting follow-up. InteractionId={interaction.ID.Value}. {callbackResult.Error}");
 
                 await m_interactionApi.CreateFollowupMessageAsync(
                     interaction.ApplicationID,
@@ -138,7 +152,7 @@ namespace Bot.Remora
             }
             catch (Exception error)
             {
-                Console.Error.WriteLine($"RemoraInteractionResponder: failed to send error response for interaction {interaction.ID.Value}. {error}");
+                Console.Error.WriteLine($"RemoraInteractionResponder: failed to send error response. InteractionId={interaction.ID.Value}. {error}");
             }
         }
     }

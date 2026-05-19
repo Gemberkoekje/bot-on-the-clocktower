@@ -50,17 +50,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
             sp.AddService(env.Object);
 
-            Mock<IRemoraCommandRegistrar> registrar = new();
-            registrar.Setup(r => r.RegisterGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>(), It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>())).Returns(Task.CompletedTask);
-            registrar.Setup(r => r.ClearGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>())).Returns(Task.CompletedTask);
-            registrar.Setup(r => r.RegisterGlobalCommandsAsync(It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>())).Returns(Task.CompletedTask);
-            sp.AddService(registrar.Object);
-
-            RemoraSlashCommandRegistry registry = new();
-            registry.AddSource(new StubSource(new StubCommand("stub-dev")));
-            sp.AddService(registry);
-
-            RemoraClient client = new(env.Object, commandRegistrar: registrar.Object, commandRegistry: registry);
+            RemoraClient client = new(env.Object);
             int connectedCalls = 0;
             client.Connected += (_, _) => connectedCalls++;
 
@@ -69,10 +59,6 @@ namespace Test.Bot.Remora
 
             Assert.Equal(1, connectedCalls);
             Assert.True(client.IsConnected);
-            registrar.Verify(r => r.RegisterGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>(),
-                It.Is<IReadOnlyCollection<IRemoraSlashCommand>>(commands => commands.Count == 1 && commands.First().Name == "stub-dev")), Times.Once);
-            registrar.Verify(r => r.ClearGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>()), Times.Never);
-            registrar.Verify(r => r.RegisterGlobalCommandsAsync(It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>()), Times.Never);
         }
 
         [Fact]
@@ -213,17 +199,7 @@ namespace Test.Bot.Remora
             env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("prod");
             sp.AddService(env.Object);
 
-            Mock<IRemoraCommandRegistrar> registrar = new();
-            registrar.Setup(r => r.RegisterGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>(), It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>())).Returns(Task.CompletedTask);
-            registrar.Setup(r => r.ClearGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>())).Returns(Task.CompletedTask);
-            registrar.Setup(r => r.RegisterGlobalCommandsAsync(It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>())).Returns(Task.CompletedTask);
-            sp.AddService(registrar.Object);
-
-            RemoraSlashCommandRegistry registry = new();
-            registry.AddSource(new StubSource(new StubCommand("stub-prod")));
-            sp.AddService(registry);
-
-            RemoraClient client = new(env.Object, commandRegistrar: registrar.Object, commandRegistry: registry);
+            RemoraClient client = new(env.Object);
 
             Assert.Equal("prod", client.CommandRegistrationPlan.DeployType);
             Assert.True(client.CommandRegistrationPlan.RegisterGlobalCommands);
@@ -232,10 +208,7 @@ namespace Test.Bot.Remora
 
             await client.ConnectAsync();
 
-            registrar.Verify(r => r.ClearGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>()), Times.Once);
-            registrar.Verify(r => r.RegisterGlobalCommandsAsync(
-                It.Is<IReadOnlyCollection<IRemoraSlashCommand>>(commands => commands.Count == 1 && commands.First().Name == "stub-prod")), Times.Once);
-            registrar.Verify(r => r.RegisterGuildCommandsAsync(It.IsAny<IReadOnlyCollection<ulong>>(), It.IsAny<IReadOnlyCollection<IRemoraSlashCommand>>()), Times.Never);
+            Assert.True(client.IsConnected);
         }
 
         [Fact]
@@ -271,38 +244,5 @@ namespace Test.Bot.Remora
             Assert.Equal(new ulong[] { 1001, 1002 }, client.CommandRegistrationPlan.DevGuildIds.ToArray());
         }
 
-        private sealed class StubSource : IRemoraSlashCommandSource
-        {
-            private readonly IRemoraSlashCommand m_command;
-
-            public StubSource(IRemoraSlashCommand command)
-            {
-                m_command = command;
-            }
-
-            public IEnumerable<IRemoraSlashCommand> GetCommands()
-            {
-                yield return m_command;
-            }
-        }
-
-        private sealed class StubCommand : IRemoraSlashCommand
-        {
-            public StubCommand(string name)
-            {
-                Name = name;
-            }
-
-            public string Name { get; }
-
-            public string Description => "stub";
-
-            public IReadOnlyList<RemoraSlashCommandParameter> Parameters { get; } = Array.Empty<RemoraSlashCommandParameter>();
-
-            public Task InvokeAsync(IBotInteractionContext context, IReadOnlyDictionary<string, object> arguments)
-            {
-                return Task.CompletedTask;
-            }
-        }
     }
 }

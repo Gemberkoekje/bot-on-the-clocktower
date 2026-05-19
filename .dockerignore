@@ -1,0 +1,11 @@
+.git
+.github
+.vs
+TestResults
+**/bin
+**/obj
+**/.idea
+**/.vscode
+README.md
+README_PYTHON.md
+plans

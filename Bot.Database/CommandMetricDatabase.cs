@@ -14,11 +14,18 @@ namespace Bot.Database
             m_documentStore = documentStore;
         }
 
+        private static DateTime NormalizeDay(DateTime timestamp)
+        {
+            return DateTime.SpecifyKind(timestamp.Date, DateTimeKind.Unspecified);
+        }
+
         private async Task<CommandMetricRecord?> GetExisting(DateTime timestamp)
         {
+            DateTime normalizedDay = NormalizeDay(timestamp);
+
             using var querySession = m_documentStore.QuerySession();
             return await querySession.Query<CommandMetricRecord>()
-                .FirstOrDefaultAsync(x => x.Day == timestamp.Date);
+                .FirstOrDefaultAsync(x => x.Day == normalizedDay);
         }
 
         private async Task<CommandMetricRecord> GetExistingOrNew(DateTime timestamp)
@@ -32,7 +39,7 @@ namespace Bot.Database
 
             return new CommandMetricRecord()
             {
-                Day = timestamp.Date,
+                Day = NormalizeDay(timestamp),
             };
         }
 
@@ -48,8 +55,9 @@ namespace Bot.Database
             rec.Commands[command]++;
 
             using var session = m_documentStore.LightweightSession();
+            DateTime normalizedDay = NormalizeDay(rec.Day);
             var existing = await session.Query<CommandMetricRecord>()
-                .FirstOrDefaultAsync(x => x.Day == rec.Day);
+                .FirstOrDefaultAsync(x => x.Day == normalizedDay);
             if (existing != null)
             {
                 session.Delete(existing);

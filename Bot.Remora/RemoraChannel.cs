@@ -30,10 +30,11 @@ namespace Bot.Remora
         public bool IsDeleted { get; private set; }
 
         private readonly IDiscordRestChannelAPI? m_channelApi;
+        private RemoraChannelCategory? m_parentCategory;
         private readonly Dictionary<ulong, (IBaseChannel.Permissions Allow, IBaseChannel.Permissions Deny)> m_memberOverwrites = new();
         private readonly Dictionary<ulong, (IBaseChannel.Permissions Allow, IBaseChannel.Permissions Deny)> m_roleOverwrites = new();
 
-        public RemoraChannel(ulong id, string name, bool isVoice = false, int position = 0, IEnumerable<IMember>? users = null, IDiscordRestChannelAPI? channelApi = null)
+        public RemoraChannel(ulong id, string name, bool isVoice = false, int position = 0, IEnumerable<IMember>? users = null, IDiscordRestChannelAPI? channelApi = null, RemoraChannelCategory? parentCategory = null)
         {
             Id = id;
             Name = name;
@@ -41,6 +42,12 @@ namespace Bot.Remora
             Position = position;
             m_users = users != null ? new List<IMember>(users) : new List<IMember>();
             m_channelApi = channelApi;
+            m_parentCategory = parentCategory;
+        }
+
+        internal void SetParentCategory(RemoraChannelCategory? parentCategory)
+        {
+            m_parentCategory = parentCategory;
         }
 
         public async Task AddOverwriteAsync(IMember member, IBaseChannel.Permissions allow, IBaseChannel.Permissions deny = IBaseChannel.Permissions.None)
@@ -189,17 +196,35 @@ namespace Bot.Remora
 
         public async Task DeleteAsync(string? reason = null)
         {
+            string reasonText = string.IsNullOrWhiteSpace(reason) ? "<none>" : reason;
+            Console.WriteLine($"RemoraChannel: delete requested. TargetType={GetType().FullName ?? GetType().Name}, Id={Id}, Name='{Name}', IsVoice={IsVoice}, Reason='{reasonText}'.");
+
             IsDeleted = true;
+            if (m_parentCategory is not null)
+            {
+                m_parentCategory.RemoveChannel(this);
+            }
+
             if (m_channelApi is null)
             {
+                Console.WriteLine($"RemoraChannel: delete skipped because no channel API was configured. TargetType={GetType().FullName ?? GetType().Name}, Id={Id}, Name='{Name}'.");
                 return;
             }
 
-            IResult result = await m_channelApi.DeleteChannelAsync(
-                new Snowflake(Id),
-                string.IsNullOrWhiteSpace(reason) ? default : new Optional<string>(reason),
-                default).ConfigureAwait(false);
-            EnsureSuccess(result, "Failed to delete channel.");
+            try
+            {
+                IResult result = await m_channelApi.DeleteChannelAsync(
+                    new Snowflake(Id),
+                    string.IsNullOrWhiteSpace(reason) ? default : new Optional<string>(reason),
+                    default).ConfigureAwait(false);
+                EnsureSuccess(result, "Failed to delete channel.");
+                Console.WriteLine($"RemoraChannel: delete succeeded. TargetType={GetType().FullName ?? GetType().Name}, Id={Id}, Name='{Name}'.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"RemoraChannel: delete failed with exception. ChannelId={Id}, ChannelName='{Name}', Exception={ex.GetType().Name}, Message={ex.Message}");
+                throw;
+            }
         }
 
         private static DiscordPermissionSet ToDiscordPermissionSet(IBaseChannel.Permissions permissions)

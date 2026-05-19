@@ -133,6 +133,7 @@
 - Log errors appropriately without exposing sensitive information
 - Provide meaningful error messages to users
 - Consider using Result pattern for expected failures
+- When sending runtime error DM messages, direct recipients to report issues at https://github.com/Gemberkoekje/bot-on-the-clocktower instead of the upstream repository
 
 ## Resource Management
 - Implement `IDisposable` for types that manage unmanaged resources

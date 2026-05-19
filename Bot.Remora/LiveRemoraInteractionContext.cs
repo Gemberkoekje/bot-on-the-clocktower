@@ -60,8 +60,11 @@ namespace Bot.Remora
 
         public async Task DeferInteractionResponse()
         {
+            Console.WriteLine($"LiveRemoraInteractionContext: defer requested. InteractionId={m_interactionId.Value}, IsDeferred={IsDeferred}.");
+
             if (IsDeferred)
             {
+                Console.WriteLine($"LiveRemoraInteractionContext: defer skipped (already deferred). InteractionId={m_interactionId.Value}.");
                 return;
             }
 
@@ -69,21 +72,35 @@ namespace Bot.Remora
             var result = await m_interactionApi.CreateInteractionResponseAsync(m_interactionId, m_token, response, default, m_cancellationToken);
             if (!result.IsSuccess)
             {
+                string errorText = result.Error?.ToString() ?? string.Empty;
+                if (errorText.Contains("InteractionHasAlreadyBeenAcknowledged", StringComparison.Ordinal))
+                {
+                    IsDeferred = true;
+                    Console.WriteLine($"LiveRemoraInteractionContext: defer skipped because interaction was already acknowledged. InteractionId={m_interactionId.Value}.");
+                    return;
+                }
+
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: defer failed. InteractionId={m_interactionId.Value}. {result.Error}");
                 throw new InvalidOperationException($"Failed to defer interaction response: {result.Error}");
             }
 
             IsDeferred = true;
+            Console.WriteLine($"LiveRemoraInteractionContext: defer succeeded. InteractionId={m_interactionId.Value}.");
         }
 
         public async Task EditResponseAsync(IBotWebhookBuilder webhookBuilder)
         {
+            Console.WriteLine($"LiveRemoraInteractionContext: edit response requested. InteractionId={m_interactionId.Value}, IsDeferred={IsDeferred}.");
+
             if (webhookBuilder is not RemoraWebhookBuilder remoraWebhookBuilder)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: edit response rejected due to webhook builder type mismatch. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Passed an incorrect webhook builder type");
             }
 
             if (!IsDeferred)
             {
+                Console.WriteLine($"LiveRemoraInteractionContext: edit requested before defer; auto-deferring. InteractionId={m_interactionId.Value}.");
                 await DeferInteractionResponse();
             }
 
@@ -100,14 +117,20 @@ namespace Bot.Remora
 
             if (!result.IsSuccess)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: edit response failed. InteractionId={m_interactionId.Value}. {result.Error}");
                 throw new InvalidOperationException($"Failed to edit interaction response: {result.Error}");
             }
+
+            Console.WriteLine($"LiveRemoraInteractionContext: edit response succeeded. InteractionId={m_interactionId.Value}.");
         }
 
         public async Task UpdateOriginalMessageAsync(IInteractionResponseBuilder builder)
         {
+            Console.WriteLine($"LiveRemoraInteractionContext: update original message requested. InteractionId={m_interactionId.Value}.");
+
             if (builder is not RemoraInteractionResponseBuilder remoraBuilder)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: update original message rejected due to builder type mismatch. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Passed an incorrect interaction response builder type");
             }
 
@@ -133,32 +156,40 @@ namespace Bot.Remora
 
             if (!result.IsSuccess)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: update original message failed. InteractionId={m_interactionId.Value}. {result.Error}");
                 throw new InvalidOperationException($"Failed to update original interaction message: {result.Error}");
             }
 
             IsDeferred = true;
+            Console.WriteLine($"LiveRemoraInteractionContext: update original message succeeded. InteractionId={m_interactionId.Value}.");
         }
 
         public async Task ShowModalAsync(IInteractionResponseBuilder builder)
         {
+            Console.WriteLine($"LiveRemoraInteractionContext: show modal requested. InteractionId={m_interactionId.Value}, IsDeferred={IsDeferred}.");
+
             if (builder is not RemoraInteractionResponseBuilder remoraBuilder)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: show modal rejected due to builder type mismatch. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Passed an incorrect interaction response builder type");
             }
 
             if (IsDeferred)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: show modal rejected because interaction already acknowledged. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Cannot show a modal after the interaction has already been acknowledged.");
             }
 
             if (string.IsNullOrWhiteSpace(remoraBuilder.CustomId))
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: show modal rejected because custom ID is missing. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Modal custom ID is required.");
             }
 
             IReadOnlyList<IMessageComponent> modalRows = BuildModalRows(remoraBuilder.Components);
             if (modalRows.Count == 0)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: show modal rejected because modal rows are empty. InteractionId={m_interactionId.Value}.");
                 throw new InvalidOperationException("Modal must include at least one text input component.");
             }
 
@@ -177,11 +208,13 @@ namespace Bot.Remora
 
             if (!result.IsSuccess)
             {
+                Console.Error.WriteLine($"LiveRemoraInteractionContext: show modal failed. InteractionId={m_interactionId.Value}. {result.Error}");
                 throw new InvalidOperationException($"Failed to show modal: {result.Error}");
             }
 
             // Modal responses acknowledge the interaction and prevent further defer/respond attempts.
             IsDeferred = true;
+            Console.WriteLine($"LiveRemoraInteractionContext: show modal succeeded. InteractionId={m_interactionId.Value}, CustomId='{remoraBuilder.CustomId}'.");
         }
 
         private static Optional<IReadOnlyList<IMessageComponent>> BuildMessageComponentRows(IReadOnlyList<IBotComponent> components)

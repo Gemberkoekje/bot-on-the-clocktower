@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Bot.Api;
@@ -170,6 +171,110 @@ namespace Test.Bot.Remora
 
             InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => channel.SendMessageAsync("hello"));
             Assert.Contains("Failed to send channel message.", ex.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public static async Task Channel_DeleteAsync_LogsTargetTypeAndName()
+        {
+            Mock<IDiscordRestChannelAPI> channelApi = CreateChannelApiMockWithSuccessfulDefaults();
+            RemoraChannel channel = new(33, "control", channelApi: channelApi.Object);
+            StringWriter writer = new();
+            TextWriter? originalOut = Console.Out;
+
+            try
+            {
+                Console.SetOut(writer);
+
+                await channel.DeleteAsync("cleanup");
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+
+            string output = writer.ToString();
+            Assert.Contains("RemoraChannel: delete requested.", output, StringComparison.Ordinal);
+            Assert.Contains("TargetType=Bot.Remora.RemoraChannel", output, StringComparison.Ordinal);
+            Assert.Contains("Id=33", output, StringComparison.Ordinal);
+            Assert.Contains("Name='control'", output, StringComparison.Ordinal);
+            Assert.Contains("Reason='cleanup'", output, StringComparison.Ordinal);
+            Assert.Contains("delete succeeded.", output, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public static async Task ChannelCategory_DeleteAsync_LogsTargetTypeAndName()
+        {
+            Mock<IDiscordRestChannelAPI> channelApi = CreateChannelApiMockWithSuccessfulDefaults();
+            RemoraChannelCategory category = new(44, "rooms", channelApi: channelApi.Object);
+            StringWriter writer = new();
+            TextWriter? originalOut = Console.Out;
+
+            try
+            {
+                Console.SetOut(writer);
+
+                await category.DeleteAsync("cleanup");
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+
+            string output = writer.ToString();
+            Assert.Contains("RemoraChannelCategory: delete requested.", output, StringComparison.Ordinal);
+            Assert.Contains("TargetType=Bot.Remora.RemoraChannelCategory", output, StringComparison.Ordinal);
+            Assert.Contains("Id=44", output, StringComparison.Ordinal);
+            Assert.Contains("Name='rooms'", output, StringComparison.Ordinal);
+            Assert.Contains("Reason='cleanup'", output, StringComparison.Ordinal);
+            Assert.Contains("delete succeeded.", output, StringComparison.Ordinal);
+            channelApi.Verify(api => api.DeleteChannelAsync(new Snowflake(44), It.Is<Optional<string>>(reason => reason.HasValue && reason.Value == "cleanup"), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public static async Task ChannelCategory_WriteOperations_UseRestApis()
+        {
+            Mock<IDiscordRestChannelAPI> channelApi = CreateChannelApiMockWithSuccessfulDefaults();
+            RemoraChannelCategory category = new(44, "rooms", channelApi: channelApi.Object);
+            RemoraMember member = new(100, "member");
+            RemoraRole role = new(200, "role");
+
+            await category.AddOverwriteAsync(member, IBaseChannel.Permissions.AccessChannels | IBaseChannel.Permissions.UseVoice);
+            await category.AddOverwriteAsync(role, IBaseChannel.Permissions.ManageChannels, IBaseChannel.Permissions.Stream);
+            await category.RemoveOverwriteAsync(role);
+
+            channelApi.Verify(
+                api => api.EditChannelPermissionsAsync(
+                    new Snowflake(44),
+                    new Snowflake(100),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => HasPermission(allow, DiscordPermission.ViewChannel)),
+                    It.IsAny<Optional<IDiscordPermissionSet?>>(),
+                    It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Member),
+                    It.IsAny<Optional<string>>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            channelApi.Verify(
+                api => api.EditChannelPermissionsAsync(
+                    new Snowflake(44),
+                    new Snowflake(200),
+                    It.Is<Optional<IDiscordPermissionSet?>>(allow => HasPermission(allow, DiscordPermission.ManageChannels)),
+                    It.Is<Optional<IDiscordPermissionSet?>>(deny => HasPermission(deny, DiscordPermission.Stream)),
+                    It.Is<Optional<PermissionOverwriteType>>(type => type.HasValue && type.Value == PermissionOverwriteType.Role),
+                    It.IsAny<Optional<string>>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            channelApi.Verify(api => api.DeleteChannelPermissionAsync(new Snowflake(44), new Snowflake(200), It.IsAny<Optional<string>>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Channel_DeleteAsync_RemovesChannelFromParentCategory()
+        {
+            RemoraChannelCategory category = new(44, "rooms");
+            RemoraChannel channel = new(45, "room-1", isVoice: true, parentCategory: category);
+            category.AddChannel(channel);
+
+            await channel.DeleteAsync("cleanup");
+
+            Assert.Empty(category.Channels);
         }
 
         private static Mock<IDiscordRestChannelAPI> CreateChannelApiMockWithSuccessfulDefaults()

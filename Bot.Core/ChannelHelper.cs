@@ -16,7 +16,13 @@ namespace Bot.Core
 
             if(cat == null)
             {
+                Console.WriteLine($"ChannelHelper: Creating category '{name}' in guild {guild.Id}");
                 cat = await guild.CreateCategoryAsync(name);
+                Console.WriteLine($"ChannelHelper: Category created. Name='{name}', Id={cat?.Id}");
+            }
+            else
+            {
+                Console.WriteLine($"ChannelHelper: Category already exists. Name='{name}', Id={cat.Id}");
             }
 
             return cat;
@@ -28,7 +34,13 @@ namespace Bot.Core
 
             if(chan == null)
             {
+                Console.WriteLine($"ChannelHelper: Creating voice channel '{name}' in category '{parent.Name}' (Id={parent.Id})");
                 chan = await guild.CreateVoiceChannelAsync(name, parent);
+                Console.WriteLine($"ChannelHelper: Voice channel created. Name='{name}', Id={chan?.Id}, ParentId={parent.Id}");
+            }
+            else
+            {
+                Console.WriteLine($"ChannelHelper: Voice channel already exists. Name='{name}', Id={chan.Id}");
             }
 
             return chan;
@@ -46,7 +58,13 @@ namespace Bot.Core
 
             if(chan == null)
             {
+                Console.WriteLine($"ChannelHelper: Creating text channel '{textName}' (from '{name}') in category '{parent.Name}' (Id={parent.Id})");
                 chan = await guild.CreateTextChannelAsync(name, parent);
+                Console.WriteLine($"ChannelHelper: Text channel created. Name='{chan?.Name}', Id={chan?.Id}, ParentId={parent.Id}");
+            }
+            else
+            {
+                Console.WriteLine($"ChannelHelper: Text channel already exists. Name='{chan.Name}', Id={chan.Id}");
             }
 
             return chan;

@@ -137,7 +137,7 @@ Lets you set the optional channels for a previously-created town
 
 Looks up a character by name. Official characters provided by https://clocktower.online/ are supported.
 
-If custom characters are desired, see the `/addScript` command.
+If custom characters are desired, see the `/addscript` command.
 
 ![image](https://user-images.githubusercontent.com/151635/162993413-2dce6201-01cb-41b7-93ee-b1bc5422b419.png)
 
@@ -174,9 +174,9 @@ Forces a refresh on all the custom scripts known. This is useful if you publish 
 By default, the bot will announce significant new features into the control channel for each town. It will only announce a new release once.
 You can control whether your server gets these messages:
 
-### `/announce [hearannouncements]`
+### `/announce [hearAnnouncements]`
 
-Tells the bot you whether you wish to receive feature announcements for towns on your server.
+Tells the bot whether you wish to receive feature announcements for towns on your server.
 
 ---
 

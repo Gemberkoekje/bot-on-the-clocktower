@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace Bot.Database
 {
-    internal class CommandMetricRecord : ICommandMetricRecord
+    public class CommandMetricRecord : ICommandMetricRecord
     {
         private DateTime m_day;
 
@@ -16,7 +16,7 @@ namespace Bot.Database
             get => m_day;
             set
             {
-                m_day = value.Date;
+                m_day = DateTime.SpecifyKind(value.Date, DateTimeKind.Unspecified);
                 Id = m_day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             }
         }

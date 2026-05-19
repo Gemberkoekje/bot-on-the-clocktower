@@ -1,224 +1,196 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Bot.Api;
 using Bot.Remora;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Remora.Commands.Attributes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Contexts;
+using Remora.Rest.Core;
 using Xunit;
+using BotChannel = Bot.Api.IChannel;
+using BotGuild = Bot.Api.IGuild;
+using DiscordUser = Remora.Discord.API.Abstractions.Objects.IUser;
 
 namespace Test.Bot.Remora
 {
     public class TestSlashCommands
     {
         [Fact]
-        public void GameSource_ContainsAllExpectedCommands()
+        public void GameCommands_ExposeExpectedCommandNames()
         {
-            var handler = new Mock<IBotGameplayInteractionHandler>();
-            var source = new RemoraGameSlashCommands(handler.Object);
-            var names = source.GetCommands().Select(c => c.Name).ToArray();
-
-            Assert.Contains("game", names);
-            Assert.Contains("night", names);
-            Assert.Contains("day", names);
-            Assert.Contains("vote", names);
-            Assert.Contains("voteTimer", names);
-            Assert.Contains("stopVoteTimer", names);
-            Assert.Contains("endGame", names);
-            Assert.Contains("storytellers", names);
-        }
-
-        [Fact]
-        public async Task GameSource_GameCommand_DelegatesToHandler()
-        {
-            var handler = new Mock<IBotGameplayInteractionHandler>();
-            var source = new RemoraGameSlashCommands(handler.Object);
-            var game = source.GetCommands().First(c => c.Name == "game");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            await game.InvokeAsync(ctx, new Dictionary<string, object>());
-
-            handler.Verify(h => h.CommandGameAsync(ctx), Times.Once);
-        }
-
-        [Fact]
-        public async Task GameSource_VoteTimer_PassesTimeString()
-        {
-            var handler = new Mock<IBotGameplayInteractionHandler>();
-            var source = new RemoraGameSlashCommands(handler.Object);
-            var cmd = source.GetCommands().First(c => c.Name == "voteTimer");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object> { ["timeString"] = "5m" });
-
-            handler.Verify(h => h.RunVoteTimerAsync(ctx, "5m"), Times.Once);
-        }
-
-        [Fact]
-        public async Task GameSource_Storytellers_FiltersNullsAndPassesMembers()
-        {
-            var handler = new Mock<IBotGameplayInteractionHandler>();
-            var source = new RemoraGameSlashCommands(handler.Object);
-            var cmd = source.GetCommands().First(c => c.Name == "storytellers");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            var m1 = new Mock<IMember>().Object;
-            var m2 = new Mock<IMember>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object>
-            {
-                ["user1"] = m1,
-                ["user3"] = m2,
-            });
-
-            handler.Verify(h => h.CommandSetStorytellersAsync(ctx, It.Is<IEnumerable<IMember>>(
-                e => e.SequenceEqual(new[] { m1, m2 }))), Times.Once);
-        }
-
-        [Fact]
-        public void LookupSource_ContainsAllExpectedCommands()
-        {
-            var lookup = new Mock<IBotLookupService>();
-            var source = new RemoraLookupSlashCommands(lookup.Object);
-            var names = source.GetCommands().Select(c => c.Name).ToArray();
-
-            Assert.Contains("lookup", names);
-            Assert.Contains("addScript", names);
-            Assert.Contains("removeScript", names);
-            Assert.Contains("listScripts", names);
-            Assert.Contains("refreshScripts", names);
-        }
-
-        [Fact]
-        public async Task LookupSource_AddScript_RoutesArgument()
-        {
-            var lookup = new Mock<IBotLookupService>();
-            var source = new RemoraLookupSlashCommands(lookup.Object);
-            var cmd = source.GetCommands().First(c => c.Name == "addScript");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object> { ["scriptJsonUrl"] = "https://x" });
-
-            lookup.Verify(l => l.AddScriptAsync(ctx, "https://x"), Times.Once);
-        }
-
-        [Fact]
-        public void MessagingSource_ContainsEvilAndLunatic()
-        {
-            var msg = new Mock<IBotMessaging>();
-            var source = new RemoraMessagingSlashCommands(msg.Object);
-            var names = source.GetCommands().Select(c => c.Name).ToArray();
-
-            Assert.Contains("evil", names);
-            Assert.Contains("lunatic", names);
-        }
-
-        [Fact]
-        public async Task MessagingSource_Evil_PassesRequiredMembers()
-        {
-            var msg = new Mock<IBotMessaging>();
-            var source = new RemoraMessagingSlashCommands(msg.Object);
-            var cmd = source.GetCommands().First(c => c.Name == "evil");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            var demon = new Mock<IMember>().Object;
-            var minion = new Mock<IMember>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object>
-            {
-                ["demon"] = demon,
-                ["minion1"] = minion,
-            });
-
-            msg.Verify(m => m.CommandEvilMessageAsync(ctx, demon,
-                It.Is<IReadOnlyCollection<IMember>>(c => c.SequenceEqual(new[] { minion })),
-                null), Times.Once);
-        }
-
-        [Fact]
-        public void MiscSource_ContainsAnnounce()
-        {
-            var ann = new Mock<IAnnouncer>();
-            var source = new RemoraMiscSlashCommands(ann.Object);
-            Assert.Contains("announce", source.GetCommands().Select(c => c.Name));
-        }
-
-        [Fact]
-        public async Task MiscSource_Announce_PassesHearFlag()
-        {
-            var ann = new Mock<IAnnouncer>();
-            var source = new RemoraMiscSlashCommands(ann.Object);
-            var cmd = source.GetCommands().First();
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object> { ["hearAnnouncements"] = true });
-
-            ann.Verify(a => a.CommandSetGuildAnnounce(ctx, true), Times.Once);
-        }
-
-        [Fact]
-        public void SetupSource_ContainsAllExpectedCommands()
-        {
-            var setup = new Mock<IBotSetup>();
-            var source = new RemoraSetupSlashCommands(setup.Object);
-            var names = source.GetCommands().Select(c => c.Name).ToArray();
-
-            Assert.Contains("createTown", names);
-            Assert.Contains("townInfo", names);
-            Assert.Contains("destroyTown", names);
-            Assert.Contains("modifyTown", names);
-            Assert.Contains("addTown", names);
-            Assert.Contains("removeTown", names);
-        }
-
-        [Fact]
-        public async Task SetupSource_CreateTown_RoutesArguments()
-        {
-            var setup = new Mock<IBotSetup>();
-            var source = new RemoraSetupSlashCommands(setup.Object);
-            var cmd = source.GetCommands().First(c => c.Name == "createTown");
-
-            var ctx = new Mock<IBotInteractionContext>().Object;
-            await cmd.InvokeAsync(ctx, new Dictionary<string, object>
-            {
-                ["townName"] = "MyTown",
-                ["useNight"] = false,
-            });
-
-            setup.Verify(s => s.CreateTownAsync(ctx, "MyTown", null, null, false), Times.Once);
-        }
-
-        [Fact]
-        public void ServiceFactory_RegistersAllSlashCommandSources()
-        {
-            var services = new ServiceCollection();
-            var env = new Mock<IEnvironment>();
-            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns("token");
-            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns("dev");
-            services.AddSingleton(env.Object);
-            services.AddRemoraServices();
-
-            using var sp = services.BuildServiceProvider();
-            var registry = sp.GetService<RemoraSlashCommandRegistry>();
-
-            Assert.NotNull(registry);
-            Assert.Contains(typeof(RemoraGameSlashCommands), registry!.SourceTypes);
-            Assert.Contains(typeof(RemoraLookupSlashCommands), registry.SourceTypes);
-            Assert.Contains(typeof(RemoraMessagingSlashCommands), registry.SourceTypes);
-            Assert.Contains(typeof(RemoraMiscSlashCommands), registry.SourceTypes);
-            Assert.Contains(typeof(RemoraSetupSlashCommands), registry.SourceTypes);
-        }
-
-        [Fact]
-        public void Registry_ResolveCommands_CreatesCommandsViaFactoryInjection()
-        {
-            var registry = new RemoraSlashCommandRegistry();
-
-            var gameplay = new Mock<IBotGameplayInteractionHandler>();
-            registry.AddSource(new RemoraGameSlashCommands(gameplay.Object));
-
-            var commands = registry.ResolveCommands().Select(c => c.Name).ToArray();
+            string[] commands = GetCommandNames(typeof(GameCommands));
 
             Assert.Contains("game", commands);
+            Assert.Contains("night", commands);
+            Assert.Contains("day", commands);
+            Assert.Contains("vote", commands);
+            Assert.Contains("votetimer", commands);
+            Assert.Contains("stopvotetimer", commands);
+            Assert.Contains("endgame", commands);
             Assert.Contains("storytellers", commands);
+        }
+
+        [Fact]
+        public void LookupCommands_ExposeExpectedCommandNames()
+        {
+            string[] commands = GetCommandNames(typeof(LookupCommands));
+
+            Assert.Contains("lookup", commands);
+            Assert.Contains("addscript", commands);
+            Assert.Contains("removescript", commands);
+            Assert.Contains("listscripts", commands);
+            Assert.Contains("refreshscripts", commands);
+        }
+
+        [Fact]
+        public void MessagingMiscAndSetupCommands_ExposeExpectedCommandNames()
+        {
+            string[] messaging = GetCommandNames(typeof(MessagingCommands));
+            string[] misc = GetCommandNames(typeof(MiscCommands));
+            string[] setup = GetCommandNames(typeof(SetupCommands));
+
+            Assert.Contains("evil", messaging);
+            Assert.Contains("lunatic", messaging);
+            Assert.Contains("announce", misc);
+            Assert.Contains("towninfo", setup);
+            Assert.Contains("destroytown", setup);
+            Assert.Contains("modifytown", setup);
+            Assert.Contains("addtown", setup);
+            Assert.Contains("removetown", setup);
+        }
+
+        [Fact]
+        public async Task GameCommands_Game_DelegatesToGameplayHandler()
+        {
+            Mock<IBotGameplayInteractionHandler> handler = new();
+            GameCommands commands = new(handler.Object, CreateInteractionContext().Object, CreateFactory().Object);
+
+            await commands.HandleGameAsync();
+
+            handler.Verify(h => h.CommandGameAsync(It.IsAny<IBotInteractionContext>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task LookupCommands_AddScript_DelegatesWithArgument()
+        {
+            Mock<IBotLookupService> lookup = new();
+            LookupCommands commands = new(lookup.Object, CreateInteractionContext().Object, CreateFactory().Object);
+
+            await commands.HandleAddScriptAsync("https://example.invalid/script.json");
+
+            lookup.Verify(l => l.AddScriptAsync(It.IsAny<IBotInteractionContext>(), "https://example.invalid/script.json"), Times.Once);
+        }
+
+        [Fact]
+        public async Task MiscCommands_Announce_DelegatesWithFlag()
+        {
+            Mock<IAnnouncer> announcer = new();
+            MiscCommands commands = new(announcer.Object, CreateInteractionContext().Object, CreateFactory().Object);
+
+            await commands.HandleAnnounceAsync(true);
+
+            announcer.Verify(a => a.CommandSetGuildAnnounce(It.IsAny<IBotInteractionContext>(), true), Times.Once);
+        }
+
+        [Fact]
+        public async Task SetupCommands_DestroyTown_DelegatesWithTownName()
+        {
+            Mock<IBotSetup> setup = new();
+            SetupCommands commands = new(setup.Object, CreateInteractionContext().Object, CreateFactory().Object);
+
+            await commands.HandleDestroyTownAsync("Ravenswood Bluff");
+
+            setup.Verify(s => s.DestroyTownAsync(It.IsAny<IBotInteractionContext>(), "Ravenswood Bluff"), Times.Once);
+        }
+
+        [Fact]
+        public async Task MessagingCommands_Lunatic_DelegatesToMessagingService()
+        {
+            Mock<IBotMessaging> messaging = new();
+            MessagingCommands commands = new(messaging.Object, CreateInteractionContext().Object, CreateFactory().Object);
+
+            Mock<DiscordUser> user = new();
+            user.SetupGet(u => u.ID).Returns(new Snowflake(1234));
+            user.SetupGet(u => u.Username).Returns("tester");
+
+            Mock<IGuildMember> member = new();
+            member.SetupGet(m => m.User).Returns(new Optional<DiscordUser>(user.Object));
+            member.SetupGet(m => m.Nickname).Returns(default(Optional<string?>));
+            member.SetupGet(m => m.Roles).Returns(new List<Snowflake>());
+
+            await commands.HandleLunaticAsync(member.Object, member.Object);
+
+            messaging.Verify(m => m.CommandLunaticMessageAsync(
+                It.IsAny<IBotInteractionContext>(),
+                It.IsAny<IMember>(),
+                It.Is<IReadOnlyCollection<IMember>>(members => members.Count == 1)), Times.Once);
+        }
+
+        private static string[] GetCommandNames(Type type)
+        {
+            return type.GetMethods()
+                .Select(m => m.GetCustomAttributes(typeof(CommandAttribute), true).FirstOrDefault())
+                .OfType<CommandAttribute>()
+                .Select(ReadCommandName)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToArray();
+        }
+
+        private static string ReadCommandName(CommandAttribute attribute)
+        {
+            PropertyInfo? textProperty = attribute.GetType().GetProperty("Text", BindingFlags.Instance | BindingFlags.Public);
+            if (textProperty is not null)
+            {
+                string? text = textProperty.GetValue(attribute) as string;
+                return text ?? string.Empty;
+            }
+
+            PropertyInfo? nameProperty = attribute.GetType().GetProperty("Name", BindingFlags.Instance | BindingFlags.Public);
+            if (nameProperty is not null)
+            {
+                string? name = nameProperty.GetValue(attribute) as string;
+                return name ?? string.Empty;
+            }
+
+            return string.Empty;
+        }
+
+        private static Mock<IInteractionContext> CreateInteractionContext()
+        {
+            Mock<IInteractionContext> interactionContext = new();
+            interactionContext.SetupGet(x => x.Interaction).Returns(new Mock<IInteraction>().Object);
+            return interactionContext;
+        }
+
+        private static Mock<ILiveRemoraInteractionContextFactory> CreateFactory()
+        {
+            Mock<BotGuild> guild = new();
+            Mock<BotChannel> channel = new();
+            Mock<IMember> member = new();
+            Mock<IDiscordRestInteractionAPI> interactionApi = new();
+
+            LiveRemoraInteractionContext liveContext = new(
+                guild.Object,
+                channel.Object,
+                member.Object,
+                interactionApi.Object,
+                new Snowflake(1),
+                new Snowflake(2),
+                "token",
+                CancellationToken.None);
+
+            Mock<ILiveRemoraInteractionContextFactory> factory = new();
+            factory
+                .Setup(f => f.Create(It.IsAny<IInteraction>(), It.IsAny<CancellationToken>()))
+                .Returns(liveContext);
+            return factory;
         }
     }
 }

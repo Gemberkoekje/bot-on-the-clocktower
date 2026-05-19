@@ -15,8 +15,7 @@ namespace Test.Bot.Remora
 
         [Theory]
         [InlineData(typeof(IColorBuilder), typeof(RemoraColorBuilder))]
-        [InlineData(typeof(IRemoraCommandRegistrar), typeof(RemoraCommandRegistrar))]
-        [InlineData(typeof(RemoraSlashCommandRegistry), typeof(RemoraSlashCommandRegistry))]
+        [InlineData(typeof(ILiveRemoraInteractionContextFactory), typeof(LiveRemoraInteractionContextFactory))]
         public void RegisterServices_CreatesAllRequiredServices(Type serviceInterface, Type serviceImpl)
         {
             var services = new ServiceCollection();
@@ -34,22 +33,5 @@ namespace Test.Bot.Remora
             Assert.IsType(serviceImpl, service);
         }
 
-        [Fact]
-        public void RegisterServices_ResolvesRemoraInteractionRuntimeSeams()
-        {
-            var services = new ServiceCollection();
-            var env = new Mock<IEnvironment>();
-            env.Setup(e => e.GetEnvironmentVariable("DISCORD_TOKEN")).Returns(DiscordToken);
-            env.Setup(e => e.GetEnvironmentVariable("DEPLOY_TYPE")).Returns(DeployTypeDev);
-            services.AddSingleton(env.Object);
-            services.AddSingleton(new Mock<IComponentService>().Object);
-            services.AddRemoraServices();
-
-            using var sp = services.BuildServiceProvider();
-
-            Assert.NotNull(sp.GetService<IRemoraInteractionResponder>());
-            Assert.NotNull(sp.GetService<IRemoraSlashCommandDispatcher>());
-            Assert.NotNull(sp.GetService<IRemoraComponentDispatcher>());
-        }
     }
 }
