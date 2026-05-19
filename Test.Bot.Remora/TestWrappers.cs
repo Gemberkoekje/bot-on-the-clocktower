@@ -70,10 +70,7 @@ namespace Test.Bot.Remora
             Assert.Same(control, guild.GetChannel(20));
             Assert.Same(day, guild.GetChannelCategory(30));
             Assert.Same(storyteller, guild.BotRole);
-
-            IRole? created = await guild.CreateRoleAsync("villager", Color.Blue);
-            Assert.NotNull(created);
-            Assert.Same(created, guild.GetRoleByName("villager"));
+            await Assert.ThrowsAsync<NotSupportedException>(() => guild.CreateRoleAsync("villager", Color.Blue));
         }
 
         [Fact]

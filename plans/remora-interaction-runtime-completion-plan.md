@@ -197,8 +197,8 @@ Phase 0 → Phase 1 → Phase 2
 
 ---
 
-## ⬜ Phase 4 — Live `RemoraGuild` adapter (read paths)
-**Status: Pending** (requires Phase 1)
+## ✅ Phase 4 — Live `RemoraGuild` adapter (read paths)
+**Status: Complete (this branch)**
 
 **Goal:** Replace in-memory stubs in `RemoraGuild` with REST-backed reads.
 
@@ -211,6 +211,26 @@ Phase 0 → Phase 1 → Phase 2
 **Tests:** Each read method against mocked REST (happy path, not-found, paging).
 
 **Acceptance:** Build + tests green. Read-only commands (e.g. `/townInfo`) work end-to-end.
+
+**Delivered:**
+- `RemoraGuild` now supports a live runtime mode backed by `IDiscordRestGuildAPI` for read paths:
+  - Roles (`Roles`, `GetRoleByName`, `BotRole`, `EveryoneRole`) via `GetGuildRolesAsync`.
+  - Channels/categories (`Channels`, `ChannelCategories`, `GetChannel*`, `GetCategoryByName`) via `GetGuildChannelsAsync`.
+  - Members (`Members`) via paged `ListGuildMembersAsync`.
+- Live reads are lazily loaded and cached per guild instance to provide stable snapshot semantics during command execution.
+- `RemoraSlashCommandDispatcher` now creates a live `RemoraGuild` adapter when a guild REST API is available from DI, enabling runtime handlers to resolve guild reads from Discord.
+- `RemoraGuild` write methods (`CreateVoiceChannelAsync`, `CreateTextChannelAsync`, `CreateCategoryAsync`, `CreateRoleAsync`) now throw `NotSupportedException` pending later phases.
+- Added focused `Test.Bot.Remora` coverage for:
+  - REST-backed guild read happy-path behavior.
+  - Lookup not-found behavior.
+  - Member paging behavior across multiple REST pages.
+
+**Files changed:**
+- `Bot.Remora/RemoraGuild.cs`
+- `Bot.Remora/RemoraSlashCommandDispatcher.cs`
+- `Test.Bot.Remora/TestRemoraGuildRuntime.cs` *(new)*
+- `Test.Bot.Remora/TestWrappers.cs`
+- `plans/remora-interaction-runtime-completion-plan.md`
 
 ---
 
