@@ -2,17 +2,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Remora.Discord.API.Abstractions.Objects;
 
 namespace Bot.Remora
 {
     internal interface IRemoraInteractionResponder
     {
-        Task RespondAsync(CancellationToken cancellationToken = default);
+        Task RespondAsync(IInteraction interaction, CancellationToken cancellationToken = default);
     }
 
     internal interface IRemoraSlashCommandDispatcher
     {
-        Task DispatchAsync(string commandName, IReadOnlyDictionary<string, object> arguments, CancellationToken cancellationToken = default);
+        Task DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default);
     }
 
     internal interface IRemoraComponentDispatcher
@@ -22,7 +23,7 @@ namespace Bot.Remora
 
     internal sealed class NoOpRemoraInteractionResponder : IRemoraInteractionResponder
     {
-        public Task RespondAsync(CancellationToken cancellationToken = default)
+        public Task RespondAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
             Debug.WriteLine("Bot.Remora: interaction responder is not yet wired.");
             return Task.CompletedTask;
@@ -31,7 +32,7 @@ namespace Bot.Remora
 
     internal sealed class NoOpRemoraSlashCommandDispatcher : IRemoraSlashCommandDispatcher
     {
-        public Task DispatchAsync(string commandName, IReadOnlyDictionary<string, object> arguments, CancellationToken cancellationToken = default)
+        public Task DispatchAsync(IInteraction interaction, CancellationToken cancellationToken = default)
         {
             Debug.WriteLine("Bot.Remora: slash command dispatcher is not yet wired.");
             return Task.CompletedTask;

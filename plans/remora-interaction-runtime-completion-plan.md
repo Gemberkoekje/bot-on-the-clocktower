@@ -63,8 +63,8 @@ Phase 0 → Phase 1 → Phase 2
 
 ---
 
-## ⬜ Phase 1 — Slash command dispatch for primitive arguments
-**Status: Pending**
+## ✅ Phase 1 — Slash command dispatch for primitive arguments
+**Status: Complete (this branch)**
 
 **Goal:** Make registered slash commands actually execute and reply (fixes "did not respond").
 
@@ -90,6 +90,27 @@ Phase 0 → Phase 1 → Phase 2
 - Failure path: handler throws → ephemeral error sent, no unhandled exception escapes.
 
 **Acceptance:** Build + tests green. A string/bool-arg command (e.g. `/announce`) runs end-to-end in `dev` mode.
+
+**Delivered:**
+- Real `IRemoraInteractionResponder` and `IRemoraSlashCommandDispatcher` implementations added.
+- `RemoraGatewayInteractionResponder : IResponder<InteractionCreate>` added and wired via DI.
+- Primitive argument binding implemented for `string`, `bool`, and integer-style option values.
+- Entity-parameter commands are detected in Phase 1 and return a friendly ephemeral follow-up message.
+- `LiveRemoraInteractionContext` added with live defer/edit REST behavior (`CreateInteractionResponseAsync`, `EditOriginalInteractionResponseAsync`).
+- `UpdateOriginalMessageAsync` and `ShowModalAsync` intentionally throw `NotSupportedException` pending Phase 3.
+- Failure path hardened: responder catches dispatch exceptions and sends an ephemeral error response without rethrowing.
+- Added focused `Test.Bot.Remora` coverage for dispatcher routing/binding, responder behavior, context defer/edit lifecycle, and failure handling.
+
+**Files changed:**
+- `Bot.Remora/DependencyInjection.cs`
+- `Bot.Remora/IRemoraSlashCommand.cs`
+- `Bot.Remora/LiveRemoraInteractionContext.cs` *(new)*
+- `Bot.Remora/RemoraCommandRegistrar.cs`
+- `Bot.Remora/RemoraGatewayInteractionResponder.cs` *(new)*
+- `Bot.Remora/RemoraInteractionResponder.cs` *(new)*
+- `Bot.Remora/RemoraInteractionRuntimeSeams.cs`
+- `Bot.Remora/RemoraSlashCommandDispatcher.cs` *(new)*
+- `Test.Bot.Remora/TestInteractionRuntime.cs` *(new)*
 
 ---
 

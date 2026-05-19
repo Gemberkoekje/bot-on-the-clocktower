@@ -9,6 +9,7 @@ namespace Bot.Remora
         None = 0,
         String,
         Boolean,
+        Integer,
         User,
         Role,
         Channel,
